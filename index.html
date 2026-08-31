@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#20242b"><link rel="manifest" href="manifest.json">
+<title>My Garage</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f2f3f5;color:#20242b;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{background:#20242b;color:#fff;padding:16px;position:sticky;top:0;z-index:2}main{max-width:760px;margin:auto;padding:14px}
+h1,h2,h3,p{margin:0}h1{font-size:25px}h2{font-size:19px}.muted{color:#68707c;font-size:14px}
+.card{background:#fff;border-radius:16px;padding:16px;margin:10px 0;box-shadow:0 1px 5px #0001}
+.vehicle{display:flex;gap:14px;align-items:center;cursor:pointer}.icon{font-size:34px}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.between{justify-content:space-between}
+button{border:0;border-radius:11px;padding:11px 14px;background:#2563eb;color:white;font-weight:700;font-size:15px}button.secondary{background:#e5e7eb;color:#20242b}button.danger{background:#fee2e2;color:#991b1b}
+.back{background:transparent;padding:0;margin-bottom:6px}.tabs{display:flex;gap:7px;overflow:auto;margin:10px 0}.tabs button{white-space:nowrap;background:#e5e7eb;color:#333}.tabs .active{background:#2563eb;color:white}
+.badge{padding:5px 8px;border-radius:999px;font-size:12px;font-weight:800}.ok{background:#dcfce7;color:#166534}.soon{background:#ffedd5;color:#9a3412}.overdue{background:#fee2e2;color:#991b1b}
+.task{border-left:5px solid #16a34a}.task.soon{border-left-color:#d97706}.task.overdue{border-left-color:#dc2626}.empty{text-align:center;color:#68707c;padding:25px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}label{display:block;font-size:13px;font-weight:700;margin:9px 0 4px}
+input,textarea{width:100%;padding:10px;border:1px solid #d1d5db;border-radius:10px;font-size:16px;background:#fff}
+dialog{border:0;border-radius:18px;width:min(94%,620px);padding:0;box-shadow:0 20px 60px #0005}dialog::backdrop{background:#0007}.modal{padding:18px}
+@media(max-width:520px){.grid{grid-template-columns:1fr}}
+</style></head>
+<body>
+<header><div style="max-width:760px;margin:auto"><button id="back" class="back" style="display:none">‹ My Garage</button><h1 id="title">My Garage</h1></div></header>
+<main id="app"></main>
+
+<dialog id="taskDlg"><form method="dialog" class="modal" id="taskForm">
+<h2 id="taskHeading">Add maintenance task</h2>
+<label>Task</label><input id="taskName" required placeholder="Engine oil & filter">
+<div class="grid"><div><label>Frequency — months</label><input id="taskMonths" type="number" min="0"></div>
+<div><label>Frequency — miles</label><input id="taskMiles" type="number" min="0"></div>
+<div><label>Last done — date</label><input id="taskDate" type="date"></div>
+<div><label>Last done — mileage</label><input id="taskLastMiles" type="number" min="0"></div></div>
+<label>Notes</label><textarea id="taskNotes" rows="3"></textarea>
+<div class="row" style="margin-top:13px"><button>Save task</button><button type="button" class="secondary" onclick="taskDlg.close()">Cancel</button></div>
+</form></dialog>
+
+<dialog id="vehicleDlg"><form method="dialog" class="modal" id="vehicleForm">
+<h2>Edit vehicle</h2><label>Registration</label><input id="vehicleReg">
+<label>Current mileage</label><input id="vehicleMileage" type="number" min="0">
+<label>Notes / modifications</label><textarea id="vehicleNotes" rows="4"></textarea>
+<div class="row" style="margin-top:13px"><button>Save</button><button type="button" class="secondary" onclick="vehicleDlg.close()">Cancel</button></div>
+</form></dialog>
+
+<dialog id="recordDlg"><form method="dialog" class="modal" id="recordForm">
+<h2>Record completed work</h2><label>Job / service</label><input id="recordJob" required>
+<div class="grid"><div><label>Date</label><input id="recordDate" type="date" required></div><div><label>Mileage</label><input id="recordMileage" type="number" min="0"></div>
+<div><label>Cost (£)</label><input id="recordCost" type="number" min="0" step="0.01"></div><div><label>Parts / oil used</label><input id="recordParts"></div></div>
+<label>Notes</label><textarea id="recordNotes" rows="3"></textarea>
+<div class="row" style="margin-top:13px"><button>Save record</button><button type="button" class="secondary" onclick="recordDlg.close()">Cancel</button></div>
+</form></dialog>
+
+<dialog id="partDlg"><form method="dialog" class="modal" id="partForm">
+<h2>Add part / oil</h2><label>Part / product</label><input id="partName" required>
+<div class="grid"><div><label>Date fitted</label><input id="partDate" type="date"></div><div><label>Mileage fitted</label><input id="partMileage" type="number" min="0"></div>
+<div><label>Category</label><input id="partCategory" placeholder="Oil, filter, brake..."></div><div><label>Manufacturer</label><input id="partMaker"></div>
+<div><label>Part number</label><input id="partNumber"></div><div><label>Cost (£)</label><input id="partCost" type="number" min="0" step="0.01"></div></div>
+<label>Type / specification</label><input id="partSpec" placeholder="10W-40">
+<label>Notes</label><textarea id="partNotes" rows="3"></textarea>
+<div class="row" style="margin-top:13px"><button>Save part</button><button type="button" class="secondary" onclick="partDlg.close()">Cancel</button></div>
+</form></dialog>
+
+<script>
+const KEY="myGarageV1";
+const starter=[
+{id:"skoda",name:"Skoda Superb",year:2010,engine:"2.0 TDI",emoji:"🚗",reg:"",mileage:"",notes:"",tasks:[],history:[],parts:[]},
+{id:"corsa",name:"Vauxhall Corsa",year:2016,engine:"1.4 Petrol",emoji:"🚗",reg:"",mileage:"",notes:"",tasks:[],history:[],parts:[]},
+{id:"st1300",name:"Honda Pan European ST1300",year:2012,engine:"ST1300",emoji:"🏍️",reg:"",mileage:"",notes:"",tasks:[],history:[],parts:[]},
+{id:"gsx250",name:"Suzuki GSX250",year:1982,engine:"GSX250",emoji:"🏍️",reg:"",mileage:"",notes:"",tasks:[],history:[],parts:[]}
+];
+let db=JSON.parse(localStorage.getItem(KEY)||"null")||starter,current=null,tab="maintenance",editing=-1;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+const v=()=>db.find(x=>x.id===current);
+const dateText=d=>d?new Date(d+"T00:00:00").toLocaleDateString("en-GB"):"—";
+function save(){localStorage.setItem(KEY,JSON.stringify(db))}
+function calc(t){let d=null,m=null;if(t.months&&t.date){d=new Date(t.date+"T00:00:00");d.setMonth(d.getMonth()+Number(t.months))}if(t.miles&&t.lastMiles)m=Number(t.lastMiles)+Number(t.miles);return{d,m}}
+function status(t){let c=calc(t),now=new Date(),cur=v().mileage===""?null:Number(v().mileage);let od=(c.d&&now>=c.d)||(c.m&&cur!=null&&cur>=c.m);let so=!od&&((c.d&&(c.d-now)<=30*86400000)||(c.m&&cur!=null&&(c.m-cur)<=500));return{c,od,so,label:od?"OVERDUE":so?"DUE SOON":"OK"}}
+function due(t){let c=calc(t),a=c.d?dateText(c.d.toISOString().slice(0,10)):"",b=c.m?c.m.toLocaleString()+" miles":"";return[a,b].filter(Boolean).join(" OR ")||"Not scheduled"}
+function render(){
+ if(!current){$("back").style.display="none";$("title").textContent="My Garage";$("app").innerHTML=
+ `<div class="card"><h2>Your vehicles</h2><p class="muted" style="margin-top:5px">Tap a vehicle to manage it.</p></div>`+
+ db.map(x=>`<div class="card vehicle" onclick="openV('${x.id}')"><div class="icon">${x.emoji}</div><div><h2>${esc(x.name)}</h2><p class="muted">${x.year} · ${esc(x.engine)}${x.mileage!==""?" · "+Number(x.mileage).toLocaleString()+" miles":""}</p></div></div>`).join("")+
+ `<div class="card"><h3>Backup</h3><p class="muted" style="margin:5px 0 10px">Export a backup before changing phones.</p><div class="row"><button onclick="backup()">Export backup</button><button class="secondary" onclick="restore()">Import backup</button></div></div>`;return}
+ $("back").style.display="block";$("title").textContent=v().name;
+ $("app").innerHTML=`<div class="card"><div class="row between"><div><div class="muted">${v().year} · ${esc(v().engine)}</div><h2>${v().emoji} ${esc(v().name)}</h2><p class="muted">${v().reg||"Registration not entered"}${v().mileage!==""?" · "+Number(v().mileage).toLocaleString()+" miles":" · Mileage not entered"}</p></div><button class="secondary" onclick="editVehicle()">Edit</button></div></div>
+ <div class="tabs"><button class="${tab=="maintenance"?"active":""}" onclick="tab='maintenance';render()">🔧 Maintenance</button><button class="${tab=="history"?"active":""}" onclick="tab='history';render()">📖 History</button><button class="${tab=="parts"?"active":""}" onclick="tab='parts';render()">🔩 Parts & Oils</button><button class="${tab=="notes"?"active":""}" onclick="tab='notes';render()">📝 Notes</button></div>`+(tab=="maintenance"?maintenance():tab=="history"?history():tab=="parts"?parts():notes())}
+function maintenance(){return `<div class="row between"><div><h3>Maintenance</h3><p class="muted">Date or mileage — whichever comes first.</p></div><button onclick="newTask()">+ Add task</button></div>`+
+(v().tasks.length?v().tasks.map((t,i)=>{let s=status(t);return `<div class="card task ${s.od?"overdue":s.so?"soon":"ok"}"><div class="row between"><div><h3>${esc(t.name)}</h3><p class="muted">${t.months?t.months+" months":""}${t.months&&t.miles?" / ":""}${t.miles?Number(t.miles).toLocaleString()+" miles":""}</p></div><span class="badge ${s.od?"overdue":s.so?"soon":"ok"}">${s.label}</span></div><p style="margin-top:8px"><b>Next due:</b> ${esc(due(t))}</p><p class="muted">Last done: ${dateText(t.date)}${t.lastMiles?" · "+Number(t.lastMiles).toLocaleString()+" miles":""}</p><div class="row" style="margin-top:10px"><button class="secondary" onclick="editTask(${i})">Edit</button><button class="danger" onclick="delTask(${i})">Delete</button></div></div>`}).join(""):`<div class="card empty">No maintenance tasks yet.<br>Add your first one above.</div>`)}
+function history(){let h=v().history||[];return `<div class="row between"><div><h3>Maintenance history</h3><p class="muted">Everything recorded as completed.</p></div><button onclick="newRecord()">+ Add record</button></div>`+(h.length?h.slice().reverse().map(r=>`<div class="card"><div class="row between"><h3>${esc(r.job)}</h3><span class="muted">${dateText(r.date)}</span></div><p class="muted">${r.mileage?Number(r.mileage).toLocaleString()+" miles":""}${r.cost?" · £"+Number(r.cost).toFixed(2):""}</p>${r.parts?`<p style="margin-top:6px"><b>Parts/oil:</b> ${esc(r.parts)}</p>`:""}${r.notes?`<p class="muted" style="margin-top:6px">${esc(r.notes)}</p>`:""}</div>`).join(""):`<div class="card empty">No history recorded yet.</div>`)}
+function parts(){let p=v().parts||[];return `<div class="row between"><div><h3>Parts & Oils</h3><p class="muted">Record exactly what you fitted or used.</p></div><button onclick="newPart()">+ Add part</button></div>`+(p.length?p.slice().reverse().map(x=>`<div class="card"><div class="row between"><h3>${esc(x.name)}</h3><span class="muted">${dateText(x.date)}</span></div><p class="muted">${[x.category,x.maker,x.number].filter(Boolean).map(esc).join(" · ")}</p>${x.spec?`<p style="margin-top:6px"><b>Specification:</b> ${esc(x.spec)}</p>`:""}<p class="muted">${x.mileage?Number(x.mileage).toLocaleString()+" miles":""}${x.cost?" · £"+Number(x.cost).toFixed(2):""}</p>${x.notes?`<p class="muted">${esc(x.notes)}</p>`:""}</div>`).join(""):`<div class="card empty">No parts or oils recorded yet.</div>`)}
+function notes(){return `<div class="card"><h3>Vehicle notes & modifications</h3><p style="margin-top:8px;white-space:pre-wrap">${esc(v().notes)||'<span class="muted">No notes yet.</span>'}</p></div>`}
+function newTask(){editing=-1;$("taskForm").reset();$("taskHeading").textContent="Add maintenance task";$("taskDlg").showModal()}
+function editTask(i){editing=i;let t=v().tasks[i];$("taskName").value=t.name;$("taskMonths").value=t.months||"";$("taskMiles").value=t.miles||"";$("taskDate").value=t.date||"";$("taskLastMiles").value=t.lastMiles||"";$("taskNotes").value=t.notes||"";$("taskHeading").textContent="Edit maintenance task";$("taskDlg").showModal()}
+$("taskForm").onsubmit=()=>{let t={name:$("taskName").value.trim(),months:$("taskMonths").value,miles:$("taskMiles").value,date:$("taskDate").value,lastMiles:$("taskLastMiles").value,notes:$("taskNotes").value.trim()};editing<0?v().tasks.push(t):v().tasks[editing]=t;save();render()}
+function delTask(i){if(confirm("Delete this maintenance task?")){v().tasks.splice(i,1);save();render()}}
+function editVehicle(){$("vehicleReg").value=v().reg||"";$("vehicleMileage").value=v().mileage||"";$("vehicleNotes").value=v().notes||"";$("vehicleDlg").showModal()}
+$("vehicleForm").onsubmit=()=>{v().reg=$("vehicleReg").value.trim();v().mileage=$("vehicleMileage").value;v().notes=$("vehicleNotes").value.trim();save();render()}
+function newRecord(){$("recordForm").reset();$("recordDate").value=new Date().toISOString().slice(0,10);$("recordDlg").showModal()}
+$("recordForm").onsubmit=()=>{v().history.push({job:$("recordJob").value.trim(),date:$("recordDate").value,mileage:$("recordMileage").value,cost:$("recordCost").value,parts:$("recordParts").value.trim(),notes:$("recordNotes").value.trim()});save();render()}
+function newPart(){$("partForm").reset();$("partDate").value=new Date().toISOString().slice(0,10);$("partDlg").showModal()}
+$("partForm").onsubmit=()=>{v().parts.push({name:$("partName").value.trim(),date:$("partDate").value,mileage:$("partMileage").value,category:$("partCategory").value.trim(),maker:$("partMaker").value.trim(),number:$("partNumber").value.trim(),cost:$("partCost").value,spec:$("partSpec").value.trim(),notes:$("partNotes").value.trim()});save();render()}
+function openV(id){current=id;tab="maintenance";render()}$("back").onclick=()=>{current=null;render()}
+function backup(){let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(db,null,2)],{type:"application/json"}));a.download="my-garage-backup.json";a.click()}
+function restore(){let i=document.createElement("input");i.type="file";i.accept=".json";i.onchange=()=>{let r=new FileReader();r.onload=()=>{try{db=JSON.parse(r.result);save();current=null;render();alert("Backup restored.")}catch(e){alert("Invalid backup.")}};r.readAsText(i.files[0])};i.click()}
+render();
+</script></body></html>

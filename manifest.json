@@ -1,0 +1,8 @@
+{
+  "name": "My Garage",
+  "short_name": "My Garage",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f2f3f5",
+  "theme_color": "#20242b"
+}
