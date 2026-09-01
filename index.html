@@ -135,5 +135,29 @@ $("partForm").onsubmit=()=>{v().parts.push({name:$("partName").value.trim(),date
 function openV(id){current=id;tab="maintenance";render()}$("back").onclick=()=>{current=null;render()}
 function backup(){let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(db,null,2)],{type:"application/json"}));a.download="my-garage-backup.json";a.click()}
 function restore(){let i=document.createElement("input");i.type="file";i.accept=".json";i.onchange=()=>{let r=new FileReader();r.onload=()=>{try{db=JSON.parse(r.result);save();current=null;render();alert("Backup restored.")}catch(e){alert("Invalid backup.")}};r.readAsText(i.files[0])};i.click()}
-render();
+async function loadFromSupabase(){
+  try{
+    const response=await fetch(`${SUPABASE_URL}/rest/v1/garage_data?id=eq.1&select=data`,{
+      headers:{
+        "apikey":SUPABASE_KEY,
+        "Authorization":`Bearer ${SUPABASE_KEY}`
+      }
+    });
+
+    if(!response.ok) return;
+
+    const rows=await response.json();
+
+    if(rows.length && rows[0].data){
+      db=rows[0].data;
+      localStorage.setItem(KEY,JSON.stringify(db));
+      render();
+    }
+  }catch(e){
+    console.error("Supabase load failed:",e);
+  }
+}
+
+loadFromSupabase();
+  render();
 </script></body></html>
