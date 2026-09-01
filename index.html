@@ -146,13 +146,9 @@ function history(){
             ${r.cost?" · £"+Number(r.cost).toFixed(2):""}
           </p>
 
-          ${r.parts
-            ? `<p style="margin-top:6px"><b>Parts/oil:</b> ${esc(r.parts)}</p>`
-            : ""}
+          ${r.parts?`<p style="margin-top:6px"><b>Parts/oil:</b> ${esc(r.parts)}</p>`:""}
 
-          ${r.notes
-            ? `<p class="muted" style="margin-top:6px">${esc(r.notes)}</p>`
-            : ""}
+          ${r.notes?`<p class="muted" style="margin-top:6px">${esc(r.notes)}</p>`:""}
 
           <div class="row" style="margin-top:10px">
             <button class="secondary" onclick="editRecord(${i})">Edit</button>
@@ -160,9 +156,7 @@ function history(){
           </div>
         </div>`;
       }).join("")
-    : `<div class="card empty">
-        No history recorded yet.
-      </div>`
+    : `<div class="card empty">No history recorded yet.</div>`
   );
 }
 function parts(){let p=v().parts||[];return `<div class="row between"><div><h3>Parts & Oils</h3><p class="muted">Record exactly what you fitted or used.</p></div><button onclick="newPart()">+ Add part</button></div>`+(p.length?p.slice().reverse().map(x=>`<div class="card"><div class="row between"><h3>${esc(x.name)}</h3><span class="muted">${dateText(x.date)}</span></div><p class="muted">${[x.category,x.maker,x.number].filter(Boolean).map(esc).join(" · ")}</p>${x.spec?`<p style="margin-top:6px"><b>Specification:</b> ${esc(x.spec)}</p>`:""}<p class="muted">${x.mileage?Number(x.mileage).toLocaleString()+" miles":""}${x.cost?" · £"+Number(x.cost).toFixed(2):""}</p>${x.notes?`<p class="muted">${esc(x.notes)}</p>`:""}</div>`).join(""):`<div class="card empty">No parts or oils recorded yet.</div>`)}
