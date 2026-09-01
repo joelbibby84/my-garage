@@ -149,12 +149,11 @@ async function loadFromSupabase(){
     const rows=await response.json();
 
     if(rows.length && rows[0].data){
-      db=rows[0].data;
-      localStorage.setItem(KEY,JSON.stringify(db));
-      render();
-    }
-  }catch(e){
-    console.error("Supabase load failed:",e);
+  const cloudData = rows[0].data;
+
+  if(Array.isArray(cloudData)){
+    db = cloudData;
+    localStorage.setItem(KEY,JSON.stringify(db));
   }
 }
 
