@@ -158,6 +158,10 @@ async function loadFromSupabase(){
   }
 }
 
-loadFromSupabase();
+async function startApp(){
+  await loadFromSupabase();
   render();
+}
+
+startApp();
 </script></body></html>
