@@ -122,7 +122,6 @@ function maintenance(){return `<div class="row between"><div><h3>Maintenance</h3
 (v().tasks.length?v().tasks.map((t,i)=>{let s=status(t);return `<div class="card task ${s.od?"overdue":s.so?"soon":"ok"}"><div class="row between"><div><h3>${esc(t.name)}</h3><p class="muted">${t.months?t.months+" months":""}${t.months&&t.miles?" / ":""}${t.miles?Number(t.miles).toLocaleString()+" miles":""}</p></div><span class="badge ${s.od?"overdue":s.so?"soon":"ok"}">${s.label}</span></div><p style="margin-top:8px"><b>Next due:</b> ${esc(due(t))}</p><p class="muted">Last done: ${dateText(t.date)}${t.lastMiles?" · "+Number(t.lastMiles).toLocaleString()+" miles":""}</p><div class="row" style="margin-top:10px"><button class="secondary" onclick="editTask(${i})">Edit</button><button class="danger" onclick="delTask(${i})">Delete</button></div></div>`}).join(""):`<div class="card empty">No maintenance tasks yet.<br>Add your first one above.</div>`)}
 function history(){
   let h=v().history||[];
-
   return `<div class="row between">
     <div>
       <h3>Maintenance history</h3>
@@ -130,34 +129,18 @@ function history(){
     </div>
     <button onclick="newRecord()">+ Add record</button>
   </div>`+
-
   (h.length
     ? h.slice().reverse().map((r,displayIndex)=>{
         let i=h.length-1-displayIndex;
-
         return `<div class="card">
           <h3>${esc(r.job)}</h3>
-
           <p class="muted" style="margin-top:8px">
-            Date: ${dateText(r.date)}
+            <b>Date:</b> ${dateText(r.date)}
           </p>
-
-          ${r.mileage?`<p class="muted" style="margin-top:4px">
-            Mileage: ${Number(r.mileage).toLocaleString()} miles
-          </p>`:""}
-
-          ${r.cost?`<p class="muted" style="margin-top:4px">
-            Cost: £${Number(r.cost).toFixed(2)}
-          </p>`:""}
-
-          ${r.parts?`<p style="margin-top:8px">
-            <b>Parts/oil:</b> ${esc(r.parts)}
-          </p>`:""}
-
-          ${r.notes?`<p class="muted" style="margin-top:6px">
-            <b>Notes:</b> ${esc(r.notes)}
-          </p>`:""}
-
+          ${r.mileage?`<p class="muted" style="margin-top:5px"><b>Mileage:</b> ${Number(r.mileage).toLocaleString()} miles</p>`:""}
+          ${r.cost?`<p class="muted" style="margin-top:5px"><b>Cost:</b> £${Number(r.cost).toFixed(2)}</p>`:""}
+          ${r.parts?`<p style="margin-top:8px"><b>Parts/oil:</b> ${esc(r.parts)}</p>`:""}
+          ${r.notes?`<p class="muted" style="margin-top:6px">${esc(r.notes)}</p>`:""}
           <div class="row" style="margin-top:10px">
             <button class="secondary" onclick="editRecord(${i})">Edit</button>
             <button class="danger" onclick="deleteRecord(${i})">Delete</button>
