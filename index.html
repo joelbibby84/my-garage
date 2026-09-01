@@ -82,7 +82,7 @@ const dateText=d=>d?new Date(d+"T00:00:00").toLocaleDateString("en-GB"):"—";
 async function save(){
   localStorage.setItem(KEY,JSON.stringify(db));
   try{
-    await fetch(`${SUPABASE_URL}/rest/v1/garage_data`,{
+    const response=await fetch(`${SUPABASE_URL}/rest/v1/garage_data`,{
       method:"POST",
       headers:{
         "Content-Type":"application/json",
@@ -92,8 +92,18 @@ async function save(){
       },
       body:JSON.stringify({id:1,data:db})
     });
+
+    const result=await response.text();
+
+    if(!response.ok){
+      alert("Supabase error: "+response.status+" "+result);
+      console.error("Supabase error:",response.status,result);
+    }else{
+      console.log("Supabase saved:",result);
+    }
   }catch(e){
-    console.error("Supabase save failed:",e);
+    alert("Supabase connection error: "+e);
+    console.error(e);
   }
 }
 function calc(t){let d=null,m=null;if(t.months&&t.date){d=new Date(t.date+"T00:00:00");d.setMonth(d.getMonth()+Number(t.months))}if(t.miles&&t.lastMiles)m=Number(t.lastMiles)+Number(t.miles);return{d,m}}
