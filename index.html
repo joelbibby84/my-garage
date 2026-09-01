@@ -81,9 +81,10 @@ const v=()=>db.find(x=>x.id===current);
 const dateText=d=>d?new Date(d+"T00:00:00").toLocaleDateString("en-GB"):"—";
 async function save(){
   localStorage.setItem(KEY,JSON.stringify(db));
+
   try{
-    const response=await fetch(`${SUPABASE_URL}/rest/v1/garage_data`,{
-      method:"POST",
+    const response=await fetch(`${SUPABASE_URL}/rest/v1/garage_data?id=eq.1`,{
+      method:"PATCH",
       headers:{
         "Content-Type":"application/json",
         "apikey":SUPABASE_KEY,
