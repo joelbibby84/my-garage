@@ -173,6 +173,7 @@ function newRecord(){
   $("recordDate").value=new Date().toISOString().slice(0,10);
   $("recordDlg").showModal();
 }
+
 $("recordForm").onsubmit=()=>{
   let r={
     job:$("recordJob").value.trim(),
@@ -182,30 +183,38 @@ $("recordForm").onsubmit=()=>{
     parts:$("recordParts").value.trim(),
     notes:$("recordNotes").value.trim()
   };
+
   if(editing<0){
     v().history.push(r);
   }else{
     v().history[editing]=r;
   }
+
   /* Automatically update vehicle mileage if this entry is higher */
   if(r.mileage && Number(r.mileage)>Number(v().mileage||0)){
     v().mileage=r.mileage;
   }
+
   editing=-1;
   save();
   render();
 }
+
 function editRecord(i){
   let r=v().history[i];
+
   editing=i;
+
   $("recordJob").value=r.job||"";
   $("recordDate").value=r.date||"";
   $("recordMileage").value=r.mileage||"";
   $("recordCost").value=r.cost||"";
   $("recordParts").value=r.parts||"";
   $("recordNotes").value=r.notes||"";
+
   $("recordDlg").showModal();
 }
+
 function deleteRecord(i){
   if(confirm("Are you sure you want to delete this maintenance history entry?")){
     v().history.splice(i,1);
@@ -213,11 +222,13 @@ function deleteRecord(i){
     render();
   }
 }
+
 function newPart(){
   $("partForm").reset();
   $("partDate").value=new Date().toISOString().slice(0,10);
   $("partDlg").showModal();
 }
+
 $("partForm").onsubmit=()=>{
   v().parts.push({
     name:$("partName").value.trim(),
@@ -230,6 +241,7 @@ $("partForm").onsubmit=()=>{
     spec:$("partSpec").value.trim(),
     notes:$("partNotes").value.trim()
   });
+
   save();
   render();
 }
