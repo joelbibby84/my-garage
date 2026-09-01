@@ -88,9 +88,9 @@ async function save(){
         "Content-Type":"application/json",
         "apikey":SUPABASE_KEY,
         "Authorization":`Bearer ${SUPABASE_KEY}`,
-        "Prefer":"resolution=merge-duplicates"
+        "Prefer":"return=representation"
       },
-      body:JSON.stringify({id:1,data:db})
+      body:JSON.stringify({data:db})
     });
 
     const result=await response.text();
