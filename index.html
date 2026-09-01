@@ -173,6 +173,7 @@ function newRecord(){
   $("recordDate").value=new Date().toISOString().slice(0,10);
   $("recordDlg").showModal();
 }
+
 $("recordForm").onsubmit=()=>{
   let r={
     job:$("recordJob").value.trim(),
@@ -189,11 +190,17 @@ $("recordForm").onsubmit=()=>{
     v().history[editing]=r;
   }
 
+  /* Automatically update vehicle mileage if this entry is higher */
+  if(r.mileage && Number(r.mileage)>Number(v().mileage||0)){
+    v().mileage=r.mileage;
+  }
+
   editing=-1;
   save();
   render();
 }
- function editRecord(i){
+
+function editRecord(i){
   let r=v().history[i];
 
   editing=i;
@@ -215,48 +222,11 @@ function deleteRecord(i){
     render();
   }
 }
-  let r={
-    job:$("recordJob").value.trim(),
-    date:$("recordDate").value,
-    mileage:$("recordMileage").value,
-    cost:$("recordCost").value,
-    parts:$("recordParts").value.trim(),
-    notes:$("recordNotes").value.trim()
-  };
 
-  if(editing>=0){
-    v().history[editing]=r;
-  }else{
-    v().history.push(r);
-  }
-
-  if(r.mileage && Number(r.mileage)>Number(v().mileage||0)){
-    v().mileage=r.mileage;
-  }
-
-  editing=-1;
-  save();
-  render();
-}
-  let r=v().history[i];
-
-  editing=i;
-
-  $("recordJob").value=r.job||"";
-  $("recordDate").value=r.date||"";
-  $("recordMileage").value=r.mileage||"";
-  $("recordCost").value=r.cost||"";
-  $("recordParts").value=r.parts||"";
-  $("recordNotes").value=r.notes||"";
-
-  $("recordDlg").showModal();
-}
-function deleteRecord(i){
-  if(confirm("Delete this history record?")){
-    v().history.splice(i,1);
-    save();
-    render();
-  }
+function newPart(){
+  $("partForm").reset();
+  $("partDate").value=new Date().toISOString().slice(0,10);
+  $("partDlg").showModal();
 }
   function newPart(){$("partForm").reset();$("partDate").value=new Date().toISOString().slice(0,10);$("partDlg").showModal()}
 $("partForm").onsubmit=()=>{v().parts.push({name:$("partName").value.trim(),date:$("partDate").value,mileage:$("partMileage").value,category:$("partCategory").value.trim(),maker:$("partMaker").value.trim(),number:$("partNumber").value.trim(),cost:$("partCost").value,spec:$("partSpec").value.trim(),notes:$("partNotes").value.trim()});save();render()}
