@@ -167,7 +167,12 @@ $("taskForm").onsubmit=()=>{let t={name:$("taskName").value.trim(),months:$("tas
 function delTask(i){if(confirm("Delete this maintenance task?")){v().tasks.splice(i,1);save();render()}}
 function editVehicle(){$("vehicleReg").value=v().reg||"";$("vehicleMileage").value=v().mileage||"";$("vehicleNotes").value=v().notes||"";$("vehicleDlg").showModal()}
 $("vehicleForm").onsubmit=()=>{v().reg=$("vehicleReg").value.trim();v().mileage=$("vehicleMileage").value;v().notes=$("vehicleNotes").value.trim();save();render()}
-function newRecord(){$("recordForm").reset();$("recordDate").value=new Date().toISOString().slice(0,10);$("recordDlg").showModal()}
+function newRecord(){
+  editing=-1;
+  $("recordForm").reset();
+  $("recordDate").value=new Date().toISOString().slice(0,10);
+  $("recordDlg").showModal();
+}
 $("recordForm").onsubmit=()=>{
   let r={
     job:$("recordJob").value.trim(),
