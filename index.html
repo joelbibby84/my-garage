@@ -138,18 +138,25 @@ function history(){
         return `<div class="card">
           <h3>${esc(r.job)}</h3>
 
-          <p class="muted" style="margin-top:4px">
-            ${dateText(r.date)}
+          <p class="muted" style="margin-top:8px">
+            Date: ${dateText(r.date)}
           </p>
 
-          <p class="muted" style="margin-top:6px">
-            ${r.mileage?Number(r.mileage).toLocaleString()+" miles":""}
-            ${r.cost?" · £"+Number(r.cost).toFixed(2):""}
-          </p>
+          ${r.mileage?`<p class="muted" style="margin-top:4px">
+            Mileage: ${Number(r.mileage).toLocaleString()} miles
+          </p>`:""}
 
-          ${r.parts?`<p style="margin-top:6px"><b>Parts/oil:</b> ${esc(r.parts)}</p>`:""}
+          ${r.cost?`<p class="muted" style="margin-top:4px">
+            Cost: £${Number(r.cost).toFixed(2)}
+          </p>`:""}
 
-          ${r.notes?`<p class="muted" style="margin-top:6px">${esc(r.notes)}</p>`:""}
+          ${r.parts?`<p style="margin-top:8px">
+            <b>Parts/oil:</b> ${esc(r.parts)}
+          </p>`:""}
+
+          ${r.notes?`<p class="muted" style="margin-top:6px">
+            <b>Notes:</b> ${esc(r.notes)}
+          </p>`:""}
 
           <div class="row" style="margin-top:10px">
             <button class="secondary" onclick="editRecord(${i})">Edit</button>
