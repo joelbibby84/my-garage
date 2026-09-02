@@ -22,15 +22,44 @@ dialog{border:0;border-radius:18px;width:min(94%,620px);padding:0;box-shadow:0 2
 <header><div style="max-width:760px;margin:auto"><button id="back" class="back" style="display:none">‹ My Garage</button><h1 id="title">My Garage</h1></div></header>
 <main id="app"></main>
 
-<dialog id="taskDlg"><form method="dialog" class="modal" id="taskForm">
-<h2 id="taskHeading">Add maintenance task</h2>
-<label>Task</label><input id="taskName" required placeholder="Engine oil & filter">
-<div class="grid"><div><label>Frequency — months</label><input id="taskMonths" type="number" min="0"></div>
-<div><label>Frequency — miles</label><input id="taskMiles" type="number" min="0"></div>
-<div><label>Last done — date</label><input id="taskDate" type="date"></div>
-<div><label>Last done — mileage</label><input id="taskLastMiles" type="number" min="0"></div></div>
-<label>Notes</label><textarea id="taskNotes" rows="3"></textarea>
-<div class="row" style="margin-top:13px"><button>Save task</button><button type="button" class="secondary" onclick="taskDlg.close()">Cancel</button></div>
+<dialog id="recordDlg"><form method="dialog" class="modal" id="recordForm">
+<h2 id="recordHeading">Record completed work</h2>
+
+<label>Job / service</label>
+<input id="recordJob" required placeholder="Oil and filter change">
+
+<div class="grid">
+<div>
+<label>Date</label>
+<input id="recordDate" type="date" required>
+</div>
+
+<div>
+<label>Mileage</label>
+<input id="recordMileage" type="number" min="0">
+</div>
+
+<div>
+<label>Cost (£)</label>
+<input id="recordCost" type="number" min="0" step="0.01">
+</div>
+</div>
+
+<label>Parts / oils used</label>
+<div id="recordPartsList"></div>
+
+<button type="button" class="secondary" onclick="addRecordPart()" style="margin-top:8px">
++ Add part
+</button>
+
+<label>Notes</label>
+<textarea id="recordNotes" rows="3" placeholder="Anything else about the work"></textarea>
+
+<div class="row" style="margin-top:13px">
+<button id="recordSaveButton">Save record</button>
+<button type="button" class="secondary" onclick="recordDlg.close()">Cancel</button>
+</div>
+
 </form></dialog>
 
 <dialog id="vehicleDlg"><form method="dialog" class="modal" id="vehicleForm">
