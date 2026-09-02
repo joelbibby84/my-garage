@@ -1,1053 +1,1271 @@
 <!doctype html>
-
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#20242b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
 <title>My Garage</title>
+
 <style>
 *{box-sizing:border-box}
 body{
   margin:0;
   background:#f2f3f5;
   color:#20242b;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
 }
 header{
   background:#20242b;
-  color:#fff;
+  color:white;
   padding:16px;
+  padding-top:calc(16px + env(safe-area-inset-top));
   position:sticky;
   top:0;
-  z-index:2
+  z-index:10;
+}
+.headerRow{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+header h1{
+  margin:0;
+  font-size:21px;
+  flex:1;
+}
+button{
+  border:0;
+  border-radius:10px;
+  padding:11px 14px;
+  font-size:15px;
+  font-weight:600;
+  cursor:pointer;
+}
+.btn{
+  background:#20242b;
+  color:white;
+}
+.btn.secondary{
+  background:#e3e5e8;
+  color:#20242b;
+}
+.btn.danger{
+  background:#b42318;
+  color:white;
+}
+.btn.green{
+  background:#287a3e;
+  color:white;
 }
 main{
-  max-width:760px;
+  max-width:700px;
   margin:auto;
-  padding:14px
+  padding:16px;
+  padding-bottom:40px;
 }
-h1,h2,h3,p{margin:0}
-h1{font-size:25px}
-h2{font-size:19px}
-.muted{color:#68707c;font-size:14px}
 .card{
-  background:#fff;
+  background:white;
   border-radius:16px;
   padding:16px;
-  margin:10px 0;
-  box-shadow:0 1px 5px #0001
+  margin-bottom:14px;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
 }
 .vehicle{
   display:flex;
-  gap:14px;
   align-items:center;
-  cursor:pointer
+  gap:14px;
+  cursor:pointer;
 }
-.icon{font-size:34px}
+.vehicleEmoji{
+  font-size:38px;
+}
+.vehicleInfo{
+  flex:1;
+}
+.vehicleName{
+  font-size:18px;
+  font-weight:700;
+}
+.vehicleSub{
+  color:#666;
+  margin-top:4px;
+  font-size:14px;
+}
+.sectionTitle{
+  font-size:18px;
+  font-weight:700;
+  margin:20px 0 10px;
+}
+.tabs{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:6px;
+  margin-bottom:14px;
+}
+.tab{
+  background:#dddfe3;
+  color:#20242b;
+  padding:10px 4px;
+  font-size:13px;
+}
+.tab.active{
+  background:#20242b;
+  color:white;
+}
 .row{
   display:flex;
   gap:8px;
   align-items:center;
-  flex-wrap:wrap
 }
-.between{justify-content:space-between}
-button{
-  border:0;
-  border-radius:11px;
-  padding:11px 14px;
-  background:#2563eb;
-  color:white;
-  font-weight:700;
-  font-size:15px
-}
-button.secondary{
-  background:#e5e7eb;
-  color:#20242b
-}
-button.danger{
-  background:#fee2e2;
-  color:#991b1b
-}
-.back{
-  background:transparent;
-  padding:0;
-  margin-bottom:6px
-}
-.tabs{
-  display:flex;
-  gap:7px;
-  overflow:auto;
-  margin:10px 0
-}
-.tabs button{
-  white-space:nowrap;
-  background:#e5e7eb;
-  color:#333
-}
-.tabs .active{
-  background:#2563eb;
-  color:white
-}
-.badge{
-  padding:5px 8px;
-  border-radius:999px;
-  font-size:12px;
-  font-weight:800
-}
-.ok{
-  background:#dcfce7;
-  color:#166534
-}
-.soon{
-  background:#ffedd5;
-  color:#9a3412
-}
-.overdue{
-  background:#fee2e2;
-  color:#991b1b
-}
-.task{
-  border-left:5px solid #16a34a
-}
-.task.soon{
-  border-left-color:#d97706
-}
-.task.overdue{
-  border-left-color:#dc2626
-}
-.empty{
-  text-align:center;
-  color:#68707c;
-  padding:25px
-}
-.grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:9px
+.row>*{
+  flex:1;
 }
 label{
   display:block;
   font-size:13px;
-  font-weight:700;
-  margin:9px 0 4px
+  font-weight:600;
+  margin:10px 0 5px;
 }
-input,textarea{
+input,textarea,select{
   width:100%;
-  padding:10px;
-  border:1px solid #d1d5db;
-  border-radius:10px;
+  border:1px solid #c9ccd1;
+  border-radius:9px;
+  padding:11px;
   font-size:16px;
-  background:#fff
+  background:white;
+}
+textarea{
+  min-height:120px;
+  resize:vertical;
+}
+.item{
+  border:1px solid #e0e2e5;
+  border-radius:12px;
+  padding:12px;
+  margin-bottom:10px;
+}
+.itemTitle{
+  font-weight:700;
+  font-size:16px;
+}
+.itemMeta{
+  color:#666;
+  font-size:13px;
+  margin-top:4px;
+}
+.itemButtons{
+  display:flex;
+  gap:7px;
+  margin-top:9px;
+}
+.itemButtons button{
+  padding:7px 10px;
+  font-size:13px;
+}
+.empty{
+  color:#777;
+  text-align:center;
+  padding:18px 5px;
+}
+.small{
+  font-size:12px;
+  color:#666;
+}
+.status{
+  margin-top:10px;
+  padding:9px;
+  border-radius:9px;
+  background:#eef1f4;
+  font-size:13px;
 }
 dialog{
+  width:min(94%,600px);
   border:0;
-  border-radius:18px;
-  width:min(94%,620px);
+  border-radius:16px;
   padding:0;
-  box-shadow:0 20px 60px #0005
+  box-shadow:0 10px 40px rgba(0,0,0,.3);
 }
 dialog::backdrop{
-  background:#0007
+  background:rgba(0,0,0,.55);
 }
-.modal{
-  padding:18px
+.dialogInner{
+  padding:20px;
 }
-@media(max-width:520px){
-  .grid{grid-template-columns:1fr}
+.dialogTitle{
+  font-size:20px;
+  font-weight:700;
+  margin-bottom:10px;
+}
+.dialogButtons{
+  display:flex;
+  gap:8px;
+  margin-top:16px;
+}
+.dialogButtons button{
+  flex:1;
+}
+.topActions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+@media(max-width:430px){
+  .tabs button{
+    font-size:11px;
+  }
 }
 </style>
 </head>
+
 <body>
+
 <header>
-  <div style="max-width:760px;margin:auto">
-    <button id="back" class="back" style="display:none">
-      ‹ My Garage
-    </button>
+  <div class="headerRow">
+    <button id="back" class="btn secondary" style="display:none" onclick="goHome()">←</button>
     <h1 id="title">My Garage</h1>
+    <button class="btn secondary" onclick="openSettings()">⚙️</button>
   </div>
 </header>
+
 <main id="app"></main>
-<!-- MAINTENANCE TASK -->
-<dialog id="taskDlg">
-<form method="dialog" class="modal" id="taskForm">
-<h2 id="taskHeading">Add maintenance task</h2>
 
-Task
-<div class="grid">
-<div>
-<label>Frequency — months</label>
-<input id="taskMonths" type="number" min="0">
-</div>
-<div>
-<label>Frequency — miles</label>
-<input id="taskMiles" type="number" min="0">
-</div>
-<div>
-<label>Last done — date</label>
-<input id="taskDate" type="date">
-</div>
-<div>
-<label>Last done — mileage</label>
-<input id="taskLastMiles" type="number" min="0">
-</div>
-</div>
+<!-- Vehicle dialog -->
+<dialog id="vehicleDialog">
+  <div class="dialogInner">
+    <div class="dialogTitle">Edit vehicle</div>
 
-Notes
+    <label>Name</label>
+    <input id="vehicleName">
 
-<textarea id="taskNotes" rows="3"></textarea>
-<div class="row" style="margin-top:13px">
-<button>Save task</button>
-<button type="button" class="secondary" onclick="taskDlg.close()">Cancel</button>
-</div>
-</form>
+    <label>Year</label>
+    <input id="vehicleYear" type="number">
+
+    <label>Engine</label>
+    <input id="vehicleEngine">
+
+    <label>Registration</label>
+    <input id="vehicleReg">
+
+    <label>Current mileage</label>
+    <input id="vehicleMileage" type="number">
+
+    <label>Notes</label>
+    <textarea id="vehicleNotes"></textarea>
+
+    <div class="dialogButtons">
+      <button class="btn secondary" onclick="vehicleDialog.close()">Cancel</button>
+      <button class="btn green" onclick="saveVehicle()">Save</button>
+    </div>
+  </div>
 </dialog>
-<!-- VEHICLE -->
-<dialog id="vehicleDlg">
-<form method="dialog" class="modal" id="vehicleForm">
-<h2>Edit vehicle</h2>
 
-Registration
-Current mileage
-Notes / modifications
+<!-- Task dialog -->
+<dialog id="taskDialog">
+  <div class="dialogInner">
+    <div class="dialogTitle">Maintenance task</div>
 
-<textarea id="vehicleNotes" rows="4"></textarea>
-<div class="row" style="margin-top:13px">
-<button>Save</button>
-<button type="button" class="secondary" onclick="vehicleDlg.close()">Cancel</button>
-</div>
-</form>
+    <label>Task</label>
+    <input id="taskName" placeholder="e.g. Change engine oil">
+
+    <label>Due date</label>
+    <input id="taskDate" type="date">
+
+    <label>Due mileage</label>
+    <input id="taskMileage" type="number" placeholder="Optional">
+
+    <div class="dialogButtons">
+      <button class="btn secondary" onclick="taskDialog.close()">Cancel</button>
+      <button class="btn green" onclick="saveTask()">Save</button>
+    </div>
+  </div>
 </dialog>
-<!-- RECORD COMPLETED WORK -->
-<dialog id="recordDlg">
-<form method="dialog" class="modal" id="recordForm">
-<h2>Record completed work</h2>
 
-Job / service
-<div class="grid">
-<div>
-<label>Date</label>
-<input id="recordDate" type="date" required>
-</div>
-<div>
-<label>Mileage</label>
-<input id="recordMileage" type="number" min="0">
-</div>
-<div>
-<label>Cost (£)</label>
-<input id="recordCost" type="number" min="0" step="0.01">
-</div>
-<div>
-<label>Parts / oil used</label>
-<input id="recordParts">
-</div>
-</div>
+<!-- History dialog -->
+<dialog id="recordDialog">
+  <div class="dialogInner">
+    <div class="dialogTitle">Record completed work</div>
 
-Notes
+    <label>Job / service</label>
+    <input id="recordJob" placeholder="e.g. Oil and filter change">
 
-<textarea id="recordNotes" rows="3"></textarea>
-<div class="row" style="margin-top:13px">
-<button>Save record</button>
-<button type="button" class="secondary" onclick="recordDlg.close()">Cancel</button>
-</div>
-</form>
+    <label>Date</label>
+    <input id="recordDate" type="date">
+
+    <label>Mileage</label>
+    <input id="recordMileage" type="number">
+
+    <label>Cost</label>
+    <input id="recordCost" type="number" step="0.01">
+
+    <label>Details</label>
+    <textarea id="recordDetails"></textarea>
+
+    <div class="dialogButtons">
+      <button class="btn secondary" onclick="recordDialog.close()">Cancel</button>
+      <button class="btn green" onclick="saveRecord()">Save</button>
+    </div>
+  </div>
 </dialog>
-<!-- PARTS -->
-<dialog id="partDlg">
-<form method="dialog" class="modal" id="partForm">
-<h2>Add part / oil</h2>
 
-Part / product
-<div class="grid">
-<div>
-<label>Date fitted</label>
-<input id="partDate" type="date">
-</div>
-<div>
-<label>Mileage fitted</label>
-<input id="partMileage" type="number" min="0">
-</div>
-<div>
-<label>Category</label>
-<input id="partCategory" placeholder="Oil, filter, brake...">
-</div>
-<div>
-<label>Manufacturer</label>
-<input id="partMaker">
-</div>
-<div>
-<label>Part number</label>
-<input id="partNumber">
-</div>
-<div>
-<label>Cost (£)</label>
-<input id="partCost" type="number" min="0" step="0.01">
-</div>
-</div>
+<!-- Parts dialog -->
+<dialog id="partDialog">
+  <div class="dialogInner">
+    <div class="dialogTitle">Add part / product</div>
 
-Type / specification
-Notes
+    <label>Part / product</label>
+    <input id="partName" placeholder="e.g. Oil filter">
 
-<textarea id="partNotes" rows="3"></textarea>
-<div class="row" style="margin-top:13px">
-<button>Save part</button>
-<button type="button" class="secondary" onclick="partDlg.close()">Cancel</button>
-</div>
-</form>
+    <label>Type / specification</label>
+    <input id="partSpec" placeholder="e.g. Mann W 712/95">
+
+    <label>Quantity</label>
+    <input id="partQty" type="number" value="1">
+
+    <label>Cost</label>
+    <input id="partCost" type="number" step="0.01">
+
+    <div class="dialogButtons">
+      <button class="btn secondary" onclick="partDialog.close()">Cancel</button>
+      <button class="btn green" onclick="savePart()">Save</button>
+    </div>
+  </div>
 </dialog>
+
+<!-- Settings dialog -->
+<dialog id="settingsDialog">
+  <div class="dialogInner">
+    <div class="dialogTitle">Garage settings</div>
+
+    <p class="small">
+      Your data is stored on this device and synchronised with Supabase when possible.
+    </p>
+
+    <div class="topActions">
+      <button class="btn" onclick="backupData()">Backup data</button>
+      <button class="btn secondary" onclick="document.getElementById('restoreFile').click()">Restore data</button>
+      <button class="btn danger" onclick="resetLocalData()">Reset local data</button>
+    </div>
+
+    <input id="restoreFile" type="file" accept=".json,application/json" style="display:none" onchange="restoreData(event)">
+
+    <div id="cloudStatus" class="status">Cloud storage: checking…</div>
+
+    <div class="dialogButtons">
+      <button class="btn secondary" onclick="settingsDialog.close()">Close</button>
+    </div>
+  </div>
+</dialog>
+
 <script>
 const SUPABASE_URL="https://baqdlzrdyuzgjdsjzenl.supabase.co";
 const SUPABASE_KEY="sb_publishable_Clz_wO8YPjTQOqrlbZ2d4w_RSimZxDH";
 const KEY="myGarageV1";
+
 const starter=[
-{
- id:"skoda",
- name:"Skoda Superb",
- year:2010,
- engine:"2.0 TDI",
- emoji:"🚗",
- reg:"",
- mileage:"",
- notes:"",
- tasks:[],
- history:[],
- parts:[]
-},
-{
- id:"corsa",
- name:"Vauxhall Corsa",
- year:2016,
- engine:"1.4 Petrol",
- emoji:"🚗",
- reg:"",
- mileage:"",
- notes:"",
- tasks:[],
- history:[],
- parts:[]
-},
-{
- id:"st1300",
- name:"Honda Pan European ST1300",
- year:2012,
- engine:"ST1300",
- emoji:"🏍️",
- reg:"",
- mileage:"",
- notes:"",
- tasks:[],
- history:[],
- parts:[]
-},
-{
- id:"gsx250",
- name:"Suzuki GSX250",
- year:1982,
- engine:"GSX250",
- emoji:"🏍️",
- reg:"",
- mileage:"",
- notes:"",
- tasks:[],
- history:[],
- parts:[]
-}
+  {
+    id:"skoda",
+    name:"Skoda Superb",
+    year:2010,
+    engine:"2.0 TDI",
+    emoji:"🚗",
+    reg:"",
+    mileage:"",
+    notes:"",
+    tasks:[],
+    history:[],
+    parts:[]
+  },
+  {
+    id:"corsa",
+    name:"Vauxhall Corsa",
+    year:2016,
+    engine:"1.4 Petrol",
+    emoji:"🚗",
+    reg:"",
+    mileage:"",
+    notes:"",
+    tasks:[],
+    history:[],
+    parts:[]
+  },
+  {
+    id:"st1300",
+    name:"Honda Pan European ST1300",
+    year:2012,
+    engine:"ST1300",
+    emoji:"🏍️",
+    reg:"",
+    mileage:"",
+    notes:"",
+    tasks:[],
+    history:[],
+    parts:[]
+  },
+  {
+    id:"gsx250",
+    name:"Suzuki GSX250",
+    year:1982,
+    engine:"GSX250",
+    emoji:"🏍️",
+    reg:"",
+    mileage:"",
+    notes:"",
+    tasks:[],
+    history:[],
+    parts:[]
+  }
 ];
-let db=JSON.parse(localStorage.getItem(KEY)||"null")||starter;
+
 let current=null;
 let tab="maintenance";
 let editing=-1;
-const $=id=>document.getElementById(id);
-const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({
- "&":"&amp;",
- "<":"&lt;",
- ">":"&gt;",
- '"':"&quot;",
- "'":"&#39;"
-}[m]));
-const v=()=>db.find(x=>x.id===current);
-const dateText=d=>
- d
- ?new Date(d+"T00:00:00").toLocaleDateString("en-GB")
- :"—";
-async function save(){
- localStorage.setItem(KEY,JSON.stringify(db));
- try{
-  const response=await fetch(
-   `${SUPABASE_URL}/rest/v1/garage_data?id=eq.1`,
-   {
-    method:"PATCH",
-    headers:{
-     "Content-Type":"application/json",
-     "apikey":SUPABASE_KEY,
-     "Authorization":`Bearer ${SUPABASE_KEY}`,
-     "Prefer":"return=representation"
-    },
-    body:JSON.stringify({data:db})
-   }
-  );
-  if(!response.ok){
-   const result=await response.text();
-   alert(
-    "Supabase error: "+
-    response.status+
-    " "+
-    result
-   );
-   console.error(
-    "Supabase error:",
-    response.status,
-    result
-   );
+let editingPart=-1;
+let recordTaskIndex=-1;
+let db=loadLocal();
+
+function $(id){
+  return document.getElementById(id);
+}
+
+function esc(s){
+  return String(s ?? "").replace(/[&<>"']/g,m=>({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
+  }[m]));
+}
+
+function today(){
+  return new Date().toISOString().slice(0,10);
+}
+
+function loadLocal(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(KEY)||"null");
+    if(Array.isArray(saved) && saved.length){
+      return normaliseDatabase(saved);
+    }
+  }catch(e){
+    console.error("Local data error:",e);
   }
- }catch(e){
-  alert("Supabase connection error: "+e);
-  console.error(e);
- }
+  return normaliseDatabase(starter);
 }
-function calc(t){
- let d=null;
- let m=null;
- if(t.months&&t.date){
-  d=new Date(t.date+"T00:00:00");
-  d.setMonth(
-   d.getMonth()+Number(t.months)
-  );
- }
- if(t.miles&&t.lastMiles){
-  m=
-   Number(t.lastMiles)+
-   Number(t.miles);
- }
- return{d,m};
-}
-function status(t){
- let c=calc(t);
- let now=new Date();
- let cur=
-  v().mileage===""
-  ?null
-  :Number(v().mileage);
- let od=
-  (c.d&&now>=c.d)||
-  (c.m&&cur!=null&&cur>=c.m);
- let so=
-  !od&&
-  (
-   (c.d&&(c.d-now)<=30*86400000)||
-   (c.m&&cur!=null&&(c.m-cur)<=500)
-  );
- return{
-  c,
-  od,
-  so,
-  label:od?"OVERDUE":so?"DUE SOON":"OK"
- };
-}
-function due(t){
- let c=calc(t);
- let a=
-  c.d
-  ?dateText(c.d.toISOString().slice(0,10))
-  :"";
- let b=
-  c.m
-  ?c.m.toLocaleString()+" miles"
-  :"";
- return[
-  a,
-  b
- ].filter(Boolean).join(" OR ")||"Not scheduled";
-}
-function render(){
- if(!current){
-  $("back").style.display="none";
-  $("title").textContent="My Garage";
-  $("app").innerHTML=
-   `<div class="card">
-    <h2>Your vehicles</h2>
-    <p class="muted" style="margin-top:5px">
-     Tap a vehicle to manage it.
-    </p>
-   </div>`
-   +
-   db.map(x=>
-    `<div class="card vehicle"
-      onclick="openV('${x.id}')">
-      <div class="icon">${x.emoji}</div>
-      <div>
-       <h2>${esc(x.name)}</h2>
-       <p class="muted">
-        ${x.year} · ${esc(x.engine)}
-        ${
-         x.mileage!==""
-         ?" · "+Number(x.mileage).toLocaleString()+" miles"
-         :""
-        }
-       </p>
-      </div>
-     </div>`
-   ).join("")
-   +
-   `<div class="card">
-    <h3>Backup</h3>
-    <p class="muted" style="margin:5px 0 10px">
-     Export a backup before changing phones.
-    </p>
-    <div class="row">
-     <button onclick="backup()">
-      Export backup
-     </button>
-     <button
-      class="secondary"
-      onclick="restore()">
-      Import backup
-     </button>
-    </div>
-   </div>`;
-  return;
- }
- $("back").style.display="block";
- $("title").textContent=v().name;
- $("app").innerHTML=
- `<div class="card">
-  <div class="row between">
-   <div>
-    <div class="muted">
-     ${v().year} · ${esc(v().engine)}
-    </div>
-    <h2>
-     ${v().emoji} ${esc(v().name)}
-    </h2>
-    <p class="muted">
-     ${v().reg||"Registration not entered"}
-     ${
-      v().mileage!==""
-      ?" · "+Number(v().mileage).toLocaleString()+" miles"
-      :" · Mileage not entered"
-     }
-    </p>
-   </div>
-   <button
-    class="secondary"
-    onclick="editVehicle()">
-    Edit
-   </button>
-  </div>
- </div>
- <div class="tabs">
-  <button
-   class="${tab=="maintenance"?"active":""}"
-   onclick="tab='maintenance';render()">
-   🔧 Maintenance
-  </button>
-  <button
-   class="${tab=="history"?"active":""}"
-   onclick="tab='history';render()">
-   📖 History
-  </button>
-  <button
-   class="${tab=="parts"?"active":""}"
-   onclick="tab='parts';render()">
-   🔩 Parts & Oils
-  </button>
-  <button
-   class="${tab=="notes"?"active":""}"
-   onclick="tab='notes';render()">
-   📝 Notes
-  </button>
- </div>`
- +
- (
-  tab=="maintenance"
-  ?maintenance()
-  :tab=="history"
-  ?history()
-  :tab=="parts"
-  ?parts()
-  :notes()
- );
-}
-function maintenance(){
- return
- `<div class="row between">
-  <div>
-   <h3>Maintenance</h3>
-   <p class="muted">
-    Date or mileage — whichever comes first.
-   </p>
-  </div>
-  <button onclick="newTask()">
-   + Add task
-  </button>
- </div>`
- +
- (
-  v().tasks.length
-  ?
-  v().tasks.map((t,i)=>{
-   let s=status(t);
-   return
-   `<div class="card task ${
-     s.od
-     ?"overdue"
-     :s.so
-     ?"soon"
-     :"ok"
-    }">
-    <div class="row between">
-     <div>
-      <h3>${esc(t.name)}</h3>
-      <p class="muted">
-       ${t.months?t.months+" months":""}
-       ${
-        t.months&&t.miles
-        ?" / "
-        :""
-       }
-       ${
-        t.miles
-        ?Number(t.miles).toLocaleString()+" miles"
-        :""
-       }
-      </p>
-     </div>
-     <span class="badge ${
-      s.od
-      ?"overdue"
-      :s.so
-      ?"soon"
-      :"ok"
-     }">
-      ${s.label}
-     </span>
-    </div>
-    <p style="margin-top:8px">
-     <b>Next due:</b> ${esc(due(t))}
-    </p>
-    <p class="muted">
-     Last done:
-     ${dateText(t.date)}
-     ${
-      t.lastMiles
-      ?" · "+Number(t.lastMiles).toLocaleString()+" miles"
-      :""
-     }
-    </p>
-    <div class="row" style="margin-top:10px">
-     <button
-      class="secondary"
-      onclick="editTask(${i})">
-      Edit
-     </button>
-     <button
-      class="danger"
-      onclick="delTask(${i})">
-      Delete
-     </button>
-    </div>
-   </div>`;
-  }).join("")
-  :
-  `<div class="card empty">
-   No maintenance tasks yet.<br>
-   Add your first one above.
-  </div>`
- );
-}
-function history(){
- let h=v().history||[];
- return
- `<div class="row between">
-  <div>
-   <h3>Maintenance history</h3>
-   <p class="muted">
-    Everything recorded as completed.
-   </p>
-  </div>
-  <button onclick="newRecord()">
-   + Add record
-  </button>
- </div>`
- +
- (
-  h.length
-  ?
-  h.slice().reverse().map((r,displayIndex)=>{
-   let i=h.length-1-displayIndex;
-   return
-   `<div class="card">
-    <h3>${esc(r.job)}</h3>
-    <p class="muted" style="margin-top:8px">
-     <b>Date:</b> ${dateText(r.date)}
-    </p>
-    ${
-     r.mileage
-     ?
-     `<p class="muted" style="margin-top:5px">
-      <b>Mileage:</b>
-      ${Number(r.mileage).toLocaleString()} miles
-     </p>`
-     :""
-    }
-    ${
-     r.cost
-     ?
-     `<p class="muted" style="margin-top:5px">
-      <b>Cost:</b>
-      £${Number(r.cost).toFixed(2)}
-     </p>`
-     :""
-    }
-    ${
-     r.parts
-     ?
-     `<p style="margin-top:8px">
-      <b>Parts/oil:</b>
-      ${esc(r.parts)}
-     </p>`
-     :""
-    }
-    ${
-     r.notes
-     ?
-     `<p class="muted" style="margin-top:6px">
-      ${esc(r.notes)}
-     </p>`
-     :""
-    }
-    <div class="row" style="margin-top:10px">
-     <button
-      class="secondary"
-      onclick="editRecord(${i})">
-      Edit
-     </button>
-     <button
-      class="danger"
-      onclick="deleteRecord(${i})">
-      Delete
-     </button>
-    </div>
-   </div>`;
-  }).join("")
-  :
-  `<div class="card empty">
-   No history recorded yet.
-  </div>`
- );
-}
-function parts(){
- let p=v().parts||[];
- return
- `<div class="row between">
-  <div>
-   <h3>Parts & Oils</h3>
-   <p class="muted">
-    Record exactly what you fitted or used.
-   </p>
-  </div>
-  <button onclick="newPart()">
-   + Add part
-  </button>
- </div>`
- +
- (
-  p.length
-  ?
-  p.slice().reverse().map(x=>
-   `<div class="card">
-    <div class="row between">
-     <h3>${esc(x.name)}</h3>
-     <span class="muted">
-      ${dateText(x.date)}
-     </span>
-    </div>
-    <p class="muted">
-     ${
-      [x.category,x.maker,x.number]
-      .filter(Boolean)
-      .map(esc)
-      .join(" · ")
-     }
-    </p>
-    ${
-     x.spec
-     ?
-     `<p style="margin-top:6px">
-      <b>Specification:</b>
-      ${esc(x.spec)}
-     </p>`
-     :""
-    }
-    <p class="muted">
-     ${
-      x.mileage
-      ?Number(x.mileage).toLocaleString()+" miles"
-      :""
-     }
-     ${
-      x.cost
-      ?" · £"+Number(x.cost).toFixed(2)
-      :""
-     }
-    </p>
-    ${
-     x.notes
-     ?
-     `<p class="muted">${esc(x.notes)}</p>`
-     :""
-    }
-   </div>`
-  ).join("")
-  :
-  `<div class="card empty">
-   No parts or oils recorded yet.
-  </div>`
- );
-}
-function notes(){
- return
- `<div class="card">
-  <h3>Vehicle notes & modifications</h3>
-  <p style="margin-top:8px;white-space:pre-wrap">
-   ${
-    esc(v().notes)||
-    '<span class="muted">No notes yet.</span>'
-   }
-  </p>
- </div>`;
-}
-function newTask(){
- editing=-1;
- $("taskForm").reset();
- $("taskHeading").textContent=
-  "Add maintenance task";
- $("taskDlg").showModal();
-}
-function editTask(i){
- editing=i;
- let t=v().tasks[i];
- $("taskName").value=t.name;
- $("taskMonths").value=t.months||"";
- $("taskMiles").value=t.miles||"";
- $("taskDate").value=t.date||"";
- $("taskLastMiles").value=t.lastMiles||"";
- $("taskNotes").value=t.notes||"";
- $("taskHeading").textContent=
-  "Edit maintenance task";
- $("taskDlg").showModal();
-}
-$("taskForm").onsubmit=()=>{
- let t={
-  name:$("taskName").value.trim(),
-  months:$("taskMonths").value,
-  miles:$("taskMiles").value,
-  date:$("taskDate").value,
-  lastMiles:$("taskLastMiles").value,
-  notes:$("taskNotes").value.trim()
- };
- if(editing<0)
-  v().tasks.push(t);
- else
-  v().tasks[editing]=t;
- editing=-1;
- save();
- render();
-};
-function delTask(i){
- if(confirm("Delete this maintenance task?")){
-  v().tasks.splice(i,1);
-  save();
-  render();
- }
-}
-function editVehicle(){
- $("vehicleReg").value=
-  v().reg||"";
- $("vehicleMileage").value=
-  v().mileage||"";
- $("vehicleNotes").value=
-  v().notes||"";
- $("vehicleDlg").showModal();
-}
-$("vehicleForm").onsubmit=()=>{
- v().reg=
-  $("vehicleReg").value.trim();
- v().mileage=
-  $("vehicleMileage").value;
- v().notes=
-  $("vehicleNotes").value.trim();
- save();
- render();
-};
-function newRecord(){
- editing=-1;
- $("recordForm").reset();
- $("recordDate").value=
-  new Date().toISOString().slice(0,10);
- $("recordDlg").showModal();
-}
-$("recordForm").onsubmit=()=>{
- let r={
-  job:$("recordJob").value.trim(),
-  date:$("recordDate").value,
-  mileage:$("recordMileage").value,
-  cost:$("recordCost").value,
-  parts:$("recordParts").value.trim(),
-  notes:$("recordNotes").value.trim()
- };
- if(editing<0)
-  v().history.push(r);
- else
-  v().history[editing]=r;
- if(
-  r.mileage &&
-  Number(r.mileage)>Number(v().mileage||0)
- ){
-  v().mileage=r.mileage;
- }
- editing=-1;
- save();
- render();
-};
-function editRecord(i){
- let r=v().history[i];
- editing=i;
- $("recordJob").value=r.job||"";
- $("recordDate").value=r.date||"";
- $("recordMileage").value=
-  r.mileage||"";
- $("recordCost").value=
-  r.cost||"";
- $("recordParts").value=
-  r.parts||"";
- $("recordNotes").value=
-  r.notes||"";
- $("recordDlg").showModal();
-}
-function deleteRecord(i){
- if(confirm(
-  "Are you sure you want to delete this maintenance history entry?"
- )){
-  v().history.splice(i,1);
-  save();
-  render();
- }
-}
-function newPart(){
- $("partForm").reset();
- $("partDate").value=
-  new Date().toISOString().slice(0,10);
- $("partDlg").showModal();
-}
-$("partForm").onsubmit=()=>{
- v().parts.push({
-  name:$("partName").value.trim(),
-  date:$("partDate").value,
-  mileage:$("partMileage").value,
-  category:$("partCategory").value.trim(),
-  maker:$("partMaker").value.trim(),
-  number:$("partNumber").value.trim(),
-  cost:$("partCost").value,
-  spec:$("partSpec").value.trim(),
-  notes:$("partNotes").value.trim()
- });
- save();
- render();
-};
-function openV(id){
- current=id;
- tab="maintenance";
- render();
-}
-$("back").onclick=()=>{
- current=null;
- render();
-};
-function backup(){
- let a=document.createElement("a");
- a.href=
-  URL.createObjectURL(
-   new Blob(
-    [JSON.stringify(db,null,2)],
-    {type:"application/json"}
-   )
-  );
- a.download=
-  "my-garage-backup.json";
- a.click();
-}
-function restore(){
- let i=document.createElement("input");
- i.type="file";
- i.accept=".json";
- i.onchange=()=>{
-  let r=new FileReader();
-  r.onload=()=>{
-   try{
-    db=JSON.parse(r.result);
-    save();
-    current=null;
-    render();
-    alert("Backup restored.");
-   }catch(e){
-    alert("Invalid backup.");
-   }
+
+function normaliseVehicle(x,index){
+  const base=starter[index] || starter[0];
+
+  return {
+    id:String(x?.id || base.id),
+    name:String(x?.name ?? base.name),
+    year:Number(x?.year || base.year),
+    engine:String(x?.engine ?? base.engine),
+    emoji:String(x?.emoji || base.emoji),
+    reg:String(x?.reg ?? ""),
+    mileage:String(x?.mileage ?? ""),
+    notes:String(x?.notes ?? ""),
+    tasks:Array.isArray(x?.tasks) ? x.tasks : [],
+    history:Array.isArray(x?.history) ? x.history : [],
+    parts:Array.isArray(x?.parts) ? x.parts : []
   };
-  r.readAsText(i.files[0]);
- };
- i.click();
 }
-async function loadFromSupabase(){
- try{
-  const response=await fetch(
-   `${SUPABASE_URL}/rest/v1/garage_data?id=eq.1&select=data`,
-   {
-    headers:{
-     "apikey":SUPABASE_KEY,
-     "Authorization":`Bearer ${SUPABASE_KEY}`
+
+function normaliseDatabase(data){
+  if(!Array.isArray(data)) return normaliseDatabase(starter);
+
+  const result=[];
+  const used=new Set();
+
+  data.forEach((x,index)=>{
+    if(!x || typeof x!=="object") return;
+
+    const vehicle=normaliseVehicle(x,index);
+    if(!used.has(vehicle.id)){
+      used.add(vehicle.id);
+      result.push(vehicle);
     }
-   }
-  );
-  if(!response.ok){
-   console.error(
-    "Supabase load error:",
-    response.status,
-    await response.text()
-   );
-   return;
+  });
+
+  starter.forEach((base,index)=>{
+    if(!used.has(base.id)){
+      result.push(normaliseVehicle(base,index));
+    }
+  });
+
+  return result;
+}
+
+function v(){
+  const found=db.find(x=>x.id===current);
+
+  if(found) return found;
+
+  if(current){
+    const fallback=db[0];
+    if(fallback){
+      current=fallback.id;
+      return fallback;
+    }
   }
-  const rows=await response.json();
-  if(
-   rows.length &&
-   rows[0].data
-  ){
-   const cloudData=
-    rows[0].data;
-   if(
-    Array.isArray(cloudData) &&
-    cloudData.length>0
-   ){
-    db=cloudData;
-    localStorage.setItem(
-     KEY,
-     JSON.stringify(db)
+
+  return null;
+}
+
+function goHome(){
+  current=null;
+  tab="maintenance";
+  render();
+}
+
+function openV(id){
+  const found=db.find(x=>x.id===id);
+  if(!found) return;
+
+  current=id;
+  tab="maintenance";
+  render();
+}
+
+function render(){
+  const vehicle=v();
+
+  if(!current || !vehicle){
+    current=null;
+    $("back").style.display="none";
+    $("title").textContent="My Garage";
+
+    $("app").innerHTML=`
+      <div class="sectionTitle">Vehicles</div>
+
+      ${db.map(x=>`
+        <div class="card vehicle" onclick="openV('${esc(x.id)}')">
+          <div class="vehicleEmoji">${esc(x.emoji)}</div>
+          <div class="vehicleInfo">
+            <div class="vehicleName">${esc(x.name)}</div>
+            <div class="vehicleSub">
+              ${esc(x.year)} · ${esc(x.engine)}
+              ${x.reg ? " · "+esc(x.reg) : ""}
+            </div>
+          </div>
+          <div>›</div>
+        </div>
+      `).join("")}
+
+      <div class="card">
+        <div class="sectionTitle" style="margin-top:0">Garage backup</div>
+        <div class="small">
+          Your garage is automatically saved on this device and can also be backed up as a file.
+        </div>
+        <br>
+        <button class="btn" onclick="backupData()">Backup all data</button>
+      </div>
+    `;
+
+    return;
+  }
+
+  $("back").style.display="block";
+  $("title").textContent=vehicle.name;
+
+  $("app").innerHTML=`
+    <div class="card">
+      <div class="row">
+        <div style="font-size:45px">${esc(vehicle.emoji)}</div>
+        <div style="flex:1">
+          <div style="font-size:22px;font-weight:700">${esc(vehicle.name)}</div>
+          <div class="vehicleSub">
+            ${esc(vehicle.year)} · ${esc(vehicle.engine)}
+          </div>
+          ${vehicle.reg ? `<div class="vehicleSub">Reg: ${esc(vehicle.reg)}</div>` : ""}
+          ${vehicle.mileage ? `<div class="vehicleSub">Mileage: ${esc(vehicle.mileage)}</div>` : ""}
+        </div>
+        <button class="btn secondary" onclick="openVehicleEdit()">Edit</button>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab ${tab==="maintenance"?"active":""}" onclick="setTab('maintenance')">Maintenance</button>
+      <button class="tab ${tab==="history"?"active":""}" onclick="setTab('history')">History</button>
+      <button class="tab ${tab==="parts"?"active":""}" onclick="setTab('parts')">Parts & Oils</button>
+      <button class="tab ${tab==="notes"?"active":""}" onclick="setTab('notes')">Notes</button>
+    </div>
+
+    <div class="card">
+      ${tab==="maintenance" ? maintenance() : ""}
+      ${tab==="history" ? history() : ""}
+      ${tab==="parts" ? parts() : ""}
+      ${tab==="notes" ? notes() : ""}
+    </div>
+  `;
+}
+
+function setTab(name){
+  tab=name;
+  render();
+}
+
+function maintenance(){
+  const vehicle=v();
+  if(!vehicle) return "";
+
+  return `
+    <div class="sectionTitle" style="margin-top:0">Maintenance</div>
+
+    <button class="btn green" onclick="openTaskDialog()">
+      + Add maintenance task
+    </button>
+
+    <div style="margin-top:14px">
+      ${
+        vehicle.tasks.length
+        ?
+        vehicle.tasks.map((task,i)=>`
+          <div class="item">
+            <div class="itemTitle">${esc(task.name || "Unnamed task")}</div>
+
+            ${
+              task.date
+              ? `<div class="itemMeta">Due: ${esc(task.date)}</div>`
+              : ""
+            }
+
+            ${
+              task.mileage
+              ? `<div class="itemMeta">Due mileage: ${esc(task.mileage)}</div>`
+              : ""
+            }
+
+            <div class="itemButtons">
+              <button class="btn green" onclick="completeTask(${i})">Complete</button>
+              <button class="btn secondary" onclick="editTask(${i})">Edit</button>
+              <button class="btn danger" onclick="deleteTask(${i})">Delete</button>
+            </div>
+          </div>
+        `).join("")
+        :
+        `<div class="empty">No maintenance tasks yet.</div>`
+      }
+    </div>
+  `;
+}
+
+function history(){
+  const vehicle=v();
+  if(!vehicle) return "";
+
+  return `
+    <div class="sectionTitle" style="margin-top:0">Service history</div>
+
+    <button class="btn green" onclick="openRecordDialog()">
+      + Record completed work
+    </button>
+
+    <div style="margin-top:14px">
+      ${
+        vehicle.history.length
+        ?
+        vehicle.history.slice().reverse().map((item,reverseIndex)=>{
+          const i=vehicle.history.length-1-reverseIndex;
+
+          return `
+            <div class="item">
+              <div class="itemTitle">${esc(item.job || "Completed work")}</div>
+
+              ${
+                item.date
+                ? `<div class="itemMeta">${esc(item.date)}</div>`
+                : ""
+              }
+
+              ${
+                item.mileage
+                ? `<div class="itemMeta">Mileage: ${esc(item.mileage)}</div>`
+                : ""
+              }
+
+              ${
+                item.cost
+                ? `<div class="itemMeta">Cost: £${esc(Number(item.cost).toFixed(2))}</div>`
+                : ""
+              }
+
+              ${
+                item.details
+                ? `<div style="margin-top:8px;white-space:pre-wrap">${esc(item.details)}</div>`
+                : ""
+              }
+
+              <div class="itemButtons">
+                <button class="btn secondary" onclick="editRecord(${i})">Edit</button>
+                <button class="btn danger" onclick="deleteRecord(${i})">Delete</button>
+              </div>
+            </div>
+          `;
+        }).join("")
+        :
+        `<div class="empty">No service history yet.</div>`
+      }
+    </div>
+  `;
+}
+
+function parts(){
+  const vehicle=v();
+  if(!vehicle) return "";
+
+  return `
+    <div class="sectionTitle" style="margin-top:0">Parts & Oils</div>
+
+    <button class="btn green" onclick="openPartDialog()">
+      + Add part / product
+    </button>
+
+    <div style="margin-top:14px">
+      ${
+        vehicle.parts.length
+        ?
+        vehicle.parts.map((item,i)=>`
+          <div class="item">
+            <div class="itemTitle">${esc(item.name || "Part / product")}</div>
+
+            ${
+              item.spec
+              ? `<div class="itemMeta">${esc(item.spec)}</div>`
+              : ""
+            }
+
+            ${
+              item.qty
+              ? `<div class="itemMeta">Quantity: ${esc(item.qty)}</div>`
+              : ""
+            }
+
+            ${
+              item.cost
+              ? `<div class="itemMeta">Cost: £${esc(Number(item.cost).toFixed(2))}</div>`
+              : ""
+            }
+
+            <div class="itemButtons">
+              <button class="btn secondary" onclick="editPart(${i})">Edit</button>
+              <button class="btn danger" onclick="deletePart(${i})">Delete</button>
+            </div>
+          </div>
+        `).join("")
+        :
+        `<div class="empty">No parts or products recorded yet.</div>`
+      }
+    </div>
+  `;
+}
+
+function notes(){
+  const vehicle=v();
+  if(!vehicle) return "";
+
+  return `
+    <div class="sectionTitle" style="margin-top:0">Notes</div>
+
+    <textarea id="notesBox" oninput="updateNotes(this.value)">${esc(vehicle.notes)}</textarea>
+
+    <div class="small" style="margin-top:8px">
+      Notes are saved automatically.
+    </div>
+  `;
+}
+
+function updateNotes(value){
+  const vehicle=v();
+  if(!vehicle) return;
+
+  vehicle.notes=value;
+  save();
+}
+
+function openVehicleEdit(){
+  const vehicle=v();
+  if(!vehicle) return;
+
+  $("vehicleName").value=vehicle.name;
+  $("vehicleYear").value=vehicle.year;
+  $("vehicleEngine").value=vehicle.engine;
+  $("vehicleReg").value=vehicle.reg;
+  $("vehicleMileage").value=vehicle.mileage;
+  $("vehicleNotes").value=vehicle.notes;
+
+  $("vehicleDialog").showModal();
+}
+
+function saveVehicle(){
+  const vehicle=v();
+  if(!vehicle) return;
+
+  vehicle.name=$("vehicleName").value.trim() || vehicle.name;
+  vehicle.year=Number($("vehicleYear").value) || vehicle.year;
+  vehicle.engine=$("vehicleEngine").value.trim();
+  vehicle.reg=$("vehicleReg").value.trim();
+  vehicle.mileage=$("vehicleMileage").value.trim();
+  vehicle.notes=$("vehicleNotes").value;
+
+  $("vehicleDialog").close();
+  save();
+  render();
+}
+
+function openTaskDialog(){
+  editing=-1;
+
+  $("taskName").value="";
+  $("taskDate").value="";
+  $("taskMileage").value="";
+
+  $("taskDialog").showModal();
+}
+
+function editTask(index){
+  const vehicle=v();
+  if(!vehicle || !vehicle.tasks[index]) return;
+
+  editing=index;
+
+  const task=vehicle.tasks[index];
+
+  $("taskName").value=task.name || "";
+  $("taskDate").value=task.date || "";
+  $("taskMileage").value=task.mileage || "";
+
+  $("taskDialog").showModal();
+}
+
+function saveTask(){
+  const vehicle=v();
+  if(!vehicle) return;
+
+  const task={
+    name:$("taskName").value.trim(),
+    date:$("taskDate").value,
+    mileage:$("taskMileage").value.trim()
+  };
+
+  if(!task.name){
+    alert("Please enter a maintenance task.");
+    return;
+  }
+
+  if(editing>=0){
+    vehicle.tasks[editing]=task;
+  }else{
+    vehicle.tasks.push(task);
+  }
+
+  $("taskDialog").close();
+  editing=-1;
+
+  save();
+  render();
+}
+
+function deleteTask(index){
+  const vehicle=v();
+  if(!vehicle) return;
+
+  if(!confirm("Delete this maintenance task?")) return;
+
+  vehicle.tasks.splice(index,1);
+  save();
+  render();
+}
+
+function completeTask(index){
+  const vehicle=v();
+  if(!vehicle || !vehicle.tasks[index]) return;
+
+  const task=vehicle.tasks[index];
+
+  recordTaskIndex=index;
+
+  $("recordJob").value=task.name || "";
+  $("recordDate").value=today();
+  $("recordMileage").value=vehicle.mileage || "";
+  $("recordCost").value="";
+  $("recordDetails").value="";
+
+  $("recordDialog").showModal();
+}
+
+function openRecordDialog(){
+  editing=-1;
+  recordTaskIndex=-1;
+
+  $("recordJob").value="";
+  $("recordDate").value=today();
+  $("recordMileage").value=v()?.mileage || "";
+  $("recordCost").value="";
+  $("recordDetails").value="";
+
+  $("recordDialog").showModal();
+}
+
+function editRecord(index){
+  const vehicle=v();
+  if(!vehicle || !vehicle.history[index]) return;
+
+  editing=index;
+  recordTaskIndex=-1;
+
+  const item=vehicle.history[index];
+
+  $("recordJob").value=item.job || "";
+  $("recordDate").value=item.date || "";
+  $("recordMileage").value=item.mileage || "";
+  $("recordCost").value=item.cost || "";
+  $("recordDetails").value=item.details || "";
+
+  $("recordDialog").showModal();
+}
+
+function saveRecord(){
+  const vehicle=v();
+  if(!vehicle) return;
+
+  const item={
+    job:$("recordJob").value.trim(),
+    date:$("recordDate").value,
+    mileage:$("recordMileage").value.trim(),
+    cost:$("recordCost").value,
+    details:$("recordDetails").value
+  };
+
+  if(!item.job){
+    alert("Please enter the job or service.");
+    return;
+  }
+
+  if(editing>=0){
+    vehicle.history[editing]=item;
+  }else{
+    vehicle.history.push(item);
+  }
+
+  if(recordTaskIndex>=0){
+    vehicle.tasks.splice(recordTaskIndex,1);
+  }
+
+  editing=-1;
+  recordTaskIndex=-1;
+
+  $("recordDialog").close();
+
+  save();
+  render();
+}
+
+function deleteRecord(index){
+  const vehicle=v();
+  if(!vehicle) return;
+
+  if(!confirm("Delete this service history entry?")) return;
+
+  vehicle.history.splice(index,1);
+
+  save();
+  render();
+}
+
+function openPartDialog(){
+  editingPart=-1;
+
+  $("partName").value="";
+  $("partSpec").value="";
+  $("partQty").value="1";
+  $("partCost").value="";
+
+  $("partDialog").showModal();
+}
+
+function editPart(index){
+  const vehicle=v();
+  if(!vehicle || !vehicle.parts[index]) return;
+
+  editingPart=index;
+
+  const item=vehicle.parts[index];
+
+  $("partName").value=item.name || "";
+  $("partSpec").value=item.spec || "";
+  $("partQty").value=item.qty || "1";
+  $("partCost").value=item.cost || "";
+
+  $("partDialog").showModal();
+}
+
+function savePart(){
+  const vehicle=v();
+  if(!vehicle) return;
+
+  const item={
+    name:$("partName").value.trim(),
+    spec:$("partSpec").value.trim(),
+    qty:$("partQty").value || "1",
+    cost:$("partCost").value
+  };
+
+  if(!item.name){
+    alert("Please enter the part or product name.");
+    return;
+  }
+
+  if(editingPart>=0){
+    vehicle.parts[editingPart]=item;
+  }else{
+    vehicle.parts.push(item);
+  }
+
+  editingPart=-1;
+
+  $("partDialog").close();
+
+  save();
+  render();
+}
+
+function deletePart(index){
+  const vehicle=v();
+  if(!vehicle) return;
+
+  if(!confirm("Delete this part/product?")) return;
+
+  vehicle.parts.splice(index,1);
+
+  save();
+  render();
+}
+
+function openSettings(){
+  updateCloudStatus("Checking cloud storage…");
+  $("settingsDialog").showModal();
+  checkCloud();
+}
+
+function updateCloudStatus(text){
+  const el=$("cloudStatus");
+  if(el) el.textContent=text;
+}
+
+async function checkCloud(){
+  try{
+    const response=await fetch(
+      `${SUPABASE_URL}/rest/v1/garage_data?id=eq.1&select=id`,
+      {
+        method:"GET",
+        headers:{
+          "apikey":SUPABASE_KEY,
+          "Authorization":`Bearer ${SUPABASE_KEY}`
+        }
+      }
     );
-   }
+
+    if(!response.ok){
+      updateCloudStatus("Cloud storage: connection error");
+      return;
+    }
+
+    const rows=await response.json();
+
+    if(rows.length){
+      updateCloudStatus("Cloud storage: connected ✓");
+    }else{
+      updateCloudStatus("Cloud storage: connected — no cloud data yet");
+    }
+  }catch(e){
+    console.error(e);
+    updateCloudStatus("Cloud storage: offline — local storage still works");
   }
- }catch(e){
-  console.error(
-   "Supabase load failed:",
-   e
+}
+
+async function save(){
+  db=normaliseDatabase(db);
+
+  localStorage.setItem(KEY,JSON.stringify(db));
+
+  try{
+    const response=await fetch(
+      `${SUPABASE_URL}/rest/v1/garage_data`,
+      {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          "apikey":SUPABASE_KEY,
+          "Authorization":`Bearer ${SUPABASE_KEY}`,
+          "Prefer":"resolution=merge-duplicates,return=representation"
+        },
+        body:JSON.stringify({
+          id:1,
+          data:db
+        })
+      }
+    );
+
+    const text=await response.text();
+
+    if(!response.ok){
+      console.error("Supabase save error:",response.status,text);
+      return false;
+    }
+
+    console.log("Supabase saved successfully:",text);
+    return true;
+
+  }catch(e){
+    console.error("Supabase connection error:",e);
+    return false;
+  }
+}
+
+async function loadFromSupabase(){
+  try{
+    const response=await fetch(
+      `${SUPABASE_URL}/rest/v1/garage_data?id=eq.1&select=data`,
+      {
+        method:"GET",
+        headers:{
+          "apikey":SUPABASE_KEY,
+          "Authorization":`Bearer ${SUPABASE_KEY}`
+        }
+      }
+    );
+
+    if(!response.ok){
+      console.error(
+        "Supabase load error:",
+        response.status,
+        await response.text()
+      );
+      return false;
+    }
+
+    const rows=await response.json();
+
+    if(
+      rows.length &&
+      rows[0] &&
+      rows[0].data &&
+      Array.isArray(rows[0].data) &&
+      rows[0].data.length
+    ){
+      db=normaliseDatabase(rows[0].data);
+      localStorage.setItem(KEY,JSON.stringify(db));
+      console.log("Garage data loaded from Supabase.");
+      return true;
+    }
+
+    console.log("No cloud garage data found. Keeping local data.");
+    return false;
+
+  }catch(e){
+    console.error("Supabase connection error:",e);
+    return false;
+  }
+}
+
+function backupData(){
+  const data={
+    app:"My Garage",
+    version:1,
+    exported:new Date().toISOString(),
+    vehicles:db
+  };
+
+  const blob=new Blob(
+    [JSON.stringify(data,null,2)],
+    {type:"application/json"}
   );
- }
+
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+
+  a.href=url;
+  a.download="my-garage-backup.json";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+
+  URL.revokeObjectURL(url);
 }
+
+function restoreData(event){
+  const file=event.target.files[0];
+
+  if(!file) return;
+
+  const reader=new FileReader();
+
+  reader.onload=function(){
+    try{
+      const imported=JSON.parse(reader.result);
+      const vehicles=Array.isArray(imported)
+        ? imported
+        : imported.vehicles;
+
+      if(!Array.isArray(vehicles) || !vehicles.length){
+        throw new Error("Invalid backup");
+      }
+
+      db=normaliseDatabase(vehicles);
+
+      localStorage.setItem(KEY,JSON.stringify(db));
+
+      save();
+
+      alert("Backup restored successfully.");
+      $("settingsDialog").close();
+      goHome();
+
+    }catch(e){
+      alert("That file does not appear to be a valid My Garage backup.");
+      console.error(e);
+    }
+
+    event.target.value="";
+  };
+
+  reader.readAsText(file);
+}
+
+function resetLocalData(){
+  if(!confirm(
+    "This will replace the garage on this device with the original four vehicles. Continue?"
+  )) return;
+
+  db=normaliseDatabase(starter);
+  localStorage.setItem(KEY,JSON.stringify(db));
+
+  save();
+
+  $("settingsDialog").close();
+  goHome();
+}
+
 async function startApp(){
- await loadFromSupabase();
- render();
+  render();
+
+  /*
+    Load cloud data after the local app is already displayed.
+    If no cloud row exists, the local data remains intact.
+  */
+  const loaded=await loadFromSupabase();
+
+  if(loaded){
+    render();
+  }
 }
+
 startApp();
 </script>
+
 </body>
 </html>
