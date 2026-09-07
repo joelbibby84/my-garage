@@ -25,7 +25,7 @@ header{
 }
 main{max-width:760px;margin:auto;padding:14px}
 
-h1,h2,h3,p{margin:0}
+h1,h2,h3,h4,p{margin:0}
 h1{font-size:25px}
 h2{font-size:19px}
 .muted{color:#68707c;font-size:14px}
@@ -116,6 +116,7 @@ button.small{
 .ok{background:#dcfce7;color:#166534}
 .soon{background:#ffedd5;color:#9a3412}
 .overdue{background:#fee2e2;color:#991b1b}
+.notset{background:#e5e7eb;color:#4b5563}
 
 .task{
  border-left:5px solid #16a34a
@@ -289,6 +290,37 @@ dialog::backdrop{background:#0007}
 }
 
 
+/* IMPORTANT DATES */
+
+.date-card{
+ border-left:5px solid #16a34a
+}
+
+.date-card.soon{
+ border-left-color:#d97706
+}
+
+.date-card.overdue{
+ border-left-color:#dc2626
+}
+
+.date-card.notset{
+ border-left-color:#9ca3af
+}
+
+.date-value{
+ font-size:18px;
+ font-weight:800;
+ margin-top:7px
+}
+
+.date-detail{
+ font-size:14px;
+ margin-top:4px;
+ color:#68707c
+}
+
+
 /* PULL TO REFRESH */
 
 #pullRefreshIndicator{
@@ -392,6 +424,31 @@ dialog::backdrop{background:#0007}
 
 <label>Current mileage</label>
 <input id="vehicleMileage" type="number" min="0">
+
+<h3 style="margin-top:18px">Important dates</h3>
+
+<p class="muted" style="margin-top:4px">
+ Leave any that you don't want to track blank.
+</p>
+
+<div class="grid">
+
+ <div>
+  <label>MOT due / expiry</label>
+  <input id="vehicleMotDate" type="date">
+ </div>
+
+ <div>
+  <label>Tax due</label>
+  <input id="vehicleTaxDate" type="date">
+ </div>
+
+ <div>
+  <label>Insurance renewal</label>
+  <input id="vehicleInsuranceDate" type="date">
+ </div>
+
+</div>
 
 <label>Notes / modifications</label>
 <textarea id="vehicleNotes" rows="4"></textarea>
@@ -533,6 +590,9 @@ const starter=[
   emoji:"🚗",
   reg:"",
   mileage:"",
+  motDate:"",
+  taxDate:"",
+  insuranceDate:"",
   notes:"",
   tasks:[],
   history:[],
@@ -546,6 +606,9 @@ const starter=[
   emoji:"🚗",
   reg:"",
   mileage:"",
+  motDate:"",
+  taxDate:"",
+  insuranceDate:"",
   notes:"",
   tasks:[],
   history:[],
@@ -559,6 +622,9 @@ const starter=[
   emoji:"🏍️",
   reg:"",
   mileage:"",
+  motDate:"",
+  taxDate:"",
+  insuranceDate:"",
   notes:"",
   tasks:[],
   history:[],
@@ -572,6 +638,9 @@ const starter=[
   emoji:"🏍️",
   reg:"",
   mileage:"",
+  motDate:"",
+  taxDate:"",
+  insuranceDate:"",
   notes:"",
   tasks:[],
   history:[],
@@ -634,6 +703,9 @@ function blankVehicle(base){
   emoji:base.emoji,
   reg:"",
   mileage:"",
+  motDate:"",
+  taxDate:"",
+  insuranceDate:"",
   notes:"",
   tasks:[],
   history:[],
@@ -658,6 +730,22 @@ function normaliseVehicle(x,base){
 
   reg:source.reg==null?"":String(source.reg),
   mileage:source.mileage==null?"":String(source.mileage),
+
+  motDate:
+   source.motDate==null
+   ?""
+   :String(source.motDate),
+
+  taxDate:
+   source.taxDate==null
+   ?""
+   :String(source.taxDate),
+
+  insuranceDate:
+   source.insuranceDate==null
+   ?""
+   :String(source.insuranceDate),
+
   notes:source.notes==null?"":String(source.notes),
 
   tasks:Array.isArray(source.tasks)
@@ -757,8 +845,10 @@ function normaliseVehicle(x,base){
     return (
      !p.taskId ||
      r.taskId===p.taskId ||
-     sameText(r.job,
-      String(p.notes||"").replace(/^From maintenance:\s*/i,"")
+     sameText(
+      r.job,
+      String(p.notes||"")
+       .replace(/^From maintenance:\s*/i,"")
      )
     );
 
@@ -783,7 +873,8 @@ function normaliseVehicle(x,base){
    r.partIds=[];
   }
 
-  const oldParts=Array.isArray(r.parts)?r.parts:[];
+  const oldParts=
+   Array.isArray(r.parts)?r.parts:[];
 
   oldParts.forEach(old=>{
 
@@ -1165,7 +1256,8 @@ async function loadFromSupabase(){
    return false;
   }
 
-  const rows=Array.isArray(result.body)
+  const rows=
+   Array.isArray(result.body)
    ?result.body
    :[];
 
@@ -1177,9 +1269,8 @@ async function loadFromSupabase(){
    return false;
   }
 
-  const fixed=normaliseDatabase(
-   rows[0].data
-  );
+  const fixed=
+   normaliseDatabase(rows[0].data);
 
   if(!fixed){
    return false;
@@ -1206,6 +1297,8 @@ async function loadFromSupabase(){
 
 }
 
+
+/* MAINTENANCE DUE CALCULATIONS */
 
 function calc(t){
 
@@ -1304,6 +1397,125 @@ function due(t){
 }
 
 
+/* IMPORTANT DATE CALCULATIONS */
+
+function importantDateStatus(dateValue){
+
+ if(!dateValue){
+
+  return{
+   set:false,
+   od:false,
+   so:false,
+   label:"NOT SET",
+   className:"notset",
+   days:null
+  };
+
+ }
+
+ const dueDate=
+  new Date(dateValue+"T00:00:00");
+
+ const now=new Date();
+
+ now.setHours(0,0,0,0);
+
+ const diff=
+  dueDate.getTime()-
+  now.getTime();
+
+ const days=
+  Math.ceil(
+   diff/86400000
+  );
+
+ const od=days<0;
+
+ const so=
+  !od &&
+  days<=30;
+
+ return{
+  set:true,
+  od,
+  so,
+  days,
+  label:
+   od
+   ?"OVERDUE"
+   :so
+    ?"DUE SOON"
+    :"OK",
+  className:
+   od
+   ?"overdue"
+   :so
+    ?"soon"
+    :"ok"
+ };
+
+}
+
+
+function daysDescription(dateValue){
+
+ const s=
+  importantDateStatus(dateValue);
+
+ if(!s.set){
+  return "No date entered";
+ }
+
+ if(s.days<0){
+
+  const n=Math.abs(s.days);
+
+  return n===1
+   ?"Overdue by 1 day"
+   :"Overdue by "+n+" days";
+ }
+
+ if(s.days===0){
+  return "Due today";
+ }
+
+ if(s.days===1){
+  return "Due tomorrow";
+ }
+
+ return "Due in "+s.days+" days";
+}
+
+
+function vehicleImportantDates(vehicle){
+
+ return [
+  {
+   type:"mot",
+   title:"MOT",
+   icon:"🧾",
+   date:vehicle.motDate||""
+  },
+  {
+   type:"tax",
+   title:"Tax",
+   icon:"💷",
+   date:vehicle.taxDate||""
+  },
+  {
+   type:"insurance",
+   title:"Insurance",
+   icon:"🛡️",
+   date:vehicle.insuranceDate||""
+  }
+ ];
+
+}
+
+
+/* LINK HELPERS */
+
 function linkedPartsForTask(taskId){
 
  return (v()?.parts||[])
@@ -1338,7 +1550,9 @@ function getDashboardItems(){
 
   vehicle.tasks.forEach(task=>{
 
-   const s=statusForVehicle(vehicle,task);
+   const s=
+    statusForVehicle(vehicle,task);
+
    const c=calc(task);
 
    const currentMiles=
@@ -1367,6 +1581,7 @@ function getDashboardItems(){
    }
 
    items.push({
+    kind:"maintenance",
     vehicle,
     task,
     status:s,
@@ -1377,7 +1592,39 @@ function getDashboardItems(){
 
   });
 
+
+  vehicleImportantDates(vehicle)
+   .filter(x=>x.date)
+   .forEach(item=>{
+
+    const s=
+     importantDateStatus(item.date);
+
+    let priority=2;
+
+    if(s.od){
+     priority=0;
+    }else if(s.so){
+     priority=1;
+    }
+
+    items.push({
+     kind:"date",
+     vehicle,
+     dateItem:item,
+     status:s,
+     priority,
+     dateTime:
+      new Date(
+       item.date+"T00:00:00"
+      ).getTime(),
+     mileGap:999999999
+    });
+
+   });
+
  });
+
 
  items.sort((a,b)=>{
 
@@ -1399,23 +1646,32 @@ function getDashboardItems(){
 
 function dashboard(){
 
- const items=getDashboardItems();
-
- const total=items.length;
+ const items=
+  getDashboardItems();
 
  const overdue=
-  items.filter(x=>x.status.od).length;
+  items.filter(
+   x=>x.status.od
+  ).length;
 
  const soon=
-  items.filter(x=>x.status.so).length;
+  items.filter(
+   x=>x.status.so
+  ).length;
+
+ const maintenanceTotal=
+  db.reduce(
+   (sum,x)=>sum+x.tasks.length,
+   0
+  );
 
  const scheduled=
   items.filter(
-   x=>calc(x.task).d||calc(x.task).m
+   x=>x.priority<3
   );
 
  const upcoming=
-  scheduled.slice(0,5);
+  scheduled.slice(0,6);
 
  return `
 
@@ -1426,7 +1682,7 @@ function dashboard(){
    <div>
     <h2>Garage Dashboard</h2>
     <p class="muted" style="margin-top:5px">
-     Maintenance across all your vehicles.
+     Maintenance and important dates across all your vehicles.
     </p>
    </div>
 
@@ -1447,7 +1703,7 @@ function dashboard(){
    </div>
 
    <div class="dashboard-stat">
-    <div class="number">${total}</div>
+    <div class="number">${maintenanceTotal}</div>
     <div class="label">Maintenance tasks</div>
    </div>
 
@@ -1468,7 +1724,7 @@ function dashboard(){
    <div>
     <h2>Coming up</h2>
     <p class="muted" style="margin-top:4px">
-     Your next maintenance jobs.
+     Maintenance, MOT, tax and insurance.
     </p>
    </div>
 
@@ -1477,50 +1733,99 @@ function dashboard(){
   ${
    upcoming.length
 
-   ?upcoming.map(x=>`
+   ?upcoming.map(x=>{
 
-    <div
-     class="dashboard-item"
-     onclick="openDashboardTask('${x.vehicle.id}','${x.task.id}')">
+    if(x.kind==="maintenance"){
 
-     <div class="row between">
+     return `
 
-      <div>
+      <div
+       class="dashboard-item"
+       onclick="openDashboardTask('${x.vehicle.id}','${x.task.id}')">
 
-       <h3>
-        ${esc(x.task.name)}
-       </h3>
+       <div class="row between">
 
-       <div class="vehicle-name">
-        ${x.vehicle.emoji}
-        ${esc(x.vehicle.name)}
+        <div>
+
+         <h3>
+          🔧 ${esc(x.task.name)}
+         </h3>
+
+         <div class="vehicle-name">
+          ${x.vehicle.emoji}
+          ${esc(x.vehicle.name)}
+         </div>
+
+        </div>
+
+        <span
+         class="badge
+         ${x.status.od?"overdue":x.status.so?"soon":"ok"}">
+
+         ${x.status.label}
+
+        </span>
+
+       </div>
+
+       <div class="due-line">
+        <b>Next due:</b>
+        ${esc(due(x.task))}
        </div>
 
       </div>
 
-      <span
-       class="badge
-       ${x.status.od?"overdue":x.status.so?"soon":"ok"}">
+     `;
 
-       ${x.status.label}
+    }
 
-      </span>
+
+    return `
+
+     <div
+      class="dashboard-item"
+      onclick="openDashboardDate('${x.vehicle.id}')">
+
+      <div class="row between">
+
+       <div>
+
+        <h3>
+         ${x.dateItem.icon}
+         ${esc(x.dateItem.title)}
+        </h3>
+
+        <div class="vehicle-name">
+         ${x.vehicle.emoji}
+         ${esc(x.vehicle.name)}
+        </div>
+
+       </div>
+
+       <span
+        class="badge ${x.status.className}">
+        ${x.status.label}
+       </span>
+
+      </div>
+
+      <div class="due-line">
+       <b>Due:</b>
+       ${dateText(x.dateItem.date)}
+       ·
+       ${esc(daysDescription(x.dateItem.date))}
+      </div>
 
      </div>
 
-     <div class="due-line">
-      <b>Next due:</b>
-      ${esc(due(x.task))}
-     </div>
+    `;
 
-    </div>
-
-   `).join("")
+   }).join("")
 
    :`
 
     <div class="empty">
-     No scheduled maintenance yet.
+     Nothing scheduled yet.
     </div>
 
    `
@@ -1538,6 +1843,19 @@ function openDashboardTask(vehicleId,taskId){
  tab="maintenance";
 
  focusTaskId=taskId;
+ focusPartId=null;
+ focusHistoryId=null;
+
+ render();
+}
+
+
+function openDashboardDate(vehicleId){
+
+ current=vehicleId;
+ tab="dates";
+
+ focusTaskId=null;
  focusPartId=null;
  focusHistoryId=null;
 
@@ -1686,6 +2004,12 @@ function render(){
     </button>
 
     <button
+     class="${tab==="dates"?"active":""}"
+     onclick="tab='dates';render()">
+     📅 Dates
+    </button>
+
+    <button
      class="${tab==="history"?"active":""}"
      onclick="tab='history';render()">
      📖 History
@@ -1709,14 +2033,116 @@ function render(){
   (
    tab==="maintenance"
    ?maintenance()
-   :tab==="history"
-    ?history()
-    :tab==="parts"
-     ?parts()
-     :notes()
+   :tab==="dates"
+    ?datesPage()
+    :tab==="history"
+     ?history()
+     :tab==="parts"
+      ?parts()
+      :notes()
   );
 
  setTimeout(scrollToFocus,50);
+}
+
+
+/* IMPORTANT DATES PAGE */
+
+function datesPage(){
+
+ const vehicle=v();
+
+ const dates=
+  vehicleImportantDates(vehicle);
+
+ return `
+
+ <div class="row between">
+
+  <div>
+   <h3>Important dates</h3>
+   <p class="muted">
+    MOT, tax and insurance renewal dates.
+   </p>
+  </div>
+
+  <button onclick="editVehicle()">
+   Edit dates
+  </button>
+
+ </div>
+
+ ${dates.map(x=>{
+
+  const s=
+   importantDateStatus(x.date);
+
+  return `
+
+   <div class="card date-card ${s.className}">
+
+    <div class="row between">
+
+     <div>
+      <h3>
+       ${x.icon} ${esc(x.title)}
+      </h3>
+     </div>
+
+     <span class="badge ${s.className}">
+      ${s.label}
+     </span>
+
+    </div>
+
+    ${
+     x.date
+
+     ?`
+
+      <div class="date-value">
+       ${dateText(x.date)}
+      </div>
+
+      <div class="date-detail">
+       ${esc(daysDescription(x.date))}
+      </div>
+
+     `
+
+     :`
+
+      <div class="date-detail"
+       style="margin-top:9px">
+       No date entered yet.
+      </div>
+
+     `
+    }
+
+   </div>
+
+  `;
+
+ }).join("")}
+
+ <div class="card">
+
+  <h3>How reminders work</h3>
+
+  <p class="muted"
+     style="margin-top:7px">
+
+   Dates appear as <b>Due soon</b>
+   when they are within 30 days.
+   Once the due date has passed they appear as
+   <b>Overdue</b>.
+
+  </p>
+
+ </div>
+
+ `;
 }
 
 
@@ -2511,13 +2937,16 @@ function scrollToFocus(){
   return;
  }
 
- const el=document.getElementById(id);
+ const el=
+  document.getElementById(id);
 
  if(el){
+
   el.scrollIntoView({
    behavior:"smooth",
    block:"center"
   });
+
  }
 
  setTimeout(()=>{
@@ -2705,10 +3134,20 @@ function delTask(i){
 
 function editVehicle(){
 
- $("vehicleReg").value=v().reg||"";
+ $("vehicleReg").value=
+  v().reg||"";
 
  $("vehicleMileage").value=
   v().mileage||"";
+
+ $("vehicleMotDate").value=
+  v().motDate||"";
+
+ $("vehicleTaxDate").value=
+  v().taxDate||"";
+
+ $("vehicleInsuranceDate").value=
+  v().insuranceDate||"";
 
  $("vehicleNotes").value=
   v().notes||"";
@@ -2724,6 +3163,15 @@ $("vehicleForm").onsubmit=()=>{
 
  v().mileage=
   $("vehicleMileage").value;
+
+ v().motDate=
+  $("vehicleMotDate").value;
+
+ v().taxDate=
+  $("vehicleTaxDate").value;
+
+ v().insuranceDate=
+  $("vehicleInsuranceDate").value;
 
  v().notes=
   $("vehicleNotes").value.trim();
