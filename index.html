@@ -9,46 +9,217 @@
 
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#f2f3f5;color:#20242b;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-header{background:#20242b;color:#fff;padding:16px;position:sticky;top:0;z-index:2}
+body{
+ margin:0;
+ background:#f2f3f5;
+ color:#20242b;
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif
+}
+header{
+ background:#20242b;
+ color:#fff;
+ padding:16px;
+ position:sticky;
+ top:0;
+ z-index:2
+}
 main{max-width:760px;margin:auto;padding:14px}
+
 h1,h2,h3,p{margin:0}
 h1{font-size:25px}
 h2{font-size:19px}
 .muted{color:#68707c;font-size:14px}
-.card{background:#fff;border-radius:16px;padding:16px;margin:10px 0;box-shadow:0 1px 5px #0001}
-.vehicle{display:flex;gap:14px;align-items:center;cursor:pointer}
+
+.card{
+ background:#fff;
+ border-radius:16px;
+ padding:16px;
+ margin:10px 0;
+ box-shadow:0 1px 5px #0001
+}
+
+.vehicle{
+ display:flex;
+ gap:14px;
+ align-items:center;
+ cursor:pointer
+}
+
 .icon{font-size:34px}
-.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+.row{
+ display:flex;
+ gap:8px;
+ align-items:center;
+ flex-wrap:wrap
+}
+
 .between{justify-content:space-between}
-button{border:0;border-radius:11px;padding:11px 14px;background:#2563eb;color:white;font-weight:700;font-size:15px}
-button.secondary{background:#e5e7eb;color:#20242b}
-button.danger{background:#fee2e2;color:#991b1b}
-button.green{background:#16a34a;color:white}
-.back{background:transparent;padding:0;margin-bottom:6px}
-.tabs{display:flex;gap:7px;overflow:auto;margin:10px 0}
-.tabs button{white-space:nowrap;background:#e5e7eb;color:#333}
-.tabs .active{background:#2563eb;color:white}
-.badge{padding:5px 8px;border-radius:999px;font-size:12px;font-weight:800}
+
+button{
+ border:0;
+ border-radius:11px;
+ padding:11px 14px;
+ background:#2563eb;
+ color:white;
+ font-weight:700;
+ font-size:15px;
+ cursor:pointer
+}
+
+button.secondary{
+ background:#e5e7eb;
+ color:#20242b
+}
+
+button.danger{
+ background:#fee2e2;
+ color:#991b1b
+}
+
+button.small{
+ padding:7px 10px;
+ font-size:13px
+}
+
+.back{
+ background:transparent;
+ padding:0;
+ margin-bottom:6px
+}
+
+.tabs{
+ display:flex;
+ gap:7px;
+ overflow:auto;
+ margin:10px 0
+}
+
+.tabs button{
+ white-space:nowrap;
+ background:#e5e7eb;
+ color:#333
+}
+
+.tabs .active{
+ background:#2563eb;
+ color:white
+}
+
+.badge{
+ padding:5px 8px;
+ border-radius:999px;
+ font-size:12px;
+ font-weight:800
+}
+
 .ok{background:#dcfce7;color:#166534}
 .soon{background:#ffedd5;color:#9a3412}
 .overdue{background:#fee2e2;color:#991b1b}
-.task{border-left:5px solid #16a34a}
+
+.task{
+ border-left:5px solid #16a34a
+}
+
 .task.soon{border-left-color:#d97706}
 .task.overdue{border-left-color:#dc2626}
-.empty{text-align:center;color:#68707c;padding:25px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-label{display:block;font-size:13px;font-weight:700;margin:9px 0 4px}
-input,textarea{width:100%;padding:10px;border:1px solid #d1d5db;border-radius:10px;font-size:16px;background:#fff}
-dialog{border:0;border-radius:18px;width:min(94%,620px);padding:0;box-shadow:0 20px 60px #0005}
+
+.empty{
+ text-align:center;
+ color:#68707c;
+ padding:25px
+}
+
+.grid{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:9px
+}
+
+label{
+ display:block;
+ font-size:13px;
+ font-weight:700;
+ margin:9px 0 4px
+}
+
+input,textarea{
+ width:100%;
+ padding:10px;
+ border:1px solid #d1d5db;
+ border-radius:10px;
+ font-size:16px;
+ background:#fff
+}
+
+dialog{
+ border:0;
+ border-radius:18px;
+ width:min(94%,620px);
+ padding:0;
+ box-shadow:0 20px 60px #0005
+}
+
 dialog::backdrop{background:#0007}
+
 .modal{padding:18px}
-.part-entry{border:1px solid #d1d5db;border-radius:12px;padding:12px;margin-top:10px;background:#f8f9fa}
-.part-entry h3{font-size:15px;margin-bottom:4px}
-.link-button{background:#e5e7eb;color:#20242b}
-.small{font-size:13px;padding:8px 10px}
+
+.part-entry{
+ border:1px solid #d1d5db;
+ border-radius:12px;
+ padding:12px;
+ margin-top:10px;
+ background:#f8f9fa
+}
+
+.part-entry h3{
+ font-size:15px;
+ margin-bottom:4px
+}
+
+.status{
+ font-size:13px;
+ padding:9px 11px;
+ border-radius:10px;
+ margin-bottom:10px
+}
+
+.status.ok{background:#dcfce7;color:#166534}
+.status.error{background:#fee2e2;color:#991b1b}
+.status.info{background:#e5e7eb;color:#374151}
+
+.linked-box{
+ margin-top:12px;
+ padding:11px;
+ border-radius:12px;
+ background:#f3f4f6
+}
+
+.linked-box h4{
+ margin:0 0 7px;
+ font-size:14px
+}
+
+.linked-part{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ gap:8px;
+ padding:7px 0;
+ border-top:1px solid #e5e7eb
+}
+
+.linked-part:first-of-type{
+ border-top:0
+}
+
+.highlight{
+ outline:3px solid #2563eb;
+ outline-offset:2px
+}
+
 @media(max-width:520px){
-.grid{grid-template-columns:1fr}
+ .grid{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -56,16 +227,17 @@ dialog::backdrop{background:#0007}
 <body>
 
 <header>
-<div style="max-width:760px;margin:auto">
-<button id="back" class="back" style="display:none">‹ My Garage</button>
-<h1 id="title">My Garage</h1>
-</div>
+ <div style="max-width:760px;margin:auto">
+  <button id="back" class="back" style="display:none">‹ My Garage</button>
+  <h1 id="title">My Garage</h1>
+ </div>
 </header>
 
 <main id="app"></main>
 
 
-<!-- MAINTENANCE TASK DIALOG -->
+<!-- MAINTENANCE TASK -->
+
 <dialog id="taskDlg">
 <form method="dialog" class="modal" id="taskForm">
 
@@ -76,25 +248,25 @@ dialog::backdrop{background:#0007}
 
 <div class="grid">
 
-<div>
-<label>Frequency — months</label>
-<input id="taskMonths" type="number" min="0">
-</div>
+ <div>
+  <label>Frequency — months</label>
+  <input id="taskMonths" type="number" min="0">
+ </div>
 
-<div>
-<label>Frequency — miles</label>
-<input id="taskMiles" type="number" min="0">
-</div>
+ <div>
+  <label>Frequency — miles</label>
+  <input id="taskMiles" type="number" min="0">
+ </div>
 
-<div>
-<label>Last done — date</label>
-<input id="taskDate" type="date">
-</div>
+ <div>
+  <label>Last done — date</label>
+  <input id="taskDate" type="date">
+ </div>
 
-<div>
-<label>Last done — mileage</label>
-<input id="taskLastMiles" type="number" min="0">
-</div>
+ <div>
+  <label>Last done — mileage</label>
+  <input id="taskLastMiles" type="number" min="0">
+ </div>
 
 </div>
 
@@ -102,15 +274,16 @@ dialog::backdrop{background:#0007}
 <textarea id="taskNotes" rows="3"></textarea>
 
 <div class="row" style="margin-top:13px">
-<button>Save task</button>
-<button type="button" class="secondary" onclick="taskDlg.close()">Cancel</button>
+ <button>Save task</button>
+ <button type="button" class="secondary" onclick="taskDlg.close()">Cancel</button>
 </div>
 
 </form>
 </dialog>
 
 
-<!-- VEHICLE DIALOG -->
+<!-- VEHICLE -->
+
 <dialog id="vehicleDlg">
 <form method="dialog" class="modal" id="vehicleForm">
 
@@ -126,15 +299,16 @@ dialog::backdrop{background:#0007}
 <textarea id="vehicleNotes" rows="4"></textarea>
 
 <div class="row" style="margin-top:13px">
-<button>Save</button>
-<button type="button" class="secondary" onclick="vehicleDlg.close()">Cancel</button>
+ <button>Save</button>
+ <button type="button" class="secondary" onclick="vehicleDlg.close()">Cancel</button>
 </div>
 
 </form>
 </dialog>
 
 
-<!-- RECORD COMPLETED WORK -->
+<!-- COMPLETED MAINTENANCE / HISTORY -->
+
 <dialog id="recordDlg">
 <form method="dialog" class="modal" id="recordForm">
 
@@ -145,46 +319,48 @@ dialog::backdrop{background:#0007}
 
 <div class="grid">
 
-<div>
-<label>Date</label>
-<input id="recordDate" type="date" required>
-</div>
+ <div>
+  <label>Date</label>
+  <input id="recordDate" type="date" required>
+ </div>
 
-<div>
-<label>Mileage</label>
-<input id="recordMileage" type="number" min="0">
-</div>
+ <div>
+  <label>Mileage</label>
+  <input id="recordMileage" type="number" min="0">
+ </div>
 
-<div>
-<label>Cost (£)</label>
-<input id="recordCost" type="number" min="0" step="0.01">
-</div>
+ <div>
+  <label>Cost (£)</label>
+  <input id="recordCost" type="number" min="0" step="0.01">
+ </div>
 
 </div>
 
 <label>Parts / oils used</label>
 <div id="recordPartsList"></div>
 
-<button type="button"
-class="secondary"
-style="margin-top:10px"
-onclick="addRecordPart()">
-+ Add another part
+<button
+ type="button"
+ class="secondary"
+ style="margin-top:10px"
+ onclick="addRecordPart()">
+ + Add another part
 </button>
 
 <label>Notes</label>
 <textarea id="recordNotes" rows="3"></textarea>
 
 <div class="row" style="margin-top:13px">
-<button>Save record</button>
-<button type="button" class="secondary" onclick="recordDlg.close()">Cancel</button>
+ <button>Save record</button>
+ <button type="button" class="secondary" onclick="recordDlg.close()">Cancel</button>
 </div>
 
 </form>
 </dialog>
 
 
-<!-- PART DIALOG -->
+<!-- PART / OIL -->
+
 <dialog id="partDlg">
 <form method="dialog" class="modal" id="partForm">
 
@@ -195,35 +371,35 @@ onclick="addRecordPart()">
 
 <div class="grid">
 
-<div>
-<label>Date fitted</label>
-<input id="partDate" type="date">
-</div>
+ <div>
+  <label>Date fitted</label>
+  <input id="partDate" type="date">
+ </div>
 
-<div>
-<label>Mileage fitted</label>
-<input id="partMileage" type="number" min="0">
-</div>
+ <div>
+  <label>Mileage fitted</label>
+  <input id="partMileage" type="number" min="0">
+ </div>
 
-<div>
-<label>Category / type</label>
-<input id="partCategory" placeholder="Oil, filter, brake...">
-</div>
+ <div>
+  <label>Category / type</label>
+  <input id="partCategory" placeholder="Oil, filter, brake...">
+ </div>
 
-<div>
-<label>Manufacturer</label>
-<input id="partMaker">
-</div>
+ <div>
+  <label>Manufacturer</label>
+  <input id="partMaker">
+ </div>
 
-<div>
-<label>Part number</label>
-<input id="partNumber">
-</div>
+ <div>
+  <label>Part number</label>
+  <input id="partNumber">
+ </div>
 
-<div>
-<label>Cost (£)</label>
-<input id="partCost" type="number" min="0" step="0.01">
-</div>
+ <div>
+  <label>Cost (£)</label>
+  <input id="partCost" type="number" min="0" step="0.01">
+ </div>
 
 </div>
 
@@ -234,8 +410,8 @@ onclick="addRecordPart()">
 <textarea id="partNotes" rows="3"></textarea>
 
 <div class="row" style="margin-top:13px">
-<button>Save part</button>
-<button type="button" class="secondary" onclick="partDlg.close()">Cancel</button>
+ <button>Save part</button>
+ <button type="button" class="secondary" onclick="partDlg.close()">Cancel</button>
 </div>
 
 </form>
@@ -246,1568 +422,2795 @@ onclick="addRecordPart()">
 
 const SUPABASE_URL="https://baqdlzrdyuzgjdsjzenl.supabase.co";
 const SUPABASE_KEY="sb_publishable_Clz_wO8YPjTQOqrlbZ2d4w_RSimZxDH";
+
 const KEY="myGarageV1";
+const CLOUD_ID=1;
 
 const starter=[
-{
-id:"skoda",
-name:"Skoda Superb",
-year:2010,
-engine:"2.0 TDI",
-emoji:"🚗",
-reg:"",
-mileage:"",
-notes:"",
-tasks:[],
-history:[],
-parts:[]
-},
-{
-id:"corsa",
-name:"Vauxhall Corsa",
-year:2016,
-engine:"1.4 Petrol",
-emoji:"🚗",
-reg:"",
-mileage:"",
-notes:"",
-tasks:[],
-history:[],
-parts:[]
-},
-{
-id:"st1300",
-name:"Honda Pan European ST1300",
-year:2012,
-engine:"ST1300",
-emoji:"🏍️",
-reg:"",
-mileage:"",
-notes:"",
-tasks:[],
-history:[],
-parts:[]
-},
-{
-id:"gsx250",
-name:"Suzuki GSX250",
-year:1982,
-engine:"GSX250",
-emoji:"🏍️",
-reg:"",
-mileage:"",
-notes:"",
-tasks:[],
-history:[],
-parts:[]
-}
+ {
+  id:"skoda",
+  name:"Skoda Superb",
+  year:2010,
+  engine:"2.0 TDI",
+  emoji:"🚗",
+  reg:"",
+  mileage:"",
+  notes:"",
+  tasks:[],
+  history:[],
+  parts:[]
+ },
+ {
+  id:"corsa",
+  name:"Vauxhall Corsa",
+  year:2016,
+  engine:"1.4 Petrol",
+  emoji:"🚗",
+  reg:"",
+  mileage:"",
+  notes:"",
+  tasks:[],
+  history:[],
+  parts:[]
+ },
+ {
+  id:"st1300",
+  name:"Honda Pan European ST1300",
+  year:2012,
+  engine:"ST1300",
+  emoji:"🏍️",
+  reg:"",
+  mileage:"",
+  notes:"",
+  tasks:[],
+  history:[],
+  parts:[]
+ },
+ {
+  id:"gsx250",
+  name:"Suzuki GSX250",
+  year:1982,
+  engine:"GSX250",
+  emoji:"🏍️",
+  reg:"",
+  mileage:"",
+  notes:"",
+  tasks:[],
+  history:[],
+  parts:[]
+ }
 ];
-
-let db=JSON.parse(localStorage.getItem(KEY)||"null")||starter;
 
 let current=null;
 let tab="maintenance";
+
 let editing=-1;
 let editingPart=-1;
-let editingRecord=-1;
-let recordTaskIndex=-1;
+
+let recordTaskId=null;
+let editingRecordId=null;
+
+let focusPartId=null;
+let focusTaskId=null;
+let focusHistoryId=null;
 
 const $=id=>document.getElementById(id);
 
-const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({
-"&":"&amp;",
-"<":"&lt;",
-">":"&gt;",
-'"':"&quot;",
-"'":"&#39;"
-}[m]));
-
-const v=()=>db.find(x=>x.id===current);
+const esc=s=>
+ String(s??"").replace(
+  /[&<>"']/g,
+  m=>({
+   "&":"&amp;",
+   "<":"&lt;",
+   ">":"&gt;",
+   '"':"&quot;",
+   "'":"&#39;"
+  }[m])
+ );
 
 const dateText=d=>
-d?new Date(d+"T00:00:00").toLocaleDateString("en-GB"):"—";
+ d
+ ?new Date(d+"T00:00:00").toLocaleDateString("en-GB")
+ :"—";
+
+const today=()=>new Date().toISOString().slice(0,10);
+
+function uid(prefix="id"){
+ if(window.crypto&&crypto.randomUUID){
+  return prefix+"_"+crypto.randomUUID();
+ }
+ return prefix+"_"+Date.now()+"_"+Math.random().toString(36).slice(2);
+}
+
+function sameText(a,b){
+ return String(a||"").trim().toLowerCase()===
+        String(b||"").trim().toLowerCase();
+}
+
+function blankVehicle(base){
+ return {
+  id:base.id,
+  name:base.name,
+  year:base.year,
+  engine:base.engine,
+  emoji:base.emoji,
+  reg:"",
+  mileage:"",
+  notes:"",
+  tasks:[],
+  history:[],
+  parts:[]
+ };
+}
 
 
-/* ---------- SUPABASE SAVE ---------- */
+function normaliseVehicle(x,base){
+
+ const source=x&&typeof x==="object"?x:{};
+
+ const vehicle={
+  ...blankVehicle(base),
+  ...source,
+
+  id:base.id,
+  name:base.name,
+  year:base.year,
+  engine:base.engine,
+  emoji:base.emoji,
+
+  reg:source.reg==null?"":String(source.reg),
+  mileage:source.mileage==null?"":String(source.mileage),
+  notes:source.notes==null?"":String(source.notes),
+
+  tasks:Array.isArray(source.tasks)
+   ?source.tasks.map(t=>({
+      ...t,
+      id:t.id||uid("task")
+     }))
+   :[],
+
+  history:Array.isArray(source.history)
+   ?source.history.map(r=>({
+      ...r,
+      id:r.id||uid("history"),
+      partIds:Array.isArray(r.partIds)?r.partIds:[]
+     }))
+   :[],
+
+  parts:Array.isArray(source.parts)
+   ?source.parts.map(p=>({
+      ...p,
+      id:p.id||uid("part")
+     }))
+   :[]
+ };
+
+ /*
+  Link old history records to maintenance jobs
+  where possible.
+ */
+
+ vehicle.history.forEach(r=>{
+
+  if(!r.taskId){
+
+   const task=vehicle.tasks.find(
+    t=>sameText(t.name,r.job)
+   );
+
+   if(task){
+    r.taskId=task.id;
+   }
+
+  }
+
+ });
+
+
+ /*
+  Try to recognise old Parts & Oils records that
+  were previously created from maintenance jobs.
+ */
+
+ vehicle.parts.forEach(p=>{
+
+  if(!p.taskId){
+
+   let jobName="";
+
+   if(
+    p.notes &&
+    String(p.notes).toLowerCase().startsWith("from maintenance:")
+   ){
+    jobName=String(p.notes)
+     .substring(String(p.notes).indexOf(":")+1)
+     .trim();
+   }
+
+   if(jobName){
+
+    const task=vehicle.tasks.find(
+     t=>sameText(t.name,jobName)
+    );
+
+    if(task){
+     p.taskId=task.id;
+    }
+
+   }
+
+  }
+
+
+  if(!p.historyId){
+
+   const possible=vehicle.history.find(r=>{
+
+    if(p.taskId&&r.taskId&&p.taskId!==r.taskId){
+     return false;
+    }
+
+    if(
+     p.date &&
+     r.date &&
+     p.date!==r.date
+    ){
+     return false;
+    }
+
+    if(
+     p.mileage &&
+     r.mileage &&
+     String(p.mileage)!==String(r.mileage)
+    ){
+     return false;
+    }
+
+    return (
+     !p.taskId ||
+     r.taskId===p.taskId ||
+     sameText(r.job,
+      String(p.notes||"").replace(/^From maintenance:\s*/i,"")
+     )
+    );
+
+   });
+
+   if(possible){
+    p.historyId=possible.id;
+
+    if(!p.taskId&&possible.taskId){
+     p.taskId=possible.taskId;
+    }
+   }
+
+  }
+
+ });
+
+
+ /*
+  Convert existing History parts into linked
+  Parts & Oils entries if they aren't already linked.
+ */
+
+ vehicle.history.forEach(r=>{
+
+  if(!Array.isArray(r.partIds)){
+   r.partIds=[];
+  }
+
+  const oldParts=Array.isArray(r.parts)?r.parts:[];
+
+  oldParts.forEach(old=>{
+
+   let match=vehicle.parts.find(p=>
+    p.historyId===r.id &&
+    sameText(p.name,old.name) &&
+    (
+     !old.number ||
+     !p.number ||
+     sameText(p.number,old.number)
+    )
+   );
+
+   if(!match){
+
+    match=vehicle.parts.find(p=>
+     !p.historyId &&
+     sameText(p.name,old.name) &&
+     (
+      !r.date ||
+      !p.date ||
+      p.date===r.date
+     ) &&
+     (
+      !r.mileage ||
+      !p.mileage ||
+      String(p.mileage)===String(r.mileage)
+     )
+    );
+
+   }
+
+   if(match){
+
+    match.historyId=r.id;
+
+    if(r.taskId){
+     match.taskId=r.taskId;
+    }
+
+   }else{
+
+    match={
+     id:uid("part"),
+     name:old.name||"",
+     date:r.date||"",
+     mileage:r.mileage||"",
+     category:old.category||"",
+     maker:old.maker||"",
+     number:old.number||"",
+     cost:old.cost||"",
+     spec:old.spec||"",
+     notes:"From maintenance: "+(r.job||""),
+     taskId:r.taskId||null,
+     historyId:r.id
+    };
+
+    vehicle.parts.push(match);
+
+   }
+
+   if(
+    match.id &&
+    !r.partIds.includes(match.id)
+   ){
+    r.partIds.push(match.id);
+   }
+
+  });
+
+
+  /*
+   Also include master parts already linked to
+   this history record.
+  */
+
+  vehicle.parts
+   .filter(p=>p.historyId===r.id)
+   .forEach(p=>{
+
+    if(!r.partIds.includes(p.id)){
+     r.partIds.push(p.id);
+    }
+
+   });
+
+ });
+
+
+ /*
+  Make sure each linked part knows its task
+  when its history entry knows the task.
+ */
+
+ vehicle.parts.forEach(p=>{
+
+  if(p.historyId&&!p.taskId){
+
+   const r=vehicle.history.find(
+    h=>h.id===p.historyId
+   );
+
+   if(r&&r.taskId){
+    p.taskId=r.taskId;
+   }
+
+  }
+
+ });
+
+ return vehicle;
+}
+
+
+function vehicleMatches(x,base){
+
+ if(!x||typeof x!=="object"){
+  return false;
+ }
+
+ const id=String(x.id||"").toLowerCase();
+ const name=String(x.name||"").toLowerCase();
+
+ return (
+  id===base.id ||
+  name===base.name.toLowerCase() ||
+  (
+   Number(x.year)===base.year &&
+   name.includes(
+    base.name.split(" ")[0].toLowerCase()
+   )
+  )
+ );
+
+}
+
+
+function normaliseDatabase(input){
+
+ if(!Array.isArray(input)){
+  return null;
+ }
+
+ return starter.map(base=>{
+
+  const found=input.find(
+   x=>vehicleMatches(x,base)
+  );
+
+  return normaliseVehicle(found,base);
+
+ });
+
+}
+
+
+function loadLocalData(){
+
+ try{
+
+  const raw=localStorage.getItem(KEY);
+
+  if(raw){
+
+   const parsed=JSON.parse(raw);
+   const fixed=normaliseDatabase(parsed);
+
+   if(fixed){
+    localStorage.setItem(KEY,JSON.stringify(fixed));
+    return fixed;
+   }
+
+  }
+
+ }catch(e){
+  console.warn("Local data could not be read:",e);
+ }
+
+ const fresh=starter.map(
+  x=>blankVehicle(x)
+ );
+
+ localStorage.setItem(
+  KEY,
+  JSON.stringify(fresh)
+ );
+
+ return fresh;
+}
+
+
+let db=loadLocalData();
+
+
+function findVehicle(id){
+ return db.find(x=>x.id===id)||null;
+}
+
+function v(){
+ return findVehicle(current);
+}
+
+function taskById(id){
+ return v()?.tasks.find(t=>t.id===id)||null;
+}
+
+function historyById(id){
+ return v()?.history.find(r=>r.id===id)||null;
+}
+
+function partById(id){
+ return v()?.parts.find(p=>p.id===id)||null;
+}
+
+
+function showStatus(message,type="info"){
+
+ const old=$("syncStatus");
+
+ if(old){
+  old.remove();
+ }
+
+ const el=document.createElement("div");
+
+ el.id="syncStatus";
+ el.className="status "+type;
+ el.textContent=message;
+
+ $("app").prepend(el);
+
+ if(type==="ok"){
+  setTimeout(()=>el.remove(),2500);
+ }
+
+}
+
+
+async function supabaseRequest(url,options={}){
+
+ const response=await fetch(
+  url,
+  {
+   ...options,
+   headers:{
+    "Content-Type":"application/json",
+    "apikey":SUPABASE_KEY,
+    "Authorization":`Bearer ${SUPABASE_KEY}`,
+    ...(options.headers||{})
+   }
+  }
+ );
+
+ const text=await response.text();
+
+ let body=null;
+
+ try{
+  body=text?JSON.parse(text):null;
+ }catch(e){
+  body=text;
+ }
+
+ return {response,body};
+}
+
 
 async function save(){
 
-localStorage.setItem(KEY,JSON.stringify(db));
+ db=normaliseDatabase(db)||
+    starter.map(x=>blankVehicle(x));
 
-try{
+ localStorage.setItem(
+  KEY,
+  JSON.stringify(db)
+ );
 
-const response=await fetch(
-`${SUPABASE_URL}/rest/v1/garage_data`,
-{
-method:"POST",
-headers:{
-"Content-Type":"application/json",
-"apikey":SUPABASE_KEY,
-"Authorization":`Bearer ${SUPABASE_KEY}`,
-"Prefer":"resolution=merge-duplicates,return=representation"
-},
-body:JSON.stringify({
-id:1,
-data:db
-})
+ try{
+
+  const payload=JSON.stringify({
+   id:CLOUD_ID,
+   data:db
+  });
+
+  const result=await supabaseRequest(
+   `${SUPABASE_URL}/rest/v1/garage_data`,
+   {
+    method:"POST",
+    headers:{
+     "Prefer":"resolution=merge-duplicates,return=representation"
+    },
+    body:payload
+   }
+  );
+
+  if(result.response.ok){
+   showStatus("Saved to cloud","ok");
+   return true;
+  }
+
+  console.error(
+   "Supabase save error:",
+   result.response.status,
+   result.body
+  );
+
+  showStatus(
+   "Saved on this device, but cloud save failed",
+   "error"
+  );
+
+  return false;
+
+ }catch(e){
+
+  console.error(
+   "Supabase connection error:",
+   e
+  );
+
+  showStatus(
+   "Saved on this device; cloud connection failed",
+   "error"
+  );
+
+  return false;
+
+ }
+
 }
-);
 
-if(!response.ok)
-console.error(
-"Supabase save error:",
-response.status,
-await response.text()
-);
 
-}catch(e){
-console.error("Supabase connection error:",e);
+async function loadFromSupabase(){
+
+ try{
+
+  const result=await supabaseRequest(
+   `${SUPABASE_URL}/rest/v1/garage_data?id=eq.${CLOUD_ID}&select=id,data`,
+   {method:"GET"}
+  );
+
+  if(!result.response.ok){
+
+   console.error(
+    "Supabase load error:",
+    result.response.status,
+    result.body
+   );
+
+   return false;
+  }
+
+  const rows=Array.isArray(result.body)
+   ?result.body
+   :[];
+
+  if(
+   !rows.length ||
+   !rows[0] ||
+   !rows[0].data
+  ){
+   return false;
+  }
+
+  const fixed=normaliseDatabase(
+   rows[0].data
+  );
+
+  if(!fixed){
+   return false;
+  }
+
+  db=fixed;
+
+  localStorage.setItem(
+   KEY,
+   JSON.stringify(db)
+  );
+
+  return true;
+
+ }catch(e){
+
+  console.error(
+   "Supabase load failed:",
+   e
+  );
+
+  return false;
+ }
+
 }
 
-}
-
-
-/* ---------- MAINTENANCE CALCULATIONS ---------- */
 
 function calc(t){
 
-let d=null;
-let m=null;
+ let d=null;
+ let m=null;
 
-if(t.months && t.date){
+ if(t.months&&t.date){
 
-d=new Date(t.date+"T00:00:00");
-d.setMonth(d.getMonth()+Number(t.months));
+  d=new Date(
+   t.date+"T00:00:00"
+  );
 
-}
+  d.setMonth(
+   d.getMonth()+Number(t.months)
+  );
 
-if(t.miles && t.lastMiles){
+ }
 
-m=Number(t.lastMiles)+Number(t.miles);
+ if(t.miles&&t.lastMiles){
 
-}
+  m=
+   Number(t.lastMiles)+
+   Number(t.miles);
 
-return{d,m};
+ }
 
+ return {d,m};
 }
 
 
 function status(t){
 
-let c=calc(t);
+ const vehicle=v();
 
-let now=new Date();
+ if(!vehicle){
+  return{
+   c:{},
+   od:false,
+   so:false,
+   label:"OK"
+  };
+ }
 
-let cur=
-v().mileage===""
-?null
-:Number(v().mileage);
+ const c=calc(t);
+ const now=new Date();
 
-let od=
-(c.d&&now>=c.d) ||
-(c.m&&cur!=null&&cur>=c.m);
+ const cur=
+  vehicle.mileage===""
+  ?null
+  :Number(vehicle.mileage);
 
-let so=
-!od &&
-(
-(c.d&&(c.d-now)<=30*86400000) ||
-(c.m&&cur!=null&&(c.m-cur)<=500)
-);
+ const od=
+  (c.d&&now>=c.d) ||
+  (c.m&&cur!=null&&cur>=c.m);
 
-return{
-c,
-od,
-so,
-label:od?"OVERDUE":so?"DUE SOON":"OK"
-};
+ const so=
+  !od &&
+  (
+   (c.d&&(c.d-now)<=30*86400000) ||
+   (c.m&&cur!=null&&(c.m-cur)<=500)
+  );
+
+ return{
+  c,
+  od,
+  so,
+  label:od
+   ?"OVERDUE"
+   :so
+    ?"DUE SOON"
+    :"OK"
+ };
 
 }
 
 
 function due(t){
 
-let c=calc(t);
+ const c=calc(t);
 
-let a=c.d?
-dateText(c.d.toISOString().slice(0,10))
-:"";
+ const a=c.d
+  ?dateText(c.d.toISOString().slice(0,10))
+  :"";
 
-let b=c.m?
-c.m.toLocaleString()+" miles"
-:"";
+ const b=c.m
+  ?c.m.toLocaleString()+" miles"
+  :"";
 
-return[a,b].filter(Boolean).join(" OR ")||"Not scheduled";
+ return [a,b]
+  .filter(Boolean)
+  .join(" OR ") ||
+  "Not scheduled";
+}
+
+
+function linkedPartsForTask(taskId){
+
+ return (v()?.parts||[])
+  .filter(p=>p.taskId===taskId);
 
 }
 
 
-/* ---------- MAIN RENDER ---------- */
+function linkedPartsForHistory(historyId){
+
+ return (v()?.parts||[])
+  .filter(p=>p.historyId===historyId);
+
+}
+
+
+function linkedHistoryForTask(taskId){
+
+ return (v()?.history||[])
+  .filter(r=>r.taskId===taskId);
+
+}
+
 
 function render(){
 
-if(!current){
+ const vehicle=v();
 
-$("back").style.display="none";
-$("title").textContent="My Garage";
+ if(current&&!vehicle){
+  current=null;
+ }
 
-$("app").innerHTML=
+ if(!current){
 
-`<div class="card">
-<h2>Your vehicles</h2>
-<p class="muted" style="margin-top:5px">
-Tap a vehicle to manage it.
-</p>
-</div>`+
+  $("back").style.display="none";
+  $("title").textContent="My Garage";
 
-db.map(x=>
-`<div class="card vehicle" onclick="openV('${x.id}')">
-<div class="icon">${x.emoji}</div>
-<div>
-<h2>${esc(x.name)}</h2>
-<p class="muted">
-${x.year} · ${esc(x.engine)}
-${x.mileage!==""?
-" · "+Number(x.mileage).toLocaleString()+" miles":
-""}
-</p>
-</div>
-</div>`
-).join("")+
+  $("app").innerHTML=
+   `<div class="card">
+     <h2>Your vehicles</h2>
+     <p class="muted" style="margin-top:5px">
+      Tap a vehicle to manage it.
+     </p>
+    </div>`+
 
-`
-<div class="card">
-<h3>Backup</h3>
-<p class="muted" style="margin:5px 0 10px">
-Export a backup before changing phones.
-</p>
-<div class="row">
-<button onclick="backup()">Export backup</button>
-<button class="secondary" onclick="restore()">Import backup</button>
-</div>
-</div>`;
+   db.map(x=>
+    `<div class="card vehicle"
+      onclick="openV('${esc(x.id)}')">
 
-return;
+      <div class="icon">
+       ${x.emoji}
+      </div>
 
+      <div>
+       <h2>${esc(x.name)}</h2>
+
+       <p class="muted">
+        ${x.year} ·
+        ${esc(x.engine)}
+        ${
+         x.mileage!==""
+         ?" · "+Number(x.mileage).toLocaleString()+" miles"
+         :""
+        }
+       </p>
+      </div>
+
+     </div>`
+   ).join("")+
+
+   `<div class="card">
+     <h3>Backup</h3>
+
+     <p class="muted"
+        style="margin:5px 0 10px">
+      Export a backup before changing phones.
+     </p>
+
+     <div class="row">
+      <button onclick="backup()">
+       Export backup
+      </button>
+
+      <button
+       class="secondary"
+       onclick="restore()">
+       Import backup
+      </button>
+     </div>
+    </div>`;
+
+  return;
+ }
+
+
+ $("back").style.display="block";
+ $("title").textContent=vehicle.name;
+
+ $("app").innerHTML=
+
+  `<div class="card">
+
+    <div class="row between">
+
+     <div>
+
+      <div class="muted">
+       ${vehicle.year} · ${esc(vehicle.engine)}
+      </div>
+
+      <h2>
+       ${vehicle.emoji} ${esc(vehicle.name)}
+      </h2>
+
+      <p class="muted">
+       ${esc(vehicle.reg)||"Registration not entered"}
+       ${
+        vehicle.mileage!==""
+        ?" · "+Number(vehicle.mileage).toLocaleString()+" miles"
+        :" · Mileage not entered"
+       }
+      </p>
+
+     </div>
+
+     <button
+      class="secondary"
+      onclick="editVehicle()">
+      Edit
+     </button>
+
+    </div>
+
+   </div>
+
+   <div class="tabs">
+
+    <button
+     class="${tab==="maintenance"?"active":""}"
+     onclick="tab='maintenance';render()">
+     🔧 Maintenance
+    </button>
+
+    <button
+     class="${tab==="history"?"active":""}"
+     onclick="tab='history';render()">
+     📖 History
+    </button>
+
+    <button
+     class="${tab==="parts"?"active":""}"
+     onclick="tab='parts';render()">
+     🔩 Parts & Oils
+    </button>
+
+    <button
+     class="${tab==="notes"?"active":""}"
+     onclick="tab='notes';render()">
+     📝 Notes
+    </button>
+
+   </div>`
+
+  +
+  (
+   tab==="maintenance"
+   ?maintenance()
+   :tab==="history"
+    ?history()
+    :tab==="parts"
+     ?parts()
+     :notes()
+  );
+
+ setTimeout(scrollToFocus,50);
 }
 
-$("back").style.display="block";
-$("title").textContent=v().name;
-
-$("app").innerHTML=
-
-`<div class="card">
-
-<div class="row between">
-
-<div>
-
-<div class="muted">
-${v().year} · ${esc(v().engine)}
-</div>
-
-<h2>${v().emoji} ${esc(v().name)}</h2>
-
-<p class="muted">
-${v().reg||"Registration not entered"}
-${v().mileage!==""?
-" · "+Number(v().mileage).toLocaleString()+" miles":
-" · Mileage not entered"}
-</p>
-
-</div>
-
-<button class="secondary" onclick="editVehicle()">
-Edit
-</button>
-
-</div>
-
-</div>
-
-<div class="tabs">
-
-<button class="${tab=="maintenance"?"active":""}"
-onclick="tab='maintenance';render()">
-🔧 Maintenance
-</button>
-
-<button class="${tab=="history"?"active":""}"
-onclick="tab='history';render()">
-📖 History
-</button>
-
-<button class="${tab=="parts"?"active":""}"
-onclick="tab='parts';render()">
-🔩 Parts & Oils
-</button>
-
-<button class="${tab=="notes"?"active":""}"
-onclick="tab='notes';render()">
-📝 Notes
-</button>
-
-</div>`+
-
-(
-tab=="maintenance"
-?maintenance()
-:tab=="history"
-?history()
-:tab=="parts"
-?parts()
-:notes()
-);
-
-}
-
-
-/* ---------- MAINTENANCE ---------- */
 
 function maintenance(){
 
-return`
+ const vehicle=v();
 
-<div class="row between">
+ return `
 
-<div>
-<h3>Maintenance</h3>
-<p class="muted">
-Date or mileage — whichever comes first.
-</p>
-</div>
+ <div class="row between">
 
-<button onclick="newTask()">+ Add task</button>
+  <div>
+   <h3>Maintenance</h3>
+   <p class="muted">
+    Date or mileage — whichever comes first.
+   </p>
+  </div>
 
-</div>`
+  <button onclick="newTask()">
+   + Add task
+  </button>
 
-+
+ </div>
 
-(
-v().tasks.length
+ `+
 
-?
+ (
+  vehicle.tasks.length
 
-v().tasks.map((t,i)=>{
+  ?vehicle.tasks.map((t,i)=>{
 
-let s=status(t);
+   const s=status(t);
 
-let relatedParts=(v().parts||[]).filter(
-p=>p.taskIndex===i
-);
+   const linkedParts=
+    linkedPartsForTask(t.id);
 
-return`
+   const completed=
+    linkedHistoryForTask(t.id);
 
-<div class="card task ${s.od?"overdue":s.so?"soon":"ok"}">
+   return `
 
-<div class="row between">
+   <div
+    id="task-${esc(t.id)}"
+    class="card task
+     ${s.od?"overdue":s.so?"soon":"ok"}
+     ${focusTaskId===t.id?"highlight":""}">
 
-<div>
+    <div class="row between">
 
-<h3>${esc(t.name)}</h3>
+     <div>
 
-<p class="muted">
+      <h3>${esc(t.name)}</h3>
 
-${t.months?t.months+" months":""}
+      <p class="muted">
 
-${t.months&&t.miles?" / ":""}
+       ${
+        t.months
+        ?t.months+" months"
+        :""
+       }
 
-${t.miles?
-Number(t.miles).toLocaleString()+" miles":
-""}
+       ${
+        t.months&&t.miles
+        ?" / "
+        :""
+       }
 
-</p>
+       ${
+        t.miles
+        ?Number(t.miles).toLocaleString()+" miles"
+        :""
+       }
 
-</div>
+      </p>
 
-<span class="badge ${s.od?"overdue":s.so?"soon":"ok"}">
-${s.label}
-</span>
+     </div>
 
-</div>
+     <span
+      class="badge
+      ${s.od?"overdue":s.so?"soon":"ok"}">
 
-<p style="margin-top:8px">
-<b>Next due:</b> ${esc(due(t))}
-</p>
+      ${s.label}
 
-<p class="muted">
-Last done:
-${dateText(t.date)}
-${t.lastMiles?
-" · "+Number(t.lastMiles).toLocaleString()+" miles":
-""}
-</p>
+     </span>
 
-${t.notes?
-`<p class="muted" style="margin-top:6px;white-space:pre-wrap">
-${esc(t.notes)}
-</p>`:""}
+    </div>
 
-${relatedParts.length?
+    <p style="margin-top:8px">
+     <b>Next due:</b>
+     ${esc(due(t))}
+    </p>
 
-`<p style="margin-top:8px">
-<b>Parts used:</b>
-${relatedParts.map(p=>
-`<button class="small link-button"
-onclick="openPartFromTask(${i},'${esc(p.name)}')">
-${esc(p.name)}
-</button>`
-).join(" ")}
-</p>`
+    <p class="muted">
+     Last done:
+     ${dateText(t.date)}
 
-:""}
+     ${
+      t.lastMiles
+      ?" · "+Number(t.lastMiles).toLocaleString()+" miles"
+      :""
+     }
+    </p>
 
-<div class="row" style="margin-top:10px">
+    ${
+     t.notes
+     ?`<p class="muted"
+          style="margin-top:6px;white-space:pre-wrap">
+        ${esc(t.notes)}
+       </p>`
+     :""
+    }
 
-<button onclick="completeTask(${i})">
-✓ Record completed
-</button>
 
-<button class="secondary"
-onclick="editTask(${i})">
-Edit
-</button>
+    ${
+     linkedParts.length
 
-<button class="secondary"
-onclick="openTaskParts(${i})">
-🔩 Parts
-</button>
+     ?`
 
-<button class="danger"
-onclick="delTask(${i})">
-Delete
-</button>
+      <div class="linked-box">
 
-</div>
+       <h4>
+        🔩 Parts & oils used for this maintenance job
+       </h4>
 
-</div>`
+       ${linkedParts.map(p=>`
 
-}).join("")
+        <div class="linked-part">
 
-:
+         <div>
 
-`<div class="card empty">
-No maintenance tasks yet.<br>
-Add your first one above.
-</div>`
+          <b>${esc(p.name)}</b>
 
-)
+          <div class="muted">
 
+           ${
+            [
+             p.maker,
+             p.number,
+             p.spec
+            ]
+            .filter(Boolean)
+            .map(esc)
+            .join(" · ")
+           }
+
+          </div>
+
+         </div>
+
+         <button
+          class="secondary small"
+          onclick="openPart('${p.id}')">
+
+          View in Parts & Oils
+
+         </button>
+
+        </div>
+
+       `).join("")}
+
+      </div>
+
+     `
+
+     :`
+
+      <div class="linked-box">
+
+       <h4>🔩 Parts & oils</h4>
+
+       <p class="muted">
+        No parts recorded for this maintenance job yet.
+        Add them when you record the job as completed.
+       </p>
+
+      </div>
+
+     `
+    }
+
+
+    ${
+     completed.length
+
+     ?`
+
+      <div class="row" style="margin-top:10px">
+
+       <button
+        class="secondary small"
+        onclick="openTaskHistory('${t.id}')">
+
+        📖 View history (${completed.length})
+
+       </button>
+
+      </div>
+
+     `
+
+     :""
+    }
+
+
+    <div class="row" style="margin-top:10px">
+
+     <button onclick="completeTask(${i})">
+      ✓ Record completed
+     </button>
+
+     <button
+      class="secondary"
+      onclick="editTask(${i})">
+      Edit
+     </button>
+
+     <button
+      class="danger"
+      onclick="delTask(${i})">
+      Delete
+     </button>
+
+    </div>
+
+   </div>
+
+   `;
+
+  }).join("")
+
+  :`
+
+   <div class="card empty">
+    No maintenance tasks yet.
+    <br>
+    Add your first one above.
+   </div>
+
+  `
+ );
 }
 
-
-/* ---------- HISTORY ---------- */
 
 function history(){
 
-let h=v().history||[];
+ const h=v().history||[];
 
-return`
+ return `
 
-<div class="row between">
+ <div class="row between">
 
-<div>
-<h3>Maintenance history</h3>
-<p class="muted">
-Everything recorded as completed.
-</p>
-</div>
+  <div>
+   <h3>Maintenance history</h3>
 
-<button onclick="newRecord()">
-+ Add record
-</button>
+   <p class="muted">
+    Everything recorded as completed.
+   </p>
+  </div>
 
-</div>`
+  <button onclick="newRecord()">
+   + Add record
+  </button>
 
-+
+ </div>
 
-(
+ `+
 
-h.length
+ (
+  h.length
 
-?
+  ?h.slice()
+   .reverse()
+   .map((r,displayIndex)=>{
 
-h.slice().reverse().map((r,displayIndex)=>{
+    const i=h.length-1-displayIndex;
 
-let i=h.length-1-displayIndex;
+    const linkedParts=
+     linkedPartsForHistory(r.id);
 
-return`
+    const task=
+     r.taskId
+     ?taskById(r.taskId)
+     :null;
 
-<div class="card">
+    return `
 
-<h3>${esc(r.job)}</h3>
+    <div
+     id="history-${esc(r.id)}"
+     class="card
+     ${focusHistoryId===r.id?"highlight":""}">
 
-<p class="muted" style="margin-top:8px">
-<b>Date:</b> ${dateText(r.date)}
-</p>
+     <h3>${esc(r.job)}</h3>
 
-${r.mileage?
-`<p class="muted" style="margin-top:5px">
-<b>Mileage:</b>
-${Number(r.mileage).toLocaleString()} miles
-</p>`:""}
+     <p class="muted"
+        style="margin-top:8px">
 
-${r.cost?
-`<p class="muted" style="margin-top:5px">
-<b>Cost:</b> £${Number(r.cost).toFixed(2)}
-</p>`:""}
+      <b>Date:</b>
+      ${dateText(r.date)}
 
-${
-r.parts&&r.parts.length
+     </p>
 
-?
+     ${
+      r.mileage
 
-`<div style="margin-top:10px">
+      ?`
 
-<b>Parts / oils:</b>
+       <p class="muted"
+          style="margin-top:5px">
 
-<div class="row" style="margin-top:6px">
+        <b>Mileage:</b>
+        ${Number(r.mileage).toLocaleString()} miles
 
-${r.parts.map((p,pi)=>
+       </p>
 
-`<button class="small link-button"
-onclick="openHistoryPart(${i},${pi})">
-🔩 ${esc(p.name)}
-</button>`
+      `
 
-).join("")}
+      :""
+     }
 
-</div>
+     ${
+      r.cost
 
-</div>`
+      ?`
 
-:
+       <p class="muted"
+          style="margin-top:5px">
 
-r.partsText
+        <b>Cost:</b>
+        £${Number(r.cost).toFixed(2)}
 
-?
+       </p>
 
-`<p style="margin-top:8px">
-<b>Parts / oil:</b>
-${esc(r.partsText)}
-</p>`
+      `
 
-:""
+      :""
+     }
 
+
+     ${
+      linkedParts.length
+
+      ?`
+
+       <div class="linked-box">
+
+        <h4>🔩 Parts / oils used</h4>
+
+        ${linkedParts.map(p=>`
+
+         <div class="linked-part">
+
+          <div>
+
+           <b>${esc(p.name)}</b>
+
+           ${
+            [
+             p.maker,
+             p.number,
+             p.spec
+            ].filter(Boolean).length
+
+            ?`
+
+             <div class="muted">
+              ${
+               [
+                p.maker,
+                p.number,
+                p.spec
+               ]
+               .filter(Boolean)
+               .map(esc)
+               .join(" · ")
+              }
+             </div>
+
+            `
+
+            :""
+           }
+
+          </div>
+
+          <button
+           class="secondary small"
+           onclick="openPart('${p.id}')">
+
+           View in Parts & Oils
+
+          </button>
+
+         </div>
+
+        `).join("")}
+
+       </div>
+
+      `
+
+      :r.partsText
+
+       ?`
+
+        <p style="margin-top:8px">
+         <b>Parts/oil:</b>
+         ${esc(r.partsText)}
+        </p>
+
+       `
+
+       :""
+     }
+
+
+     ${
+      r.notes
+
+      ?`
+
+       <p
+        class="muted"
+        style="margin-top:6px;white-space:pre-wrap">
+
+        ${esc(r.notes)}
+
+       </p>
+
+      `
+
+      :""
+     }
+
+
+     <div
+      class="row"
+      style="margin-top:10px">
+
+      ${
+       task
+
+       ?`
+
+        <button
+         class="secondary"
+         onclick="openMaintenanceTask('${task.id}')">
+
+         🔧 View maintenance job
+
+        </button>
+
+       `
+
+       :""
+      }
+
+      <button
+       class="secondary"
+       onclick="editRecord(${i})">
+       Edit
+      </button>
+
+      <button
+       class="danger"
+       onclick="deleteRecord(${i})">
+       Delete
+      </button>
+
+     </div>
+
+    </div>
+
+    `;
+
+   }).join("")
+
+  :`
+
+   <div class="card empty">
+    No history recorded yet.
+   </div>
+
+  `
+ );
 }
 
-${r.notes?
-`<p class="muted"
-style="margin-top:6px;white-space:pre-wrap">
-${esc(r.notes)}
-</p>`:""}
-
-<div class="row" style="margin-top:10px">
-
-<button class="secondary"
-onclick="editRecord(${i})">
-Edit
-</button>
-
-${
-r.parts&&r.parts.length
-?
-
-`<button class="secondary"
-onclick="openHistoryParts(${i})">
-🔩 View parts
-</button>`
-
-:""
-
-}
-
-<button class="danger"
-onclick="deleteRecord(${i})">
-Delete
-</button>
-
-</div>
-
-</div>`
-
-}).join("")
-
-:
-
-`<div class="card empty">
-No history recorded yet.
-</div>`
-
-);
-
-}
-
-
-/* ---------- PARTS ---------- */
 
 function parts(){
 
-let p=v().parts||[];
+ const p=v().parts||[];
 
-return`
+ return `
 
-<div class="row between">
+ <div class="row between">
 
-<div>
-<h3>Parts & Oils</h3>
-<p class="muted">
-Record exactly what you fitted or used.
-</p>
-</div>
+  <div>
 
-<button onclick="newPart()">
-+ Add part
-</button>
+   <h3>Parts & Oils</h3>
 
-</div>`
+   <p class="muted">
+    Record exactly what you fitted or used.
+   </p>
 
-+
+  </div>
 
-(
+  <button onclick="newPart()">
+   + Add part
+  </button>
 
-p.length
+ </div>
 
-?
+ `+
 
-p.slice().reverse().map((x,displayIndex)=>{
+ (
+  p.length
 
-let i=p.length-1-displayIndex;
+  ?p.slice()
+   .reverse()
+   .map((x,displayIndex)=>{
 
-return`
+    const i=p.length-1-displayIndex;
 
-<div class="card">
+    const task=
+     x.taskId
+     ?taskById(x.taskId)
+     :null;
 
-<div class="row between">
+    const hist=
+     x.historyId
+     ?historyById(x.historyId)
+     :null;
 
-<h3>${esc(x.name)}</h3>
+    return `
 
-<span class="muted">
-${dateText(x.date)}
-</span>
+    <div
+     id="part-${esc(x.id)}"
+     class="card
+     ${focusPartId===x.id?"highlight":""}">
 
-</div>
+     <div class="row between">
 
-<p class="muted">
-${[
-x.category,
-x.maker,
-x.number
-].filter(Boolean).map(esc).join(" · ")}
-</p>
+      <h3>${esc(x.name)}</h3>
 
-${x.spec?
-`<p style="margin-top:6px">
-<b>Specification:</b>
-${esc(x.spec)}
-</p>`:""}
+      <span class="muted">
+       ${dateText(x.date)}
+      </span>
 
-<p class="muted">
+     </div>
 
-${x.mileage?
-Number(x.mileage).toLocaleString()+" miles":
-""}
+     <p class="muted">
 
-${x.cost?
-" · £"+Number(x.cost).toFixed(2):
-""}
+      ${
+       [
+        x.category,
+        x.maker,
+        x.number
+       ]
+       .filter(Boolean)
+       .map(esc)
+       .join(" · ")
+      }
 
-</p>
+     </p>
 
-${x.taskName?
-`<p style="margin-top:6px">
-<b>Maintenance:</b>
-<button class="small link-button"
-onclick="openTaskByName('${esc(x.taskName)}')">
-${esc(x.taskName)}
-</button>
-</p>`:""}
+     ${
+      x.spec
 
-${x.historyIndex!==undefined?
-`<p style="margin-top:6px">
-<b>History:</b>
-<button class="small link-button"
-onclick="openHistory(${x.historyIndex})">
-View completed job
-</button>
-</p>`:""}
+      ?`
 
-${x.notes?
-`<p class="muted"
-style="white-space:pre-wrap;margin-top:6px">
-${esc(x.notes)}
-</p>`:""}
+       <p style="margin-top:6px">
+        <b>Specification:</b>
+        ${esc(x.spec)}
+       </p>
 
-<div class="row" style="margin-top:10px">
+      `
 
-<button class="secondary"
-onclick="editPart(${i})">
-Edit
-</button>
+      :""
+     }
 
-<button class="danger"
-onclick="deletePart(${i})">
-Delete
-</button>
+     <p class="muted">
 
-</div>
+      ${
+       x.mileage
+       ?Number(x.mileage).toLocaleString()+" miles"
+       :""
+      }
 
-</div>`
+      ${
+       x.cost
+       ?" · £"+Number(x.cost).toFixed(2)
+       :""
+      }
 
-}).join("")
+     </p>
 
-:
 
-`<div class="card empty">
-No parts or oils recorded yet.
-</div>`
+     ${
+      task||hist
 
-);
+      ?`
 
+       <div class="linked-box">
+
+        <h4>Linked maintenance</h4>
+
+        ${
+         task
+
+         ?`
+
+          <p>
+           <b>Maintenance job:</b>
+           ${esc(task.name)}
+          </p>
+
+         `
+
+         :""
+        }
+
+        ${
+         hist
+
+         ?`
+
+          <p class="muted"
+             style="margin-top:5px">
+
+           Completed:
+           ${dateText(hist.date)}
+
+           ${
+            hist.mileage
+            ?" · "+Number(hist.mileage).toLocaleString()+" miles"
+            :""
+           }
+
+          </p>
+
+         `
+
+         :""
+        }
+
+        <div
+         class="row"
+         style="margin-top:9px">
+
+         ${
+          task
+
+          ?`
+
+           <button
+            class="secondary small"
+            onclick="openMaintenanceTask('${task.id}')">
+
+            🔧 Maintenance
+
+           </button>
+
+          `
+
+          :""
+         }
+
+         ${
+          hist
+
+          ?`
+
+           <button
+            class="secondary small"
+            onclick="openHistoryRecord('${hist.id}')">
+
+            📖 History
+
+           </button>
+
+          `
+
+          :""
+         }
+
+        </div>
+
+       </div>
+
+      `
+
+      :""
+     }
+
+
+     ${
+      x.notes
+
+      ?`
+
+       <p
+        class="muted"
+        style="white-space:pre-wrap;margin-top:8px">
+
+        ${esc(x.notes)}
+
+       </p>
+
+      `
+
+      :""
+     }
+
+
+     <div
+      class="row"
+      style="margin-top:10px">
+
+      <button
+       class="secondary"
+       onclick="editPart(${i})">
+       Edit
+      </button>
+
+      <button
+       class="danger"
+       onclick="deletePart(${i})">
+       Delete
+      </button>
+
+     </div>
+
+    </div>
+
+    `;
+
+   }).join("")
+
+  :`
+
+   <div class="card empty">
+    No parts or oils recorded yet.
+   </div>
+
+  `
+ );
 }
 
-
-/* ---------- NOTES ---------- */
 
 function notes(){
 
-return`
+ return `
 
-<div class="card">
+ <div class="card">
 
-<h3>Vehicle notes & modifications</h3>
+  <h3>Vehicle notes & modifications</h3>
 
-<p style="margin-top:8px;white-space:pre-wrap">
+  <p
+   style="margin-top:8px;white-space:pre-wrap">
 
-${esc(v().notes)||'<span class="muted">No notes yet.</span>'}
+   ${
+    esc(v().notes) ||
+    '<span class="muted">No notes yet.</span>'
+   }
 
-</p>
+  </p>
 
-</div>`;
+ </div>
+
+ `;
 
 }
 
 
-/* ---------- TASKS ---------- */
+function scrollToFocus(){
+
+ let id=null;
+
+ if(tab==="parts"&&focusPartId){
+  id="part-"+focusPartId;
+ }
+
+ if(tab==="maintenance"&&focusTaskId){
+  id="task-"+focusTaskId;
+ }
+
+ if(tab==="history"&&focusHistoryId){
+  id="history-"+focusHistoryId;
+ }
+
+ if(!id){
+  return;
+ }
+
+ const el=document.getElementById(id);
+
+ if(el){
+  el.scrollIntoView({
+   behavior:"smooth",
+   block:"center"
+  });
+ }
+
+ setTimeout(()=>{
+
+  focusPartId=null;
+  focusTaskId=null;
+  focusHistoryId=null;
+
+ },1000);
+
+}
+
+
+function openPart(id){
+
+ focusPartId=id;
+ focusTaskId=null;
+ focusHistoryId=null;
+
+ tab="parts";
+ render();
+
+}
+
+
+function openMaintenanceTask(id){
+
+ focusTaskId=id;
+ focusPartId=null;
+ focusHistoryId=null;
+
+ tab="maintenance";
+ render();
+
+}
+
+
+function openHistoryRecord(id){
+
+ focusHistoryId=id;
+ focusPartId=null;
+ focusTaskId=null;
+
+ tab="history";
+ render();
+
+}
+
+
+function openTaskHistory(taskId){
+
+ const records=
+  linkedHistoryForTask(taskId);
+
+ if(!records.length){
+  return;
+ }
+
+ focusHistoryId=
+  records[records.length-1].id;
+
+ tab="history";
+ render();
+
+}
+
+
+/* MAINTENANCE TASKS */
 
 function newTask(){
 
-editing=-1;
+ editing=-1;
 
-$("taskForm").reset();
+ $("taskForm").reset();
 
-$("taskHeading").textContent="Add maintenance task";
+ $("taskHeading").textContent=
+  "Add maintenance task";
 
-$("taskDlg").showModal();
-
+ $("taskDlg").showModal();
 }
 
 
 function editTask(i){
 
-editing=i;
+ editing=i;
 
-let t=v().tasks[i];
+ const t=v().tasks[i];
 
-$("taskName").value=t.name||"";
-$("taskMonths").value=t.months||"";
-$("taskMiles").value=t.miles||"";
-$("taskDate").value=t.date||"";
-$("taskLastMiles").value=t.lastMiles||"";
-$("taskNotes").value=t.notes||"";
+ $("taskName").value=t.name||"";
+ $("taskMonths").value=t.months||"";
+ $("taskMiles").value=t.miles||"";
+ $("taskDate").value=t.date||"";
+ $("taskLastMiles").value=t.lastMiles||"";
+ $("taskNotes").value=t.notes||"";
 
-$("taskHeading").textContent="Edit maintenance task";
+ $("taskHeading").textContent=
+  "Edit maintenance task";
 
-$("taskDlg").showModal();
-
+ $("taskDlg").showModal();
 }
 
 
 $("taskForm").onsubmit=()=>{
 
-let t={
-name:$("taskName").value.trim(),
-months:$("taskMonths").value,
-miles:$("taskMiles").value,
-date:$("taskDate").value,
-lastMiles:$("taskLastMiles").value,
-notes:$("taskNotes").value.trim()
+ const existing=
+  editing>=0
+  ?v().tasks[editing]
+  :null;
+
+ const t={
+
+  id:existing?.id||uid("task"),
+
+  name:$("taskName").value.trim(),
+
+  months:$("taskMonths").value,
+
+  miles:$("taskMiles").value,
+
+  date:$("taskDate").value,
+
+  lastMiles:$("taskLastMiles").value,
+
+  notes:$("taskNotes").value.trim()
+
+ };
+
+ if(editing<0){
+
+  v().tasks.push(t);
+
+ }else{
+
+  v().tasks[editing]=t;
+
+ }
+
+ editing=-1;
+
+ save();
+ render();
 };
-
-if(editing<0)
-v().tasks.push(t);
-else
-v().tasks[editing]=t;
-
-save();
-render();
-
-}
 
 
 function delTask(i){
 
-if(confirm("Are you sure you want to delete this maintenance task?")){
+ const task=v().tasks[i];
 
-v().tasks.splice(i,1);
+ const linkedParts=
+  linkedPartsForTask(task.id);
 
-save();
-render();
+ const linkedHistory=
+  linkedHistoryForTask(task.id);
 
+ let message=
+  "Are you sure you want to delete this maintenance task?";
+
+ if(linkedParts.length||linkedHistory.length){
+
+  message+=
+   "\n\nIts History and Parts & Oils records will be kept, but they will no longer be linked to this maintenance task.";
+
+ }
+
+ if(!confirm(message)){
+  return;
+ }
+
+ linkedParts.forEach(p=>{
+  p.taskId=null;
+ });
+
+ linkedHistory.forEach(r=>{
+  r.taskId=null;
+ });
+
+ v().tasks.splice(i,1);
+
+ save();
+ render();
 }
 
-}
 
-
-/* ---------- VEHICLE ---------- */
+/* VEHICLE */
 
 function editVehicle(){
 
-$("vehicleReg").value=v().reg||"";
-$("vehicleMileage").value=v().mileage||"";
-$("vehicleNotes").value=v().notes||"";
+ $("vehicleReg").value=v().reg||"";
 
-$("vehicleDlg").showModal();
+ $("vehicleMileage").value=
+  v().mileage||"";
 
+ $("vehicleNotes").value=
+  v().notes||"";
+
+ $("vehicleDlg").showModal();
 }
 
 
 $("vehicleForm").onsubmit=()=>{
 
-v().reg=$("vehicleReg").value.trim();
-v().mileage=$("vehicleMileage").value;
-v().notes=$("vehicleNotes").value.trim();
+ v().reg=
+  $("vehicleReg").value.trim();
 
-save();
-render();
+ v().mileage=
+  $("vehicleMileage").value;
 
-}
+ v().notes=
+  $("vehicleNotes").value.trim();
+
+ save();
+ render();
+};
 
 
-/* ---------- RECORD PARTS ---------- */
+/* RECORD PARTS */
 
 function resetRecordParts(parts=[]){
 
-$("recordPartsList").innerHTML="";
+ $("recordPartsList").innerHTML="";
 
-(parts.length?parts:[{}]).forEach(p=>addRecordPart(p));
+ (parts.length?parts:[{}])
+  .forEach(p=>addRecordPart(p));
 
 }
 
 
 function addRecordPart(p={}){
 
-let n=$("recordPartsList").children.length;
+ const n=
+  $("recordPartsList").children.length;
 
-let d=document.createElement("div");
+ const d=
+  document.createElement("div");
 
-d.className="part-entry";
+ d.className="part-entry";
 
-d.innerHTML=`
+ d.innerHTML=`
 
-<h3>Part ${n+1}</h3>
+  <h3>Part ${n+1}</h3>
 
-<div class="grid">
+  <div class="grid">
 
-<div>
-<label>Part / product</label>
-<input class="rp-name"
-value="${esc(p.name||"")}"
-placeholder="Oil filter">
-</div>
+   <div>
+    <label>Part / product</label>
+    <input
+     class="rp-name"
+     value="${esc(p.name||"")}"
+     placeholder="Oil filter">
+   </div>
 
-<div>
-<label>Category / type</label>
-<input class="rp-category"
-value="${esc(p.category||"")}"
-placeholder="Filter, oil, brake...">
-</div>
+   <div>
+    <label>Category / type</label>
+    <input
+     class="rp-category"
+     value="${esc(p.category||"")}"
+     placeholder="Filter, oil, brake...">
+   </div>
 
-<div>
-<label>Manufacturer</label>
-<input class="rp-maker"
-value="${esc(p.maker||"")}">
-</div>
+   <div>
+    <label>Manufacturer</label>
+    <input
+     class="rp-maker"
+     value="${esc(p.maker||"")}">
+   </div>
 
-<div>
-<label>Part number</label>
-<input class="rp-number"
-value="${esc(p.number||"")}">
-</div>
+   <div>
+    <label>Part number</label>
+    <input
+     class="rp-number"
+     value="${esc(p.number||"")}">
+   </div>
 
-<div>
-<label>Specification</label>
-<input class="rp-spec"
-value="${esc(p.spec||"")}"
-placeholder="10W-40">
-</div>
+   <div>
+    <label>Specification</label>
+    <input
+     class="rp-spec"
+     value="${esc(p.spec||"")}"
+     placeholder="10W-40">
+   </div>
 
-<div>
-<label>Cost (£)</label>
-<input class="rp-cost"
-type="number"
-min="0"
-step="0.01"
-value="${esc(p.cost||"")}">
-</div>
+   <div>
+    <label>Cost (£)</label>
+    <input
+     class="rp-cost"
+     type="number"
+     min="0"
+     step="0.01"
+     value="${esc(p.cost||"")}">
+   </div>
 
-</div>
+  </div>
 
-<div class="row" style="margin-top:8px">
+  <div
+   class="row"
+   style="margin-top:8px">
 
-<button type="button"
-class="danger"
-onclick="this.closest('.part-entry').remove();renumberRecordParts()">
-Remove part
-</button>
+   <button
+    type="button"
+    class="danger"
+    onclick="
+     this.closest('.part-entry').remove();
+     renumberRecordParts();
+    ">
 
-</div>
-`;
+    Remove part
 
-$("recordPartsList").appendChild(d);
+   </button>
+
+  </div>
+ `;
+
+ $("recordPartsList")
+  .appendChild(d);
 
 }
 
 
 function renumberRecordParts(){
 
-[
-...$("recordPartsList").children
-].forEach((x,i)=>
-x.querySelector("h3").textContent="Part "+(i+1)
-);
+ [...$("recordPartsList").children]
+  .forEach((x,i)=>{
+
+   x.querySelector("h3")
+    .textContent="Part "+(i+1);
+
+  });
 
 }
 
 
 function collectRecordParts(){
 
-return[
-...$("recordPartsList").querySelectorAll(".part-entry")
-].map(x=>({
+ return [
+  ...$("recordPartsList")
+   .querySelectorAll(".part-entry")
+ ].map(x=>({
 
-name:x.querySelector(".rp-name").value.trim(),
+  name:
+   x.querySelector(".rp-name")
+    .value.trim(),
 
-category:x.querySelector(".rp-category").value.trim(),
+  category:
+   x.querySelector(".rp-category")
+    .value.trim(),
 
-maker:x.querySelector(".rp-maker").value.trim(),
+  maker:
+   x.querySelector(".rp-maker")
+    .value.trim(),
 
-number:x.querySelector(".rp-number").value.trim(),
+  number:
+   x.querySelector(".rp-number")
+    .value.trim(),
 
-spec:x.querySelector(".rp-spec").value.trim(),
+  spec:
+   x.querySelector(".rp-spec")
+    .value.trim(),
 
-cost:x.querySelector(".rp-cost").value
+  cost:
+   x.querySelector(".rp-cost")
+    .value
 
-})).filter(x=>x.name);
+ }))
+ .filter(x=>x.name);
 
 }
 
 
-/* ---------- COMPLETE MAINTENANCE JOB ---------- */
+/* COMPLETE A MAINTENANCE TASK */
 
 function completeTask(i){
 
-let t=v().tasks[i];
+ const t=v().tasks[i];
 
-recordTaskIndex=i;
-editingRecord=-1;
+ recordTaskId=t.id;
+ editingRecordId=null;
+ editing=-1;
 
-$("recordForm").reset();
+ $("recordForm").reset();
 
-$("recordHeading").textContent=
-"Record completed: "+t.name;
+ $("recordHeading").textContent=
+  "Record completed: "+t.name;
 
-$("recordJob").value=t.name;
+ $("recordJob").value=t.name;
+ $("recordDate").value=today();
+ $("recordMileage").value=v().mileage||"";
+ $("recordCost").value="";
+ $("recordNotes").value="";
 
-$("recordDate").value=
-new Date().toISOString().slice(0,10);
+ resetRecordParts();
 
-$("recordMileage").value=
-v().mileage||"";
-
-$("recordCost").value="";
-$("recordNotes").value="";
-
-resetRecordParts();
-
-$("recordDlg").showModal();
-
+ $("recordDlg").showModal();
 }
 
 
-/* ---------- NEW HISTORY RECORD ---------- */
+/* MANUAL HISTORY ENTRY */
 
 function newRecord(){
 
-recordTaskIndex=-1;
-editingRecord=-1;
+ recordTaskId=null;
+ editingRecordId=null;
+ editing=-1;
 
-$("recordForm").reset();
+ $("recordForm").reset();
 
-$("recordHeading").textContent=
-"Record completed work";
+ $("recordHeading").textContent=
+  "Record completed work";
 
-$("recordDate").value=
-new Date().toISOString().slice(0,10);
+ $("recordDate").value=today();
 
-resetRecordParts();
+ resetRecordParts();
 
-$("recordDlg").showModal();
-
+ $("recordDlg").showModal();
 }
 
 
-/* ---------- SAVE HISTORY RECORD ---------- */
+/* SAVE HISTORY */
 
 $("recordForm").onsubmit=()=>{
 
-let r={
+ const vehicle=v();
 
-job:$("recordJob").value.trim(),
+ const enteredParts=
+  collectRecordParts();
 
-date:$("recordDate").value,
+ const oldRecord=
+  editingRecordId
+  ?historyById(editingRecordId)
+  :null;
 
-mileage:$("recordMileage").value,
+ const recordId=
+  oldRecord?.id||
+  uid("history");
 
-cost:$("recordCost").value,
+ /*
+  If editing an existing record, keep its existing
+  task link unless we're explicitly completing a task.
+ */
 
-parts:collectRecordParts(),
+ const taskId=
+  recordTaskId ||
+  oldRecord?.taskId ||
+  null;
 
-notes:$("recordNotes").value.trim()
+ const r={
+
+  id:recordId,
+
+  taskId:taskId,
+
+  job:
+   $("recordJob").value.trim(),
+
+  date:
+   $("recordDate").value,
+
+  mileage:
+   $("recordMileage").value,
+
+  cost:
+   $("recordCost").value,
+
+  notes:
+   $("recordNotes").value.trim(),
+
+  partIds:[]
+
+ };
+
+
+ /*
+  Find the existing position if editing.
+ */
+
+ let historyIndex=-1;
+
+ if(oldRecord){
+
+  historyIndex=
+   vehicle.history.findIndex(
+    x=>x.id===oldRecord.id
+   );
+
+ }
+
+
+ /*
+  Remove old Parts & Oils entries that belong
+  specifically to this history record.
+
+  They will be recreated below from the edited
+  parts list, preventing duplicates.
+ */
+
+ if(oldRecord){
+
+  vehicle.parts=
+   vehicle.parts.filter(
+    p=>p.historyId!==oldRecord.id
+   );
+
+ }
+
+
+ /*
+  Create the linked Parts & Oils records.
+ */
+
+ enteredParts.forEach(p=>{
+
+  const linkedPart={
+
+   id:uid("part"),
+
+   name:p.name,
+
+   date:r.date,
+
+   mileage:r.mileage,
+
+   category:p.category,
+
+   maker:p.maker,
+
+   number:p.number,
+
+   cost:p.cost,
+
+   spec:p.spec,
+
+   notes:
+    "From maintenance: "+r.job,
+
+   taskId:r.taskId,
+
+   historyId:r.id
+
+  };
+
+  vehicle.parts.push(linkedPart);
+
+  r.partIds.push(
+   linkedPart.id
+  );
+
+ });
+
+
+ /*
+  Save or replace the History record.
+ */
+
+ if(historyIndex>=0){
+
+  vehicle.history[historyIndex]=r;
+
+ }else{
+
+  vehicle.history.push(r);
+
+ }
+
+
+ /*
+  Update current mileage if the recorded mileage
+  is higher than the vehicle mileage.
+ */
+
+ if(
+  r.mileage &&
+  Number(r.mileage)>
+  Number(vehicle.mileage||0)
+ ){
+
+  vehicle.mileage=r.mileage;
+
+ }
+
+
+ /*
+  Update the matching maintenance task's
+  last completed date and mileage.
+ */
+
+ if(r.taskId){
+
+  const t=taskById(r.taskId);
+
+  if(t){
+
+   t.date=r.date;
+
+   t.lastMiles=
+    r.mileage||
+    t.lastMiles||
+    "";
+
+  }
+
+ }
+
+
+ editing=-1;
+ editingRecordId=null;
+ recordTaskId=null;
+
+ save();
+ render();
 
 };
 
 
-/* Save / replace history */
-
-if(editingRecord<0)
-v().history.push(r);
-else
-v().history[editingRecord]=r;
-
-
-/* Update vehicle mileage */
-
-if(
-r.mileage &&
-Number(r.mileage)>Number(v().mileage||0)
-)
-v().mileage=r.mileage;
-
-
-/* Update maintenance task */
-
-if(recordTaskIndex>=0){
-
-let t=v().tasks[recordTaskIndex];
-
-t.date=r.date;
-
-t.lastMiles=
-r.mileage||
-t.lastMiles||
-"";
-
-}
-
-
-/* Link each part to the maintenance job
-   and the history entry */
-
-let historyIndex=
-editingRecord<0
-?v().history.length-1
-:editingRecord;
-
-
-/* Remove old Parts & Oils entries that
-   belong to this history record when editing */
-
-if(editingRecord>=0){
-
-v().parts=
-(v().parts||[]).filter(
-p=>p.historyIndex!==editingRecord
-);
-
-}
-
-
-/* Add the parts into Parts & Oils */
-
-r.parts.forEach(p=>{
-
-v().parts.push({
-
-name:p.name,
-
-date:r.date,
-
-mileage:r.mileage,
-
-category:p.category,
-
-maker:p.maker,
-
-number:p.number,
-
-cost:p.cost,
-
-spec:p.spec,
-
-notes:"From maintenance: "+r.job,
-
-taskName:r.job,
-
-taskIndex:recordTaskIndex,
-
-historyIndex:historyIndex
-
-});
-
-});
-
-
-editingRecord=-1;
-recordTaskIndex=-1;
-
-save();
-render();
-
-}
-
-
-/* ---------- EDIT HISTORY ---------- */
+/* EDIT HISTORY */
 
 function editRecord(i){
 
-let r=v().history[i];
+ const r=v().history[i];
 
-editingRecord=i;
-recordTaskIndex=-1;
+ editingRecordId=r.id;
+ recordTaskId=r.taskId||null;
+ editing=-1;
 
-$("recordHeading").textContent=
-"Edit maintenance record";
+ $("recordHeading").textContent=
+  "Edit maintenance record";
 
-$("recordJob").value=r.job||"";
-$("recordDate").value=r.date||"";
-$("recordMileage").value=r.mileage||"";
-$("recordCost").value=r.cost||"";
-$("recordNotes").value=r.notes||"";
+ $("recordJob").value=
+  r.job||"";
 
-resetRecordParts(r.parts||[]);
+ $("recordDate").value=
+  r.date||"";
 
-$("recordDlg").showModal();
+ $("recordMileage").value=
+  r.mileage||"";
 
+ $("recordCost").value=
+  r.cost||"";
+
+ $("recordNotes").value=
+  r.notes||"";
+
+
+ /*
+  Load linked Parts & Oils back into
+  the history editor.
+ */
+
+ const linked=
+  linkedPartsForHistory(r.id);
+
+ const editParts=
+  linked.length
+  ?linked
+  :(Array.isArray(r.parts)?r.parts:[]);
+
+ resetRecordParts(editParts);
+
+ $("recordDlg").showModal();
 }
 
 
-/* ---------- DELETE HISTORY ---------- */
+/* DELETE HISTORY */
 
 function deleteRecord(i){
 
-if(confirm(
-"Are you sure you want to delete this maintenance history entry?\n\n"+
-"The history entry and its linked Parts & Oils entries will be removed."
-)){
+ const r=v().history[i];
 
-v().history.splice(i,1);
+ const linked=
+  linkedPartsForHistory(r.id);
 
-/* Remove linked parts */
+ let message=
+  "Are you sure you want to delete this maintenance history entry?";
 
-v().parts=
-(v().parts||[]).filter(
-p=>p.historyIndex!==i
-);
+ if(linked.length){
 
-/* Repair history indexes after deletion */
+  message+=
+   "\n\nThe Parts & Oils entries linked to this completed job will also be removed.";
 
-(v().parts||[]).forEach(p=>{
+ }
 
-if(
-p.historyIndex!==undefined &&
-p.historyIndex>i
-)
-p.historyIndex--;
+ if(!confirm(message)){
+  return;
+ }
 
-});
+ v().parts=
+  v().parts.filter(
+   p=>p.historyId!==r.id
+  );
 
-save();
-render();
+ v().history.splice(i,1);
 
-}
+ save();
+ render();
 
 }
 
 
-/* ---------- PARTS PAGE ---------- */
+/* PART / OIL */
 
 function newPart(){
 
-editingPart=-1;
+ editingPart=-1;
 
-$("partForm").reset();
+ $("partForm").reset();
 
-$("partHeading").textContent=
-"Add part / oil";
+ $("partHeading").textContent=
+  "Add part / oil";
 
-$("partDate").value=
-new Date().toISOString().slice(0,10);
+ $("partDate").value=today();
 
-$("partDlg").showModal();
-
+ $("partDlg").showModal();
 }
 
 
 function editPart(i){
 
-editingPart=i;
+ editingPart=i;
 
-let p=v().parts[i];
+ const p=v().parts[i];
 
-$("partHeading").textContent=
-"Edit part / oil";
+ $("partHeading").textContent=
+  "Edit part / oil";
 
-$("partName").value=p.name||"";
-$("partDate").value=p.date||"";
-$("partMileage").value=p.mileage||"";
-$("partCategory").value=p.category||"";
-$("partMaker").value=p.maker||"";
-$("partNumber").value=p.number||"";
-$("partCost").value=p.cost||"";
-$("partSpec").value=p.spec||"";
-$("partNotes").value=p.notes||"";
+ $("partName").value=p.name||"";
+ $("partDate").value=p.date||"";
+ $("partMileage").value=p.mileage||"";
+ $("partCategory").value=p.category||"";
+ $("partMaker").value=p.maker||"";
+ $("partNumber").value=p.number||"";
+ $("partCost").value=p.cost||"";
+ $("partSpec").value=p.spec||"";
+ $("partNotes").value=p.notes||"";
 
-$("partDlg").showModal();
-
+ $("partDlg").showModal();
 }
 
 
 $("partForm").onsubmit=()=>{
 
-let old=
-editingPart>=0
-?v().parts[editingPart]
-:null;
+ const old=
+  editingPart>=0
+  ?v().parts[editingPart]
+  :null;
 
-let p={
+ const p={
 
-name:$("partName").value.trim(),
+  id:old?.id||uid("part"),
 
-date:$("partDate").value,
+  name:
+   $("partName").value.trim(),
 
-mileage:$("partMileage").value,
+  date:
+   $("partDate").value,
 
-category:$("partCategory").value.trim(),
+  mileage:
+   $("partMileage").value,
 
-maker:$("partMaker").value.trim(),
+  category:
+   $("partCategory").value.trim(),
 
-number:$("partNumber").value.trim(),
+  maker:
+   $("partMaker").value.trim(),
 
-cost:$("partCost").value,
+  number:
+   $("partNumber").value.trim(),
 
-spec:$("partSpec").value.trim(),
+  cost:
+   $("partCost").value,
 
-notes:$("partNotes").value.trim(),
+  spec:
+   $("partSpec").value.trim(),
 
-/* Preserve links */
+  notes:
+   $("partNotes").value.trim(),
 
-taskName:old?.taskName||"",
+  /*
+   Preserve its links when a linked
+   part is edited directly.
+  */
 
-taskIndex:old?.taskIndex,
+  taskId:
+   old?.taskId||null,
 
-historyIndex:old?.historyIndex
+  historyId:
+   old?.historyId||null
+
+ };
+
+
+ if(editingPart<0){
+
+  v().parts.push(p);
+
+ }else{
+
+  v().parts[editingPart]=p;
+
+ }
+
+
+ /*
+  Keep the History record's list of linked
+  part IDs correct.
+ */
+
+ if(p.historyId){
+
+  const r=historyById(p.historyId);
+
+  if(r){
+
+   if(!Array.isArray(r.partIds)){
+    r.partIds=[];
+   }
+
+   if(!r.partIds.includes(p.id)){
+    r.partIds.push(p.id);
+   }
+
+  }
+
+ }
+
+
+ editingPart=-1;
+
+ save();
+ render();
 
 };
-
-if(editingPart<0)
-v().parts.push(p);
-else
-v().parts[editingPart]=p;
-
-editingPart=-1;
-
-save();
-render();
-
-}
 
 
 function deletePart(i){
 
-if(confirm(
-"Are you sure you want to delete this part/oil entry?"
-)){
+ const p=v().parts[i];
 
-v().parts.splice(i,1);
+ let message=
+  "Are you sure you want to delete this part/oil entry?";
 
-save();
-render();
+ if(p.historyId||p.taskId){
 
-}
+  message+=
+   "\n\nIt will also disappear from its linked Maintenance and History records.";
 
-}
+ }
 
-
-/* ---------- LINKS BETWEEN SECTIONS ---------- */
-
-
-/* Open Parts from a maintenance task */
-
-function openTaskParts(taskIndex){
-
-tab="parts";
-render();
-
-/* Highlight isn't necessary; the linked parts
-   are shown against their maintenance job. */
-
-}
+ if(!confirm(message)){
+  return;
+ }
 
 
-/* Open Parts from a task's part button */
+ /*
+  Remove the part reference from History.
+ */
 
-function openPartFromTask(taskIndex,name){
+ if(p.historyId){
 
-tab="parts";
-render();
+  const r=historyById(p.historyId);
 
-}
+  if(r&&Array.isArray(r.partIds)){
+
+   r.partIds=
+    r.partIds.filter(
+     id=>id!==p.id
+    );
+
+  }
+
+ }
 
 
-/* Open task from Parts page */
+ v().parts.splice(i,1);
 
-function openTaskByName(name){
-
-let i=v().tasks.findIndex(
-t=>t.name===name
-);
-
-if(i>=0){
-
-tab="maintenance";
-render();
-
-}
+ save();
+ render();
 
 }
 
 
-/* Open history record from Parts page */
-
-function openHistory(i){
-
-if(
-i<0 ||
-i>=v().history.length
-)return;
-
-tab="history";
-render();
-
-}
-
-
-/* Open Parts from a history record */
-
-function openHistoryParts(i){
-
-tab="parts";
-render();
-
-}
-
-
-/* Open an individual linked part from history */
-
-function openHistoryPart(historyIndex,partIndex){
-
-let r=v().history[historyIndex];
-
-if(!r||!r.parts||!r.parts[partIndex])
-return;
-
-let part=r.parts[partIndex];
-
-let actualIndex=
-(v().parts||[]).findIndex(
-p=>
-p.historyIndex===historyIndex &&
-p.name===part.name
-);
-
-if(actualIndex>=0){
-
-editingPart=actualIndex;
-
-editPart(actualIndex);
-
-}else{
-
-tab="parts";
-render();
-
-}
-
-}
-
-
-/* ---------- NAVIGATION ---------- */
+/* NAVIGATION */
 
 function openV(id){
 
-current=id;
-tab="maintenance";
+ if(!findVehicle(id)){
 
-render();
+  console.warn(
+   "Vehicle not found:",
+   id
+  );
 
+  return;
+ }
+
+ current=id;
+ tab="maintenance";
+
+ focusPartId=null;
+ focusTaskId=null;
+ focusHistoryId=null;
+
+ render();
 }
+
 
 $("back").onclick=()=>{
 
-current=null;
-render();
+ current=null;
+
+ focusPartId=null;
+ focusTaskId=null;
+ focusHistoryId=null;
+
+ render();
 
 };
 
 
-/* ---------- BACKUP ---------- */
+/* BACKUP */
 
 function backup(){
 
-let a=document.createElement("a");
+ const a=
+  document.createElement("a");
 
-a.href=URL.createObjectURL(
-new Blob(
-[JSON.stringify(db,null,2)],
-{type:"application/json"}
-)
-);
+ a.href=
+  URL.createObjectURL(
+   new Blob(
+    [JSON.stringify(db,null,2)],
+    {type:"application/json"}
+   )
+  );
 
-a.download="my-garage-backup.json";
+ a.download=
+  "my-garage-backup.json";
 
-a.click();
+ a.click();
+
+ setTimeout(
+  ()=>URL.revokeObjectURL(a.href),
+  1000
+ );
 
 }
 
 
-/* ---------- RESTORE ---------- */
+/* RESTORE */
 
 function restore(){
 
-let i=document.createElement("input");
+ const i=
+  document.createElement("input");
 
-i.type="file";
-i.accept=".json";
+ i.type="file";
+ i.accept=".json";
 
-i.onchange=()=>{
+ i.onchange=()=>{
 
-let r=new FileReader();
+  const r=
+   new FileReader();
 
-r.onload=()=>{
+  r.onload=()=>{
 
-try{
+   try{
 
-db=JSON.parse(r.result);
+    const parsed=
+     JSON.parse(r.result);
 
-save();
+    const fixed=
+     normaliseDatabase(parsed);
 
-current=null;
+    if(!fixed){
+     throw new Error(
+      "Invalid backup format"
+     );
+    }
 
-render();
+    db=fixed;
 
-alert("Backup restored.");
+    localStorage.setItem(
+     KEY,
+     JSON.stringify(db)
+    );
 
-}catch(e){
+    current=null;
 
-alert("Invalid backup.");
+    render();
+    save();
 
-}
+    alert(
+     "Backup restored and repaired."
+    );
 
-};
+   }catch(e){
 
-r.readAsText(i.files[0]);
+    alert(
+     "Invalid backup. Nothing was changed."
+    );
 
-};
+    console.error(e);
 
-i.click();
+   }
 
-}
+  };
 
+  if(i.files[0]){
+   r.readAsText(i.files[0]);
+  }
 
-/* ---------- SUPABASE LOAD ---------- */
+ };
 
-async function loadFromSupabase(){
-
-try{
-
-const response=await fetch(
-`${SUPABASE_URL}/rest/v1/garage_data?id=eq.1&select=data`,
-{
-headers:{
-"apikey":SUPABASE_KEY,
-"Authorization":`Bearer ${SUPABASE_KEY}`
-}
-}
-);
-
-if(!response.ok){
-
-console.error(
-"Supabase load error:",
-response.status,
-await response.text()
-);
-
-return;
-
-}
-
-const rows=await response.json();
-
-if(
-rows.length &&
-rows[0].data
-){
-
-const cloudData=rows[0].data;
-
-if(
-Array.isArray(cloudData) &&
-cloudData.length>0
-){
-
-db=cloudData;
-
-localStorage.setItem(
-KEY,
-JSON.stringify(db)
-);
-
-}
-
-}
-
-}catch(e){
-
-console.error(
-"Supabase load failed:",
-e
-);
-
-}
-
+ i.click();
 }
 
 
-/* ---------- START ---------- */
+/* START APP */
 
 async function startApp(){
 
-await loadFromSupabase();
+ /*
+  Show local data immediately.
+ */
 
-render();
+ render();
+
+ /*
+  Then load cloud data and repair/link older
+  maintenance/history/parts data.
+ */
+
+ const loaded=
+  await loadFromSupabase();
+
+ if(loaded){
+
+  render();
+
+  /*
+   Save the normalised linked structure back
+   to Supabase so the new IDs and links persist.
+  */
+
+  await save();
+
+ }
 
 }
+
 
 startApp();
 
