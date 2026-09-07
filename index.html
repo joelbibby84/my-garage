@@ -276,6 +276,9 @@ dialog::backdrop{
     <label>Due mileage</label>
     <input id="taskMileage" type="number" placeholder="Optional">
 
+    <label>Notes / details</label>
+    <textarea id="taskNotes" placeholder="Anything you need to remember about this task"></textarea>
+
     <div class="dialogButtons">
       <button class="btn secondary" onclick="taskDialog.close()">Cancel</button>
       <button class="btn green" onclick="saveTask()">Save</button>
@@ -633,6 +636,12 @@ function maintenance(){
               : ""
             }
 
+${
+  task.notes
+  ? `<div class="itemMeta">Notes: ${esc(task.notes)}</div>`
+  : ""
+}
+
             ${
               task.mileage
               ? `<div class="itemMeta">Due mileage: ${esc(task.mileage)}</div>`
@@ -822,6 +831,7 @@ function openTaskDialog(){
   $("taskName").value="";
   $("taskDate").value="";
   $("taskMileage").value="";
+  $("taskNotes").value="";
 
   $("taskDialog").showModal();
 }
@@ -837,6 +847,7 @@ function editTask(index){
   $("taskName").value=task.name || "";
   $("taskDate").value=task.date || "";
   $("taskMileage").value=task.mileage || "";
+  $("taskNotes").value=task.notes || "";
 
   $("taskDialog").showModal();
 }
@@ -848,7 +859,8 @@ function saveTask(){
   const task={
     name:$("taskName").value.trim(),
     date:$("taskDate").value,
-    mileage:$("taskMileage").value.trim()
+    mileage:$("taskMileage").value.trim(),
+    notes:$("taskNotes").value.trim()
   };
 
   if(!task.name){
