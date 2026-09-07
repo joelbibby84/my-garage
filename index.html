@@ -21,7 +21,7 @@ header{
  padding:16px;
  position:sticky;
  top:0;
- z-index:2
+ z-index:20
 }
 main{max-width:760px;margin:auto;padding:14px}
 
@@ -218,6 +218,102 @@ dialog::backdrop{background:#0007}
  outline-offset:2px
 }
 
+
+/* DASHBOARD */
+
+.dashboard-grid{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:10px;
+ margin-top:12px
+}
+
+.dashboard-stat{
+ background:#f3f4f6;
+ border-radius:14px;
+ padding:13px
+}
+
+.dashboard-stat .number{
+ font-size:27px;
+ font-weight:800;
+ line-height:1
+}
+
+.dashboard-stat .label{
+ font-size:13px;
+ color:#68707c;
+ margin-top:5px
+}
+
+.dashboard-stat.alert{
+ background:#fee2e2;
+ color:#991b1b
+}
+
+.dashboard-stat.warning{
+ background:#ffedd5;
+ color:#9a3412
+}
+
+.dashboard-item{
+ padding:11px 0;
+ border-top:1px solid #e5e7eb;
+ cursor:pointer
+}
+
+.dashboard-item:first-of-type{
+ border-top:0
+}
+
+.dashboard-item h3{
+ font-size:16px
+}
+
+.dashboard-item .vehicle-name{
+ font-size:13px;
+ color:#68707c;
+ margin-top:3px
+}
+
+.dashboard-item .due-line{
+ font-size:14px;
+ margin-top:5px
+}
+
+.refresh-hint{
+ text-align:center;
+ color:#68707c;
+ font-size:12px;
+ padding:3px 0 7px
+}
+
+
+/* PULL TO REFRESH */
+
+#pullRefreshIndicator{
+ position:fixed;
+ left:50%;
+ top:72px;
+ transform:translate(-50%,-80px);
+ z-index:50;
+ background:#20242b;
+ color:#fff;
+ border-radius:999px;
+ padding:8px 14px;
+ font-size:13px;
+ font-weight:700;
+ box-shadow:0 3px 12px #0003;
+ opacity:0;
+ transition:transform .18s ease,opacity .18s ease;
+ pointer-events:none
+}
+
+#pullRefreshIndicator.show{
+ transform:translate(-50%,0);
+ opacity:1
+}
+
 @media(max-width:520px){
  .grid{grid-template-columns:1fr}
 }
@@ -232,6 +328,8 @@ dialog::backdrop{background:#0007}
   <h1 id="title">My Garage</h1>
  </div>
 </header>
+
+<div id="pullRefreshIndicator">Pull down to refresh</div>
 
 <main id="app"></main>
 
@@ -943,9 +1041,7 @@ async function supabaseRequest(url,options={}){
 }
 
 
-/*
- CLOUD SAVE
-*/
+/* CLOUD SAVE */
 
 async function save(){
 
@@ -1021,26 +1117,6 @@ async function save(){
    return false;
   }
 
-
-  if(
-   Array.isArray(result.body) &&
-   result.body.length===1 &&
-   Number(result.body[0].id)===CLOUD_ID
-  ){
-
-   showStatus(
-    "Saved to cloud ✓",
-    "ok"
-   );
-
-   return true;
-  }
-
-
-  console.warn(
-   "Supabase save succeeded but returned an unexpected response:",
-   result.body
-  );
 
   showStatus(
    "Saved to cloud ✓",
@@ -1160,9 +1236,7 @@ function calc(t){
 }
 
 
-function status(t){
-
- const vehicle=v();
+function statusForVehicle(vehicle,t){
 
  if(!vehicle){
   return{
@@ -1203,6 +1277,11 @@ function status(t){
     :"OK"
  };
 
+}
+
+
+function status(t){
+ return statusForVehicle(v(),t);
 }
 
 
@@ -1249,6 +1328,225 @@ function linkedHistoryForTask(taskId){
 }
 
 
+/* DASHBOARD */
+
+function getDashboardItems(){
+
+ const items=[];
+
+ db.forEach(vehicle=>{
+
+  vehicle.tasks.forEach(task=>{
+
+   const s=statusForVehicle(vehicle,task);
+   const c=calc(task);
+
+   const currentMiles=
+    vehicle.mileage===""
+    ?null
+    :Number(vehicle.mileage);
+
+   const mileGap=
+    c.m&&currentMiles!=null
+    ?c.m-currentMiles
+    :999999999;
+
+   const dateTime=
+    c.d
+    ?c.d.getTime()
+    :9999999999999;
+
+   let priority=3;
+
+   if(s.od){
+    priority=0;
+   }else if(s.so){
+    priority=1;
+   }else if(c.d||c.m){
+    priority=2;
+   }
+
+   items.push({
+    vehicle,
+    task,
+    status:s,
+    priority,
+    dateTime,
+    mileGap
+   });
+
+  });
+
+ });
+
+ items.sort((a,b)=>{
+
+  if(a.priority!==b.priority){
+   return a.priority-b.priority;
+  }
+
+  if(a.dateTime!==b.dateTime){
+   return a.dateTime-b.dateTime;
+  }
+
+  return a.mileGap-b.mileGap;
+
+ });
+
+ return items;
+}
+
+
+function dashboard(){
+
+ const items=getDashboardItems();
+
+ const total=items.length;
+
+ const overdue=
+  items.filter(x=>x.status.od).length;
+
+ const soon=
+  items.filter(x=>x.status.so).length;
+
+ const scheduled=
+  items.filter(
+   x=>calc(x.task).d||calc(x.task).m
+  );
+
+ const upcoming=
+  scheduled.slice(0,5);
+
+ return `
+
+ <div class="card">
+
+  <div class="row between">
+
+   <div>
+    <h2>Garage Dashboard</h2>
+    <p class="muted" style="margin-top:5px">
+     Maintenance across all your vehicles.
+    </p>
+   </div>
+
+   <span style="font-size:30px">🛠️</span>
+
+  </div>
+
+  <div class="dashboard-grid">
+
+   <div class="dashboard-stat ${overdue?"alert":""}">
+    <div class="number">${overdue}</div>
+    <div class="label">Overdue</div>
+   </div>
+
+   <div class="dashboard-stat ${soon?"warning":""}">
+    <div class="number">${soon}</div>
+    <div class="label">Due soon</div>
+   </div>
+
+   <div class="dashboard-stat">
+    <div class="number">${total}</div>
+    <div class="label">Maintenance tasks</div>
+   </div>
+
+   <div class="dashboard-stat">
+    <div class="number">${db.length}</div>
+    <div class="label">Vehicles</div>
+   </div>
+
+  </div>
+
+ </div>
+
+
+ <div class="card">
+
+  <div class="row between">
+
+   <div>
+    <h2>Coming up</h2>
+    <p class="muted" style="margin-top:4px">
+     Your next maintenance jobs.
+    </p>
+   </div>
+
+  </div>
+
+  ${
+   upcoming.length
+
+   ?upcoming.map(x=>`
+
+    <div
+     class="dashboard-item"
+     onclick="openDashboardTask('${x.vehicle.id}','${x.task.id}')">
+
+     <div class="row between">
+
+      <div>
+
+       <h3>
+        ${esc(x.task.name)}
+       </h3>
+
+       <div class="vehicle-name">
+        ${x.vehicle.emoji}
+        ${esc(x.vehicle.name)}
+       </div>
+
+      </div>
+
+      <span
+       class="badge
+       ${x.status.od?"overdue":x.status.so?"soon":"ok"}">
+
+       ${x.status.label}
+
+      </span>
+
+     </div>
+
+     <div class="due-line">
+      <b>Next due:</b>
+      ${esc(due(x.task))}
+     </div>
+
+    </div>
+
+   `).join("")
+
+   :`
+
+    <div class="empty">
+     No scheduled maintenance yet.
+    </div>
+
+   `
+  }
+
+ </div>
+
+ `;
+}
+
+
+function openDashboardTask(vehicleId,taskId){
+
+ current=vehicleId;
+ tab="maintenance";
+
+ focusTaskId=taskId;
+ focusPartId=null;
+ focusHistoryId=null;
+
+ render();
+}
+
+
+/* MAIN RENDER */
+
 function render(){
 
  const vehicle=v();
@@ -1263,12 +1561,25 @@ function render(){
   $("title").textContent="My Garage";
 
   $("app").innerHTML=
+
+   `<div class="refresh-hint">
+     Pull down from the top to refresh cloud data
+    </div>`
+
+   +
+
+   dashboard()
+
+   +
+
    `<div class="card">
      <h2>Your vehicles</h2>
      <p class="muted" style="margin-top:5px">
       Tap a vehicle to manage it.
      </p>
-    </div>`+
+    </div>`
+
+   +
 
    db.map(x=>
     `<div class="card vehicle"
@@ -1293,7 +1604,9 @@ function render(){
       </div>
 
      </div>`
-   ).join("")+
+   ).join("")
+
+   +
 
    `<div class="card">
      <h3>Backup</h3>
@@ -1325,7 +1638,11 @@ function render(){
 
  $("app").innerHTML=
 
-  `<div class="card">
+  `<div class="refresh-hint">
+    Pull down from the top to refresh cloud data
+   </div>
+
+   <div class="card">
 
     <div class="row between">
 
@@ -3158,6 +3475,168 @@ function restore(){
 
  i.click();
 }
+
+
+/* PULL TO REFRESH */
+
+let pullStartY=null;
+let pullDistance=0;
+let pullRefreshing=false;
+
+const pullIndicator=
+ document.getElementById(
+  "pullRefreshIndicator"
+ );
+
+
+async function refreshFromCloud(){
+
+ if(pullRefreshing){
+  return;
+ }
+
+ pullRefreshing=true;
+
+ pullIndicator.textContent=
+  "Refreshing…";
+
+ pullIndicator.classList.add("show");
+
+ const loaded=
+  await loadFromSupabase();
+
+ render();
+
+ if(loaded){
+
+  showStatus(
+   "Refreshed from cloud ✓",
+   "ok"
+  );
+
+ }else{
+
+  showStatus(
+   "Could not refresh cloud data",
+   "error"
+  );
+
+ }
+
+ setTimeout(()=>{
+
+  pullIndicator.classList.remove("show");
+  pullIndicator.textContent=
+   "Pull down to refresh";
+
+  pullRefreshing=false;
+
+ },700);
+
+}
+
+
+document.addEventListener(
+ "touchstart",
+ e=>{
+
+  if(pullRefreshing){
+   return;
+  }
+
+  if(
+   document.querySelector(
+    "dialog[open]"
+   )
+  ){
+   return;
+  }
+
+  if(
+   window.scrollY<=0 &&
+   e.touches.length===1
+  ){
+
+   pullStartY=
+    e.touches[0].clientY;
+
+   pullDistance=0;
+
+  }
+
+ },
+ {passive:true}
+);
+
+
+document.addEventListener(
+ "touchmove",
+ e=>{
+
+  if(
+   pullStartY===null ||
+   !e.touches.length
+  ){
+   return;
+  }
+
+  const distance=
+   e.touches[0].clientY-
+   pullStartY;
+
+  if(distance<=0){
+   return;
+  }
+
+  pullDistance=distance;
+
+  if(distance>20){
+
+   pullIndicator.classList.add(
+    "show"
+   );
+
+   pullIndicator.textContent=
+    distance>=80
+    ?"Release to refresh"
+    :"Pull down to refresh";
+
+  }
+
+ },
+ {passive:true}
+);
+
+
+document.addEventListener(
+ "touchend",
+ async()=>{
+
+  if(pullStartY===null){
+   return;
+  }
+
+  const shouldRefresh=
+   pullDistance>=80;
+
+  pullStartY=null;
+  pullDistance=0;
+
+  if(shouldRefresh){
+
+   await refreshFromCloud();
+
+  }else{
+
+   pullIndicator.classList.remove(
+    "show"
+   );
+
+  }
+
+ },
+ {passive:true}
+);
 
 
 /* START APP */
