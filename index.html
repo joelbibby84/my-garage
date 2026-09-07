@@ -585,11 +585,6 @@ function normaliseVehicle(x,base){
    :[]
  };
 
- /*
-  Link old history records to maintenance jobs
-  where possible.
- */
-
  vehicle.history.forEach(r=>{
 
   if(!r.taskId){
@@ -606,11 +601,6 @@ function normaliseVehicle(x,base){
 
  });
 
-
- /*
-  Try to recognise old Parts & Oils records that
-  were previously created from maintenance jobs.
- */
 
  vehicle.parts.forEach(p=>{
 
@@ -688,11 +678,6 @@ function normaliseVehicle(x,base){
 
  });
 
-
- /*
-  Convert existing History parts into linked
-  Parts & Oils entries if they aren't already linked.
- */
 
  vehicle.history.forEach(r=>{
 
@@ -772,11 +757,6 @@ function normaliseVehicle(x,base){
   });
 
 
-  /*
-   Also include master parts already linked to
-   this history record.
-  */
-
   vehicle.parts
    .filter(p=>p.historyId===r.id)
    .forEach(p=>{
@@ -789,11 +769,6 @@ function normaliseVehicle(x,base){
 
  });
 
-
- /*
-  Make sure each linked part knows its task
-  when its history entry knows the task.
- */
 
  vehicle.parts.forEach(p=>{
 
@@ -968,10 +943,25 @@ async function supabaseRequest(url,options={}){
 }
 
 
+/*
+ CLOUD SAVE
+
+ This deliberately uses PATCH on the existing
+ garage_data row with id=1.
+
+ This is the same type of update used by the
+ earlier working version of My Garage.
+*/
+
 async function save(){
 
- db=normaliseDatabase(db)||
-    starter.map(x=>blankVehicle(x));
+ db=
+  normaliseDatabase(db) ||
+  starter.map(x=>blankVehicle(x));
+
+ /*
+  Always keep a local copy first.
+ */
 
  localStorage.setItem(
   KEY,
@@ -980,39 +970,161 @@ async function save(){
 
  try{
 
-  const payload=JSON.stringify({
-   id:CLOUD_ID,
-   data:db
-  });
+  const result=
+   await supabaseRequest(
+    `${SUPABASE_URL}/rest/v1/garage_data?id=eq.${CLOUD_ID}`,
+    {
+     method:"PATCH",
 
-  const result=await supabaseRequest(
-   `${SUPABASE_URL}/rest/v1/garage_data`,
-   {
-    method:"POST",
-    headers:{
-     "Prefer":"resolution=merge-duplicates,return=representation"
-    },
-    body:payload
-   }
-  );
+     headers:{
+      "Prefer":"return=representation"
+     },
 
-  if(result.response.ok){
-   showStatus("Saved to cloud","ok");
-   return true;
+     body:JSON.stringify({
+      data:db
+     })
+    }
+   );
+
+
+  /*
+   HTTP failure.
+  */
+
+  if(!result.response.ok){
+
+   console.error(
+    "Supabase save error:",
+    result.response.status,
+    result.body
+   );
+
+   showStatus(
+    "Saved on this device, but cloud save failed",
+    "error"
+   );
+
+   return false;
   }
 
-  console.error(
-   "Supabase save error:",
-   result.response.status,
-   result.body
-  );
+
+  /*
+   PATCH succeeded but did not actually update a row.
+   With return=representation, a successful update
+   should return the row that was changed.
+  */
+
+  if(
+   Array.isArray(result.body) &&
+   result.body.length===0
+  ){
+
+   console.error(
+    "Supabase save returned no updated row."
+   );
+
+   showStatus(
+    "Saved on this device, but cloud row was not updated",
+    "error"
+   );
+
+   return false;
+  }
+
+
+  /*
+   Read the cloud row straight back.
+
+   This makes sure we don't say "Saved to cloud"
+   unless Supabase really contains the new data.
+  */
+
+  const verify=
+   await supabaseRequest(
+    `${SUPABASE_URL}/rest/v1/garage_data?id=eq.${CLOUD_ID}&select=data`,
+    {
+     method:"GET"
+    }
+   );
+
+
+  if(!verify.response.ok){
+
+   console.error(
+    "Cloud verification failed:",
+    verify.response.status,
+    verify.body
+   );
+
+   showStatus(
+    "Cloud save could not be verified",
+    "error"
+   );
+
+   return false;
+  }
+
+
+  const rows=
+   Array.isArray(verify.body)
+   ?verify.body
+   :[];
+
+
+  if(
+   !rows.length ||
+   !rows[0] ||
+   !Array.isArray(rows[0].data)
+  ){
+
+   console.error(
+    "Cloud verification returned no garage data.",
+    verify.body
+   );
+
+   showStatus(
+    "Cloud save could not be verified",
+    "error"
+   );
+
+   return false;
+  }
+
+
+  /*
+   Compare the cloud data with what we just saved.
+  */
+
+  const cloudFixed=
+   normaliseDatabase(rows[0].data);
+
+
+  if(
+   !cloudFixed ||
+   JSON.stringify(cloudFixed)!==
+   JSON.stringify(db)
+  ){
+
+   console.error(
+    "Cloud data does not match this device after save."
+   );
+
+   showStatus(
+    "Cloud data did not update correctly",
+    "error"
+   );
+
+   return false;
+  }
+
 
   showStatus(
-   "Saved on this device, but cloud save failed",
-   "error"
+   "Saved to cloud",
+   "ok"
   );
 
-  return false;
+  return true;
+
 
  }catch(e){
 
@@ -1027,7 +1139,6 @@ async function save(){
   );
 
   return false;
-
  }
 
 }
@@ -2599,11 +2710,6 @@ $("recordForm").onsubmit=()=>{
   oldRecord?.id||
   uid("history");
 
- /*
-  If editing an existing record, keep its existing
-  task link unless we're explicitly completing a task.
- */
-
  const taskId=
   recordTaskId ||
   oldRecord?.taskId ||
@@ -2635,10 +2741,6 @@ $("recordForm").onsubmit=()=>{
  };
 
 
- /*
-  Find the existing position if editing.
- */
-
  let historyIndex=-1;
 
  if(oldRecord){
@@ -2651,14 +2753,6 @@ $("recordForm").onsubmit=()=>{
  }
 
 
- /*
-  Remove old Parts & Oils entries that belong
-  specifically to this history record.
-
-  They will be recreated below from the edited
-  parts list, preventing duplicates.
- */
-
  if(oldRecord){
 
   vehicle.parts=
@@ -2668,10 +2762,6 @@ $("recordForm").onsubmit=()=>{
 
  }
 
-
- /*
-  Create the linked Parts & Oils records.
- */
 
  enteredParts.forEach(p=>{
 
@@ -2713,10 +2803,6 @@ $("recordForm").onsubmit=()=>{
  });
 
 
- /*
-  Save or replace the History record.
- */
-
  if(historyIndex>=0){
 
   vehicle.history[historyIndex]=r;
@@ -2728,11 +2814,6 @@ $("recordForm").onsubmit=()=>{
  }
 
 
- /*
-  Update current mileage if the recorded mileage
-  is higher than the vehicle mileage.
- */
-
  if(
   r.mileage &&
   Number(r.mileage)>
@@ -2743,11 +2824,6 @@ $("recordForm").onsubmit=()=>{
 
  }
 
-
- /*
-  Update the matching maintenance task's
-  last completed date and mileage.
- */
 
  if(r.taskId){
 
@@ -2805,11 +2881,6 @@ function editRecord(i){
  $("recordNotes").value=
   r.notes||"";
 
-
- /*
-  Load linked Parts & Oils back into
-  the history editor.
- */
 
  const linked=
   linkedPartsForHistory(r.id);
@@ -2939,11 +3010,6 @@ $("partForm").onsubmit=()=>{
   notes:
    $("partNotes").value.trim(),
 
-  /*
-   Preserve its links when a linked
-   part is edited directly.
-  */
-
   taskId:
    old?.taskId||null,
 
@@ -2963,11 +3029,6 @@ $("partForm").onsubmit=()=>{
 
  }
 
-
- /*
-  Keep the History record's list of linked
-  part IDs correct.
- */
 
  if(p.historyId){
 
@@ -3014,10 +3075,6 @@ function deletePart(i){
   return;
  }
 
-
- /*
-  Remove the part reference from History.
- */
 
  if(p.historyId){
 
@@ -3182,16 +3239,7 @@ function restore(){
 
 async function startApp(){
 
- /*
-  Show local data immediately.
- */
-
  render();
-
- /*
-  Then load cloud data and repair/link older
-  maintenance/history/parts data.
- */
 
  const loaded=
   await loadFromSupabase();
@@ -3201,8 +3249,8 @@ async function startApp(){
   render();
 
   /*
-   Save the normalised linked structure back
-   to Supabase so the new IDs and links persist.
+   Save repaired IDs/links back to the same
+   existing cloud row.
   */
 
   await save();
