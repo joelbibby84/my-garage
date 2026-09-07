@@ -945,9 +945,6 @@ async function supabaseRequest(url,options={}){
 
 /*
  CLOUD SAVE
-
- Update the single existing garage_data
- row where id=1.
 */
 
 async function save(){
@@ -965,21 +962,71 @@ async function save(){
 
   const result=
    await supabaseRequest(
-    `${SUPABASE_URL}/rest/v1/garage_data?id=eq.${CLOUD_ID}`,
+
+    `${SUPABASE_URL}/rest/v1/garage_data?on_conflict=id`,
+
     {
-     method:"PATCH",
+     method:"POST",
 
      headers:{
-      "Prefer":"return=representation"
+      "Prefer":
+       "resolution=merge-duplicates,return=representation"
      },
 
      body:JSON.stringify({
+      id:CLOUD_ID,
       data:db
      })
     }
+
    );
 
-  if(result.response.ok){
+
+  if(!result.response.ok){
+
+   console.error(
+    "Supabase save failed:",
+    result.response.status,
+    result.body
+   );
+
+   let detail="";
+
+   if(
+    result.body &&
+    typeof result.body==="object"
+   ){
+
+    detail=
+     result.body.message ||
+     result.body.details ||
+     result.body.hint ||
+     JSON.stringify(result.body);
+
+   }else if(result.body){
+
+    detail=String(result.body);
+
+   }
+
+
+   showStatus(
+    "Cloud save failed ("+
+    result.response.status+
+    ")"+
+    (detail?" — "+detail:""),
+    "error"
+   );
+
+   return false;
+  }
+
+
+  if(
+   Array.isArray(result.body) &&
+   result.body.length===1 &&
+   Number(result.body[0].id)===CLOUD_ID
+  ){
 
    showStatus(
     "Saved to cloud ✓",
@@ -989,18 +1036,19 @@ async function save(){
    return true;
   }
 
-  console.error(
-   "Supabase save error:",
-   result.response.status,
+
+  console.warn(
+   "Supabase save succeeded but returned an unexpected response:",
    result.body
   );
 
   showStatus(
-   "Saved on this device, but cloud save failed",
-   "error"
+   "Saved to cloud ✓",
+   "ok"
   );
 
-  return false;
+  return true;
+
 
  }catch(e){
 
@@ -1010,7 +1058,8 @@ async function save(){
   );
 
   showStatus(
-   "Saved on this device; cloud connection failed",
+   "Cloud connection failed — "+
+   (e?.message||String(e)),
    "error"
   );
 
@@ -3123,11 +3172,6 @@ async function startApp(){
  if(loaded){
 
   render();
-
-  /*
-   Save repaired IDs/links back to the same
-   existing cloud row.
-  */
 
   await save();
 
