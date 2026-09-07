@@ -946,62 +946,79 @@ async function supabaseRequest(url,options={}){
 /*
  CLOUD SAVE
 
- This deliberately uses PATCH on the existing
- garage_data row with id=1.
-
- This is the same type of update used by the
- earlier working version of My Garage.
+ Update the single existing garage_data
+ row where id=1.
 */
-
 
 async function save(){
 
-  // Normalise and save locally first
-  db = normaliseDatabase(db) || starter.map(x => blankVehicle(x));
+ db=
+  normaliseDatabase(db) ||
+  starter.map(x=>blankVehicle(x));
 
-  localStorage.setItem(KEY, JSON.stringify(db));
+ localStorage.setItem(
+  KEY,
+  JSON.stringify(db)
+ );
 
-  try {
+ try{
 
-    // UPSERT to the single cloud row (id = 1)
-    const { response, body } = await supabaseRequest(
-      `${SUPABASE_URL}/rest/v1/garage_data`,
-      {
-        method: "POST",
-        headers: {
-          "Prefer": "resolution=merge-duplicates,return=representation"
-        },
-        body: JSON.stringify({
-          id: CLOUD_ID,
-          data: db
-        })
-      }
-    );
+  const result=
+   await supabaseRequest(
+    `${SUPABASE_URL}/rest/v1/garage_data?id=eq.${CLOUD_ID}`,
+    {
+     method:"PATCH",
 
-    if (!response.ok) {
-      console.error("Supabase save failed:", response.status, body);
-      showStatus("Saved on this device, but cloud save failed", "error");
-      return false;
+     headers:{
+      "Prefer":"return=representation"
+     },
+
+     body:JSON.stringify({
+      data:db
+     })
     }
+   );
 
-    // Save succeeded — don't compare JSON, just confirm we got the row back.
-    if (Array.isArray(body) && body.length === 1 && body[0].id === CLOUD_ID) {
-      showStatus("Saved to cloud ✓", "ok");
-      return true;
-    }
+  if(result.response.ok){
 
-    showStatus("Saved to cloud ✓", "ok");
-    return true;
+   showStatus(
+    "Saved to cloud ✓",
+    "ok"
+   );
 
-  } catch (e) {
-
-    console.error("Supabase connection error:", e);
-    showStatus("Saved on this device; cloud connection failed", "error");
-    return false;
-
+   return true;
   }
 
+  console.error(
+   "Supabase save error:",
+   result.response.status,
+   result.body
+  );
+
+  showStatus(
+   "Saved on this device, but cloud save failed",
+   "error"
+  );
+
+  return false;
+
+ }catch(e){
+
+  console.error(
+   "Supabase connection error:",
+   e
+  );
+
+  showStatus(
+   "Saved on this device; cloud connection failed",
+   "error"
+  );
+
+  return false;
+ }
+
 }
+
 
 async function loadFromSupabase(){
 
