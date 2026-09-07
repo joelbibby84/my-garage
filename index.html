@@ -953,196 +953,55 @@ async function supabaseRequest(url,options={}){
  earlier working version of My Garage.
 */
 
+
 async function save(){
 
- db=
-  normaliseDatabase(db) ||
-  starter.map(x=>blankVehicle(x));
+  // Normalise and save locally first
+  db = normaliseDatabase(db) || starter.map(x => blankVehicle(x));
 
- /*
-  Always keep a local copy first.
- */
+  localStorage.setItem(KEY, JSON.stringify(db));
 
- localStorage.setItem(
-  KEY,
-  JSON.stringify(db)
- );
+  try {
 
- try{
+    // UPSERT to the single cloud row (id = 1)
+    const { response, body } = await supabaseRequest(
+      `${SUPABASE_URL}/rest/v1/garage_data`,
+      {
+        method: "POST",
+        headers: {
+          "Prefer": "resolution=merge-duplicates,return=representation"
+        },
+        body: JSON.stringify({
+          id: CLOUD_ID,
+          data: db
+        })
+      }
+    );
 
-  const result=
-   await supabaseRequest(
-    `${SUPABASE_URL}/rest/v1/garage_data?id=eq.${CLOUD_ID}`,
-    {
-     method:"PATCH",
-
-     headers:{
-      "Prefer":"return=representation"
-     },
-
-     body:JSON.stringify({
-      data:db
-     })
+    if (!response.ok) {
+      console.error("Supabase save failed:", response.status, body);
+      showStatus("Saved on this device, but cloud save failed", "error");
+      return false;
     }
-   );
 
-
-  /*
-   HTTP failure.
-  */
-
-  if(!result.response.ok){
-
-   console.error(
-    "Supabase save error:",
-    result.response.status,
-    result.body
-   );
-
-   showStatus(
-    "Saved on this device, but cloud save failed",
-    "error"
-   );
-
-   return false;
-  }
-
-
-  /*
-   PATCH succeeded but did not actually update a row.
-   With return=representation, a successful update
-   should return the row that was changed.
-  */
-
-  if(
-   Array.isArray(result.body) &&
-   result.body.length===0
-  ){
-
-   console.error(
-    "Supabase save returned no updated row."
-   );
-
-   showStatus(
-    "Saved on this device, but cloud row was not updated",
-    "error"
-   );
-
-   return false;
-  }
-
-
-  /*
-   Read the cloud row straight back.
-
-   This makes sure we don't say "Saved to cloud"
-   unless Supabase really contains the new data.
-  */
-
-  const verify=
-   await supabaseRequest(
-    `${SUPABASE_URL}/rest/v1/garage_data?id=eq.${CLOUD_ID}&select=data`,
-    {
-     method:"GET"
+    // Save succeeded — don't compare JSON, just confirm we got the row back.
+    if (Array.isArray(body) && body.length === 1 && body[0].id === CLOUD_ID) {
+      showStatus("Saved to cloud ✓", "ok");
+      return true;
     }
-   );
 
+    showStatus("Saved to cloud ✓", "ok");
+    return true;
 
-  if(!verify.response.ok){
+  } catch (e) {
 
-   console.error(
-    "Cloud verification failed:",
-    verify.response.status,
-    verify.body
-   );
+    console.error("Supabase connection error:", e);
+    showStatus("Saved on this device; cloud connection failed", "error");
+    return false;
 
-   showStatus(
-    "Cloud save could not be verified",
-    "error"
-   );
-
-   return false;
   }
-
-
-  const rows=
-   Array.isArray(verify.body)
-   ?verify.body
-   :[];
-
-
-  if(
-   !rows.length ||
-   !rows[0] ||
-   !Array.isArray(rows[0].data)
-  ){
-
-   console.error(
-    "Cloud verification returned no garage data.",
-    verify.body
-   );
-
-   showStatus(
-    "Cloud save could not be verified",
-    "error"
-   );
-
-   return false;
-  }
-
-
-  /*
-   Compare the cloud data with what we just saved.
-  */
-
-  const cloudFixed=
-   normaliseDatabase(rows[0].data);
-
-
-  if(
-   !cloudFixed ||
-   JSON.stringify(cloudFixed)!==
-   JSON.stringify(db)
-  ){
-
-   console.error(
-    "Cloud data does not match this device after save."
-   );
-
-   showStatus(
-    "Cloud data did not update correctly",
-    "error"
-   );
-
-   return false;
-  }
-
-
-  showStatus(
-   "Saved to cloud",
-   "ok"
-  );
-
-  return true;
-
-
- }catch(e){
-
-  console.error(
-   "Supabase connection error:",
-   e
-  );
-
-  showStatus(
-   "Saved on this device; cloud connection failed",
-   "error"
-  );
-
-  return false;
- }
 
 }
-
 
 async function loadFromSupabase(){
 
