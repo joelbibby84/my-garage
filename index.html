@@ -5417,10 +5417,22 @@ function wishlistJobMarkup(job){
      job.taskId && taskById(job.taskId)
      ?`
 
-      <div class="linked-box" style="margin-top:9px">
+      <button
+       type="button"
+       class="linked-box"
+       style="
+        margin-top:9px;
+        width:100%;
+        text-align:left;
+        color:#20242b;
+        font-weight:400
+       "
+       onclick="openMaintenanceTask('${job.taskId}')">
+
        <b>🔗 Maintenance:</b>
        ${esc(taskById(job.taskId).name)}
-      </div>
+
+      </button>
 
      `
      :""
