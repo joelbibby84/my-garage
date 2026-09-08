@@ -158,7 +158,7 @@ label{
  margin:9px 0 4px
 }
 
-input,textarea{
+input,textarea,select{
  width:100%;
  padding:10px;
  border:1px solid #d1d5db;
@@ -355,6 +355,126 @@ dialog::backdrop{
  margin-top:9px;
  font-size:13px;
  color:#68707c
+}
+
+
+/* PHOTOS & DOCUMENTS */
+
+.attachment-grid{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:11px;
+ margin-top:10px
+}
+
+.attachment-card{
+ background:#fff;
+ border-radius:16px;
+ overflow:hidden;
+ box-shadow:0 1px 5px #0001
+}
+
+.attachment-thumb{
+ width:100%;
+ aspect-ratio:4/3;
+ background:#e5e7eb;
+ overflow:hidden;
+ cursor:pointer;
+ position:relative
+}
+
+.attachment-thumb img{
+ width:100%;
+ height:100%;
+ display:block;
+ object-fit:cover
+}
+
+.attachment-body{
+ padding:12px
+}
+
+.attachment-body h3{
+ font-size:15px
+}
+
+.attachment-description{
+ font-size:14px;
+ margin-top:7px;
+ white-space:pre-wrap;
+ line-height:1.35
+}
+
+.attachment-meta{
+ font-size:12px;
+ color:#68707c;
+ margin-top:5px
+}
+
+.attachment-linked{
+ margin-top:8px;
+ padding:8px;
+ border-radius:10px;
+ background:#f3f4f6;
+ font-size:12px
+}
+
+.attachment-editor-preview{
+ width:100%;
+ aspect-ratio:4/3;
+ max-height:320px;
+ background:#e5e7eb;
+ border-radius:13px;
+ overflow:hidden;
+ position:relative;
+ margin-top:10px
+}
+
+.attachment-editor-preview img{
+ width:100%;
+ height:100%;
+ object-fit:contain;
+ display:none;
+ background:#111
+}
+
+.attachment-editor-placeholder{
+ position:absolute;
+ inset:0;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ font-size:50px;
+ color:#68707c
+}
+
+#attachmentStatus{
+ font-size:13px;
+ color:#68707c;
+ margin-top:8px
+}
+
+.viewer-modal{
+ padding:0;
+ background:#111;
+ color:#fff
+}
+
+.viewer-image{
+ display:block;
+ width:100%;
+ max-height:70vh;
+ object-fit:contain;
+ background:#111
+}
+
+.viewer-info{
+ padding:15px;
+ background:#20242b
+}
+
+.viewer-info .muted{
+ color:#cbd5e1
 }
 
 
@@ -732,6 +852,174 @@ dialog::backdrop{
 </dialog>
 
 
+<!-- PHOTO / DOCUMENT -->
+
+<dialog id="attachmentDlg">
+
+<form
+ class="modal"
+ id="attachmentForm">
+
+<h2 id="attachmentHeading">
+ Add photo / document
+</h2>
+
+<p class="muted"
+ style="margin-top:5px">
+ Photograph a problem, receipt, repair or anything else you want to keep with this vehicle.
+</p>
+
+<div class="attachment-editor-preview">
+
+ <img
+  id="attachmentPreviewImg"
+  alt="Selected photo">
+
+ <div
+  id="attachmentPreviewPlaceholder"
+  class="attachment-editor-placeholder">
+  📷
+ </div>
+
+</div>
+
+<input
+ id="attachmentLibraryInput"
+ type="file"
+ accept="image/*"
+ hidden>
+
+<input
+ id="attachmentCameraInput"
+ type="file"
+ accept="image/*"
+ capture="environment"
+ hidden>
+
+<div class="row"
+ style="margin-top:10px">
+
+ <button
+  type="button"
+  onclick="takeAttachmentPhoto()">
+  📷 Take photo
+ </button>
+
+ <button
+  type="button"
+  class="secondary"
+  onclick="chooseAttachmentPhoto()">
+  🖼️ Choose photo
+ </button>
+
+</div>
+
+<div id="attachmentStatus"></div>
+
+<div class="grid">
+
+ <div>
+  <label>Date</label>
+  <input
+   id="attachmentDate"
+   type="date">
+ </div>
+
+ <div>
+  <label>Category</label>
+
+  <select id="attachmentCategory">
+   <option value="Issue">Issue</option>
+   <option value="Receipt / Invoice">Receipt / Invoice</option>
+   <option value="Repair">Repair</option>
+   <option value="Part">Part</option>
+   <option value="Other">Other</option>
+  </select>
+ </div>
+
+</div>
+
+<label>Description / notes</label>
+
+<textarea
+ id="attachmentDescription"
+ rows="4"
+ placeholder="Example: Front nearside suspension knocking over bumps. Check drop link and lower arm."></textarea>
+
+<label>Link to maintenance or history (optional)</label>
+
+<select id="attachmentLink">
+ <option value="">Not linked</option>
+</select>
+
+<div class="row"
+ style="margin-top:13px">
+
+ <button
+  id="attachmentSaveBtn"
+  type="submit">
+  Save
+ </button>
+
+ <button
+  type="button"
+  class="secondary"
+  onclick="cancelAttachmentEdit()">
+  Cancel
+ </button>
+
+</div>
+
+</form>
+</dialog>
+
+
+<!-- PHOTO VIEWER -->
+
+<dialog id="photoViewerDlg">
+
+<div class="viewer-modal">
+
+ <img
+  id="photoViewerImg"
+  class="viewer-image"
+  alt="Garage photo">
+
+ <div class="viewer-info">
+
+  <div class="row between">
+
+   <h3 id="photoViewerCategory">
+    Photo
+   </h3>
+
+   <button
+    type="button"
+    class="secondary small"
+    onclick="photoViewerDlg.close()">
+    Close
+   </button>
+
+  </div>
+
+  <p
+   id="photoViewerDate"
+   class="muted"
+   style="margin-top:6px">
+  </p>
+
+  <p
+   id="photoViewerDescription"
+   style="margin-top:9px;white-space:pre-wrap">
+  </p>
+
+ </div>
+
+</div>
+
+</dialog>
+
+
 <!-- COMPLETED MAINTENANCE / HISTORY -->
 
 <dialog id="recordDlg">
@@ -948,7 +1236,8 @@ const starter=[
   notes:"",
   tasks:[],
   history:[],
-  parts:[]
+  parts:[],
+  attachments:[]
  },
  {
   id:"corsa",
@@ -965,7 +1254,8 @@ const starter=[
   notes:"",
   tasks:[],
   history:[],
-  parts:[]
+  parts:[],
+  attachments:[]
  },
  {
   id:"st1300",
@@ -982,7 +1272,8 @@ const starter=[
   notes:"",
   tasks:[],
   history:[],
-  parts:[]
+  parts:[],
+  attachments:[]
  },
  {
   id:"gsx250",
@@ -999,7 +1290,8 @@ const starter=[
   notes:"",
   tasks:[],
   history:[],
-  parts:[]
+  parts:[],
+  attachments:[]
  }
 ];
 
@@ -1016,6 +1308,7 @@ let editingRecordId=null;
 let focusPartId=null;
 let focusTaskId=null;
 let focusHistoryId=null;
+let focusAttachmentId=null;
 
 
 /* VEHICLE PHOTO EDIT STATE */
@@ -1023,6 +1316,13 @@ let focusHistoryId=null;
 let pendingVehiclePhotoFile=null;
 let pendingVehiclePhotoPreviewUrl=null;
 let pendingRemoveVehiclePhoto=false;
+
+
+/* ATTACHMENT EDIT STATE */
+
+let editingAttachmentId=null;
+let pendingAttachmentFile=null;
+let pendingAttachmentPreviewUrl=null;
 
 
 const $=id=>
@@ -1220,7 +1520,7 @@ async function deleteStorageObject(path){
     await response.text();
 
    console.warn(
-    "Old image could not be deleted:",
+    "Image could not be deleted:",
     response.status,
     text
    );
@@ -1233,7 +1533,7 @@ async function deleteStorageObject(path){
  }catch(e){
 
   console.warn(
-   "Old image delete error:",
+   "Image delete error:",
    e
   );
 
@@ -1283,12 +1583,14 @@ function loadImageFromFile(file){
 }
 
 
-async function resizeVehicleImage(file){
+async function resizeGarageImage(
+ file,
+ maxDimension=1600,
+ quality=.82
+){
 
  const img=
   await loadImageFromFile(file);
-
- const maxDimension=1400;
 
  let width=
   img.naturalWidth||
@@ -1305,7 +1607,6 @@ async function resizeVehicleImage(file){
   );
 
  }
-
 
  const scale=
   Math.min(
@@ -1353,7 +1654,7 @@ async function resizeVehicleImage(file){
     canvas.toBlob(
      resolve,
      "image/jpeg",
-     .82
+     quality
     )
   );
 
@@ -1366,6 +1667,17 @@ async function resizeVehicleImage(file){
  }
 
  return blob;
+}
+
+
+async function resizeVehicleImage(file){
+
+ return resizeGarageImage(
+  file,
+  1400,
+  .82
+ );
+
 }
 
 
@@ -1502,7 +1814,6 @@ $("vehiclePhotoInput")
     return;
    }
 
-
    if(
     file.type &&
     !file.type.startsWith("image/")
@@ -1515,7 +1826,6 @@ $("vehiclePhotoInput")
     e.target.value="";
     return;
    }
-
 
    if(pendingVehiclePhotoPreviewUrl){
 
@@ -1552,7 +1862,6 @@ function removeVehiclePhoto(){
  if(!vehicle){
   return;
  }
-
 
  if(pendingVehiclePhotoPreviewUrl){
 
@@ -1593,6 +1902,340 @@ function cancelVehicleEdit(){
 }
 
 
+/* ATTACHMENT PHOTO UI */
+
+function clearPendingAttachmentPhoto(){
+
+ pendingAttachmentFile=null;
+
+ if(pendingAttachmentPreviewUrl){
+
+  URL.revokeObjectURL(
+   pendingAttachmentPreviewUrl
+  );
+
+  pendingAttachmentPreviewUrl=null;
+ }
+
+ $("attachmentLibraryInput").value="";
+ $("attachmentCameraInput").value="";
+
+}
+
+
+function setAttachmentPreview(url=""){
+
+ const img=
+  $("attachmentPreviewImg");
+
+ const placeholder=
+  $("attachmentPreviewPlaceholder");
+
+ if(url){
+
+  img.src=url;
+  img.style.display="block";
+  placeholder.style.display="none";
+
+ }else{
+
+  img.removeAttribute("src");
+  img.style.display="none";
+  placeholder.style.display="flex";
+
+ }
+
+}
+
+
+function takeAttachmentPhoto(){
+
+ $("attachmentCameraInput").click();
+
+}
+
+
+function chooseAttachmentPhoto(){
+
+ $("attachmentLibraryInput").click();
+
+}
+
+
+function handleAttachmentFile(file){
+
+ if(!file){
+  return;
+ }
+
+ if(
+  file.type &&
+  !file.type.startsWith("image/")
+ ){
+
+  alert(
+   "Please choose an image."
+  );
+
+  return;
+ }
+
+ if(pendingAttachmentPreviewUrl){
+
+  URL.revokeObjectURL(
+   pendingAttachmentPreviewUrl
+  );
+
+ }
+
+ pendingAttachmentFile=file;
+
+ pendingAttachmentPreviewUrl=
+  URL.createObjectURL(file);
+
+ setAttachmentPreview(
+  pendingAttachmentPreviewUrl
+ );
+
+ $("attachmentStatus")
+  .textContent=
+   "Photo selected. Add your notes, then tap Save.";
+
+}
+
+
+$("attachmentLibraryInput")
+ .addEventListener(
+  "change",
+  e=>{
+
+   handleAttachmentFile(
+    e.target.files?.[0]
+   );
+
+  }
+ );
+
+
+$("attachmentCameraInput")
+ .addEventListener(
+  "change",
+  e=>{
+
+   handleAttachmentFile(
+    e.target.files?.[0]
+   );
+
+  }
+ );
+
+
+function attachmentLinkOptions(
+ selectedTaskId=null,
+ selectedHistoryId=null
+){
+
+ const vehicle=v();
+
+ let html=
+  `<option value="">Not linked</option>`;
+
+
+ if(vehicle.tasks.length){
+
+  html+=
+   `<optgroup label="Maintenance tasks">`;
+
+  vehicle.tasks.forEach(
+   t=>{
+
+    const selected=
+     selectedTaskId===t.id
+     ?" selected"
+     :"";
+
+    html+=
+     `<option value="task:${esc(t.id)}"${selected}>
+       ${esc(t.name)}
+      </option>`;
+
+   }
+  );
+
+  html+=
+   `</optgroup>`;
+
+ }
+
+
+ if(vehicle.history.length){
+
+  html+=
+   `<optgroup label="History">`;
+
+  vehicle.history
+   .slice()
+   .reverse()
+   .forEach(
+    r=>{
+
+     const selected=
+      selectedHistoryId===r.id
+      ?" selected"
+      :"";
+
+     html+=
+      `<option value="history:${esc(r.id)}"${selected}>
+        ${dateText(r.date)} · ${esc(r.job)}
+       </option>`;
+
+    }
+   );
+
+  html+=
+   `</optgroup>`;
+
+ }
+
+
+ return html;
+}
+
+
+function newAttachment(){
+
+ editingAttachmentId=null;
+
+ clearPendingAttachmentPhoto();
+
+ $("attachmentForm").reset();
+
+ $("attachmentHeading")
+  .textContent=
+   "Add photo / document";
+
+ $("attachmentDate").value=
+  today();
+
+ $("attachmentCategory").value=
+  "Issue";
+
+ $("attachmentDescription").value=
+  "";
+
+ $("attachmentLink").innerHTML=
+  attachmentLinkOptions();
+
+ $("attachmentStatus").textContent=
+  "Take a new photo or choose one from your phone.";
+
+ setAttachmentPreview("");
+
+ $("attachmentSaveBtn")
+  .disabled=false;
+
+ $("attachmentSaveBtn")
+  .textContent="Save";
+
+ $("attachmentDlg")
+  .showModal();
+
+}
+
+
+function editAttachment(id){
+
+ const a=
+  attachmentById(id);
+
+ if(!a){
+  return;
+ }
+
+ editingAttachmentId=id;
+
+ clearPendingAttachmentPhoto();
+
+ $("attachmentHeading")
+  .textContent=
+   "Edit photo / document";
+
+ $("attachmentDate").value=
+  a.date||"";
+
+ $("attachmentCategory").value=
+  a.category||"Other";
+
+ $("attachmentDescription").value=
+  a.description||"";
+
+ $("attachmentLink").innerHTML=
+  attachmentLinkOptions(
+   a.taskId||null,
+   a.historyId||null
+  );
+
+ $("attachmentStatus").textContent=
+  "You can edit the notes or choose a replacement photo.";
+
+ setAttachmentPreview(
+  publicPhotoUrl(
+   a.path
+  )
+ );
+
+ $("attachmentSaveBtn")
+  .disabled=false;
+
+ $("attachmentSaveBtn")
+  .textContent="Save";
+
+ $("attachmentDlg")
+  .showModal();
+
+}
+
+
+function cancelAttachmentEdit(){
+
+ clearPendingAttachmentPhoto();
+
+ editingAttachmentId=null;
+
+ $("attachmentDlg").close();
+
+}
+
+
+function parseAttachmentLink(value){
+
+ let taskId=null;
+ let historyId=null;
+
+ if(
+  value &&
+  value.startsWith("task:")
+ ){
+  taskId=
+   value.substring(5);
+ }
+
+ if(
+  value &&
+  value.startsWith("history:")
+ ){
+  historyId=
+   value.substring(8);
+ }
+
+ return{
+  taskId,
+  historyId
+ };
+
+}
+
+
 /* VEHICLE DATA */
 
 function blankVehicle(base){
@@ -1615,7 +2258,8 @@ function blankVehicle(base){
   notes:"",
   tasks:[],
   history:[],
-  parts:[]
+  parts:[],
+  attachments:[]
  };
 
 }
@@ -1705,6 +2349,22 @@ function normaliseVehicle(x,base){
      p=>({
       ...p,
       id:p.id||uid("part")
+     })
+    )
+   :[],
+
+  attachments:
+   Array.isArray(source.attachments)
+   ?source.attachments.map(
+     a=>({
+      ...a,
+      id:a.id||uid("photo"),
+      path:a.path||"",
+      date:a.date||"",
+      category:a.category||"Other",
+      description:a.description||"",
+      taskId:a.taskId||null,
+      historyId:a.historyId||null
      })
     )
    :[]
@@ -2007,6 +2667,30 @@ function normaliseVehicle(x,base){
 
  });
 
+
+ vehicle.attachments.forEach(a=>{
+
+  if(
+   a.taskId &&
+   !vehicle.tasks.some(
+    t=>t.id===a.taskId
+   )
+  ){
+   a.taskId=null;
+  }
+
+  if(
+   a.historyId &&
+   !vehicle.history.some(
+    r=>r.id===a.historyId
+   )
+  ){
+   a.historyId=null;
+  }
+
+ });
+
+
  return vehicle;
 }
 
@@ -2179,6 +2863,40 @@ function partById(id){
    p=>p.id===id
   ) ||
   null
+ );
+
+}
+
+
+function attachmentById(id){
+
+ return (
+  v()?.attachments.find(
+   a=>a.id===id
+  ) ||
+  null
+ );
+
+}
+
+
+function linkedAttachmentsForTask(taskId){
+
+ return (
+  v()?.attachments||[]
+ ).filter(
+  a=>a.taskId===taskId
+ );
+
+}
+
+
+function linkedAttachmentsForHistory(historyId){
+
+ return (
+  v()?.attachments||[]
+ ).filter(
+  a=>a.historyId===historyId
  );
 
 }
@@ -3343,6 +4061,9 @@ function openDashboardTask(
  focusHistoryId=
   null;
 
+ focusAttachmentId=
+  null;
+
  render();
 
 }
@@ -3361,6 +4082,7 @@ function openDashboardDate(
  focusTaskId=null;
  focusPartId=null;
  focusHistoryId=null;
+ focusAttachmentId=null;
 
  render();
 
@@ -3706,6 +4428,22 @@ function render(){
 
     <button
      class="${
+      tab==="photos"
+      ?"active"
+      :""
+     }"
+     onclick="
+      tab='photos';
+      render();
+     ">
+
+     📷 Photos & Docs
+
+    </button>
+
+
+    <button
+     class="${
       tab==="history"
       ?"active"
       :""
@@ -3762,13 +4500,16 @@ function render(){
    :tab==="dates"
     ?datesPage()
 
-    :tab==="history"
-     ?history()
+    :tab==="photos"
+     ?photosPage()
 
-     :tab==="parts"
-      ?parts()
+     :tab==="history"
+      ?history()
 
-      :notes()
+      :tab==="parts"
+       ?parts()
+
+       :notes()
   );
 
 
@@ -3931,6 +4672,537 @@ function datesPage(){
 }
 
 
+/* PHOTOS & DOCUMENTS PAGE */
+
+function attachmentLinkText(a){
+
+ if(a.taskId){
+
+  const task=
+   taskById(a.taskId);
+
+  if(task){
+   return "Maintenance: "+task.name;
+  }
+
+ }
+
+ if(a.historyId){
+
+  const history=
+   historyById(a.historyId);
+
+  if(history){
+
+   return (
+    "History: "+
+    history.job+
+    " · "+
+    dateText(history.date)
+   );
+
+  }
+
+ }
+
+ return "";
+}
+
+
+function photosPage(){
+
+ const attachments=
+  (v().attachments||[])
+   .slice()
+   .sort(
+    (a,b)=>
+     String(b.date||"")
+      .localeCompare(
+       String(a.date||"")
+      )
+   );
+
+
+ return `
+
+ <div class="row between">
+
+  <div>
+
+   <h3>
+    Photos & documents
+   </h3>
+
+   <p class="muted">
+    Keep pictures of issues, repairs, receipts and other useful records.
+   </p>
+
+  </div>
+
+  <button onclick="newAttachment()">
+   + Add photo
+  </button>
+
+ </div>
+
+
+ ${
+  attachments.length
+
+  ?`
+
+   <div class="attachment-grid">
+
+    ${
+     attachments.map(
+      a=>{
+
+       const linkText=
+        attachmentLinkText(a);
+
+       return `
+
+        <div
+         id="attachment-${esc(a.id)}"
+         class="attachment-card
+         ${
+          focusAttachmentId===a.id
+          ?"highlight"
+          :""
+         }">
+
+         <div
+          class="attachment-thumb"
+          onclick="viewAttachment('${a.id}')">
+
+          <img
+           src="${esc(publicPhotoUrl(a.path))}"
+           loading="lazy"
+           alt="${esc(a.category||"Garage photo")}">
+
+         </div>
+
+
+         <div class="attachment-body">
+
+          <div class="row between">
+
+           <h3>
+            ${esc(a.category||"Other")}
+           </h3>
+
+           <span class="muted">
+            ${dateText(a.date)}
+           </span>
+
+          </div>
+
+
+          ${
+           a.description
+
+           ?`
+
+            <div class="attachment-description">
+             ${esc(a.description)}
+            </div>
+
+           `
+
+           :`
+
+            <div class="attachment-meta">
+             No description entered.
+            </div>
+
+           `
+          }
+
+
+          ${
+           linkText
+
+           ?`
+
+            <div class="attachment-linked">
+             🔗 ${esc(linkText)}
+            </div>
+
+           `
+
+           :""
+          }
+
+
+          <div
+           class="row"
+           style="margin-top:10px">
+
+           <button
+            class="secondary small"
+            onclick="viewAttachment('${a.id}')">
+
+            View
+
+           </button>
+
+           <button
+            class="secondary small"
+            onclick="editAttachment('${a.id}')">
+
+            Edit
+
+           </button>
+
+           <button
+            class="danger small"
+            onclick="deleteAttachment('${a.id}')">
+
+            Delete
+
+           </button>
+
+          </div>
+
+         </div>
+
+        </div>
+
+       `;
+
+      }
+     ).join("")
+    }
+
+   </div>
+
+  `
+
+  :`
+
+   <div class="card empty">
+
+    No photos or documents yet.
+    <br><br>
+    Use <b>Add photo</b> to photograph an issue, receipt or repair.
+
+   </div>
+
+  `
+ }
+
+ `;
+
+}
+
+
+function viewAttachment(id){
+
+ const a=
+  attachmentById(id);
+
+ if(!a){
+  return;
+ }
+
+ $("photoViewerImg").src=
+  publicPhotoUrl(a.path);
+
+ $("photoViewerCategory").textContent=
+  a.category||"Photo";
+
+ $("photoViewerDate").textContent=
+  a.date
+  ?dateText(a.date)
+  :"No date entered";
+
+ $("photoViewerDescription").textContent=
+  a.description||
+  "No description entered.";
+
+ $("photoViewerDlg")
+  .showModal();
+
+}
+
+
+function openAttachment(id){
+
+ focusAttachmentId=id;
+ focusPartId=null;
+ focusTaskId=null;
+ focusHistoryId=null;
+
+ tab="photos";
+
+ render();
+
+}
+
+
+/* SAVE PHOTO / DOCUMENT */
+
+$("attachmentForm")
+ .addEventListener(
+  "submit",
+  async e=>{
+
+   e.preventDefault();
+
+
+   const vehicle=v();
+
+   if(!vehicle){
+    return;
+   }
+
+
+   const existing=
+    editingAttachmentId
+    ?attachmentById(
+      editingAttachmentId
+     )
+    :null;
+
+
+   if(
+    !existing &&
+    !pendingAttachmentFile
+   ){
+
+    alert(
+     "Please take or choose a photo first."
+    );
+
+    return;
+   }
+
+
+   const saveBtn=
+    $("attachmentSaveBtn");
+
+   const statusEl=
+    $("attachmentStatus");
+
+
+   saveBtn.disabled=true;
+   saveBtn.textContent=
+    "Saving…";
+
+
+   let newPath=
+    existing?.path||"";
+
+   const oldPath=
+    existing?.path||"";
+
+
+   try{
+
+
+    if(pendingAttachmentFile){
+
+     statusEl.textContent=
+      "Preparing photo…";
+
+
+     const blob=
+      await resizeGarageImage(
+       pendingAttachmentFile,
+       1600,
+       .82
+      );
+
+
+     statusEl.textContent=
+      "Uploading photo…";
+
+
+     newPath=
+      "vehicles/"+
+      vehicle.id+
+      "/attachments/"+
+      Date.now()+
+      ".jpg";
+
+
+     await uploadStorageObject(
+      newPath,
+      blob
+     );
+
+    }
+
+
+    const link=
+     parseAttachmentLink(
+      $("attachmentLink").value
+     );
+
+
+    const item={
+
+     id:
+      existing?.id||
+      uid("photo"),
+
+     path:
+      newPath,
+
+     date:
+      $("attachmentDate").value,
+
+     category:
+      $("attachmentCategory").value,
+
+     description:
+      $("attachmentDescription")
+       .value
+       .trim(),
+
+     taskId:
+      link.taskId,
+
+     historyId:
+      link.historyId
+
+    };
+
+
+    if(existing){
+
+     const index=
+      vehicle.attachments
+       .findIndex(
+        a=>a.id===existing.id
+       );
+
+     vehicle.attachments[index]=item;
+
+    }else{
+
+     vehicle.attachments.push(item);
+
+    }
+
+
+    if(
+     pendingAttachmentFile &&
+     oldPath &&
+     oldPath!==newPath
+    ){
+
+     await deleteStorageObject(
+      oldPath
+     );
+
+    }
+
+
+    clearPendingAttachmentPhoto();
+
+    editingAttachmentId=null;
+
+    $("attachmentDlg")
+     .close();
+
+
+    focusAttachmentId=
+     item.id;
+
+
+    render();
+
+    await save();
+
+
+   }catch(err){
+
+    console.error(
+     "Attachment save failed:",
+     err
+    );
+
+
+    statusEl.textContent=
+     "Photo could not be saved.";
+
+
+    alert(
+     "The photo could not be saved.\n\n"+
+     (
+      err?.message||
+      String(err)
+     )
+    );
+
+
+    saveBtn.disabled=false;
+    saveBtn.textContent=
+     "Save";
+
+   }
+
+  }
+ );
+
+
+async function deleteAttachment(id){
+
+ const a=
+  attachmentById(id);
+
+ if(!a){
+  return;
+ }
+
+
+ if(
+  !confirm(
+   "Are you sure you want to delete this photo and its notes?"
+  )
+ ){
+  return;
+ }
+
+
+ const vehicle=v();
+
+
+ const index=
+  vehicle.attachments
+   .findIndex(
+    x=>x.id===id
+   );
+
+
+ if(index<0){
+  return;
+ }
+
+
+ if(a.path){
+
+  await deleteStorageObject(
+   a.path
+  );
+
+ }
+
+
+ vehicle.attachments.splice(
+  index,
+  1
+ );
+
+
+ await save();
+
+ render();
+
+}
+
+
 /* MAINTENANCE */
 
 function maintenance(){
@@ -3986,6 +5258,12 @@ function maintenance(){
 
      const completed=
       linkedHistoryForTask(
+       t.id
+      );
+
+
+     const linkedPhotos=
+      linkedAttachmentsForTask(
        t.id
       );
 
@@ -4194,6 +5472,40 @@ function maintenance(){
 
 
       ${
+       linkedPhotos.length
+
+       ?`
+
+        <div class="linked-box">
+
+         <h4>
+          📷 Photos & documents
+         </h4>
+
+         <p class="muted">
+          ${linkedPhotos.length}
+          photo${linkedPhotos.length===1?"":"s"}
+          linked to this maintenance job.
+         </p>
+
+         <button
+          class="secondary small"
+          style="margin-top:8px"
+          onclick="openAttachment('${linkedPhotos[0].id}')">
+
+          View photos
+
+         </button>
+
+        </div>
+
+       `
+
+       :""
+      }
+
+
+      ${
        completed.length
 
        ?`
@@ -4326,6 +5638,12 @@ function history(){
 
      const linkedParts=
       linkedPartsForHistory(
+       r.id
+      );
+
+
+     const linkedPhotos=
+      linkedAttachmentsForHistory(
        r.id
       );
 
@@ -4499,6 +5817,40 @@ function history(){
         `
 
         :""
+      }
+
+
+      ${
+       linkedPhotos.length
+
+       ?`
+
+        <div class="linked-box">
+
+         <h4>
+          📷 Photos & documents
+         </h4>
+
+         <p class="muted">
+          ${linkedPhotos.length}
+          photo${linkedPhotos.length===1?"":"s"}
+          linked to this history record.
+         </p>
+
+         <button
+          class="secondary small"
+          style="margin-top:8px"
+          onclick="openAttachment('${linkedPhotos[0].id}')">
+
+          View photos
+
+         </button>
+
+        </div>
+
+       `
+
+       :""
       }
 
 
@@ -4992,6 +6344,16 @@ function scrollToFocus(){
  }
 
 
+ if(
+  tab==="photos" &&
+  focusAttachmentId
+ ){
+  id=
+   "attachment-"+
+   focusAttachmentId;
+ }
+
+
  if(!id){
   return;
  }
@@ -5017,6 +6379,7 @@ function scrollToFocus(){
    focusPartId=null;
    focusTaskId=null;
    focusHistoryId=null;
+   focusAttachmentId=null;
 
   },
   1000
@@ -5030,6 +6393,7 @@ function openPart(id){
  focusPartId=id;
  focusTaskId=null;
  focusHistoryId=null;
+ focusAttachmentId=null;
 
  tab="parts";
 
@@ -5043,6 +6407,7 @@ function openMaintenanceTask(id){
  focusTaskId=id;
  focusPartId=null;
  focusHistoryId=null;
+ focusAttachmentId=null;
 
  tab="maintenance";
 
@@ -5056,6 +6421,7 @@ function openHistoryRecord(id){
  focusHistoryId=id;
  focusPartId=null;
  focusTaskId=null;
+ focusAttachmentId=null;
 
  tab="history";
 
@@ -5229,17 +6595,24 @@ function delTask(i){
   );
 
 
+ const linkedPhotos=
+  linkedAttachmentsForTask(
+   task.id
+  );
+
+
  let message=
   "Are you sure you want to delete this maintenance task?";
 
 
  if(
   linkedParts.length ||
-  linkedHistory.length
+  linkedHistory.length ||
+  linkedPhotos.length
  ){
 
   message+=
-   "\n\nIts History and Parts & Oils records will be kept, but they will no longer be linked to this maintenance task.";
+   "\n\nIts History, Parts & Oils and Photos records will be kept, but they will no longer be linked to this maintenance task.";
 
  }
 
@@ -5259,6 +6632,13 @@ function delTask(i){
  linkedHistory.forEach(
   r=>{
    r.taskId=null;
+  }
+ );
+
+
+ linkedPhotos.forEach(
+  a=>{
+   a.taskId=null;
   }
  );
 
@@ -5370,11 +6750,6 @@ $("vehicleForm")
    try{
 
 
-    /*
-     If a new photo has been chosen,
-     prepare and upload it first.
-    */
-
     if(pendingVehiclePhotoFile){
 
      photoStatus.textContent=
@@ -5409,11 +6784,6 @@ $("vehicleForm")
       newPhotoPath;
 
 
-     /*
-      Delete the previous image after
-      the replacement has uploaded.
-     */
-
      if(
       oldPhotoPath &&
       oldPhotoPath!==
@@ -5428,11 +6798,6 @@ $("vehicleForm")
 
     }
 
-
-    /*
-     Remove an existing photo if
-     requested without a replacement.
-    */
 
     else if(
      pendingRemoveVehiclePhoto &&
@@ -5452,10 +6817,6 @@ $("vehicleForm")
 
     }
 
-
-    /*
-     Save the normal vehicle details.
-    */
 
     vehicle.reg=
      $("vehicleReg")
@@ -6146,6 +7507,12 @@ function deleteRecord(i){
   );
 
 
+ const linkedPhotos=
+  linkedAttachmentsForHistory(
+   r.id
+  );
+
+
  let message=
   "Are you sure you want to delete this maintenance history entry?";
 
@@ -6158,9 +7525,24 @@ function deleteRecord(i){
  }
 
 
+ if(linkedPhotos.length){
+
+  message+=
+   "\n\nLinked photos will be kept, but will no longer be linked to this history record.";
+
+ }
+
+
  if(!confirm(message)){
   return;
  }
+
+
+ linkedPhotos.forEach(
+  a=>{
+   a.historyId=null;
+  }
+ );
 
 
  v().parts=
@@ -6467,6 +7849,7 @@ function openV(id){
  focusPartId=null;
  focusTaskId=null;
  focusHistoryId=null;
+ focusAttachmentId=null;
 
 
  render();
@@ -6482,6 +7865,7 @@ $("back").onclick=
  focusPartId=null;
  focusTaskId=null;
  focusHistoryId=null;
+ focusAttachmentId=null;
 
  render();
 
