@@ -1579,6 +1579,7 @@ const starter=[
 
 let current=null;
 let tab="maintenance";
+let vehicleTabsScrollLeft=0;
 
 let editing=-1;
 let editingPart=-1;
@@ -4672,6 +4673,16 @@ function vehicleTile(vehicle){
 /* MAIN RENDER */
 
 function render(){
+ if(current){
+ const tabsEl=document.querySelector(".tabs");
+ if(tabsEl){
+  vehicleTabsScrollLeft=tabsEl.scrollLeft;
+ }
+}
+
+ if(!current){
+ vehicleTabsScrollLeft=0;
+}
 
  const vehicle=
   v();
@@ -4994,7 +5005,12 @@ function render(){
   );
 
 
- setTimeout(
+requestAnimationFrame(()=>{
+ const tabsEl=document.querySelector(".tabs");
+ if(tabsEl){
+  tabsEl.scrollLeft=vehicleTabsScrollLeft;
+ }
+}); setTimeout(
   scrollToFocus,
   50
  );
