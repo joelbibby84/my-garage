@@ -4620,7 +4620,7 @@ function showDashboardDetail(type){
   const vehicleGrid=document.querySelector(".vehicle-grid");
   if(vehicleGrid){
    const vehicleHeading=vehicleGrid.previousElementSibling||vehicleGrid;
-   const y=vehicleHeading.getBoundingClientRect().top+window.scrollY-90;
+   const y=vehicleHeading.getBoundingClientRect().top+window.scrollY-60;
    window.scrollTo({top:Math.max(0,y),behavior:"smooth"});
   }
   return;
@@ -4636,7 +4636,7 @@ function showDashboardDetail(type){
   body=rows.length?rows.sort((a,b)=>b.amount-a.amount).map(x=>`<div class="dashboard-item" onclick="openDashboardWishlist('${x.vehicle.id}')"><div class="row between"><h3>${x.vehicle.emoji} ${esc(x.vehicle.name)}</h3><b>${money(x.amount)}</b></div><div class="muted">${x.count} unbought priced ${x.count===1?"part":"parts"} · Tap to view wishlist</div></div>`).join(""):`<div class="empty">No unbought wishlist parts with a price entered.</div>`;
  }
  target.innerHTML=`<div class="card"><div class="row between"><h2>${title}</h2><button class="secondary" onclick="closeDashboardDetail()">Close</button></div>${body}</div>`;
- const y=target.getBoundingClientRect().top+window.scrollY-110;
+ const y=target.getBoundingClientRect().top+window.scrollY-75;
  window.scrollTo({top:Math.max(0,y),behavior:"smooth"});
 }
 function closeDashboardDetail(){const target=$("dashboardDetail");if(target)target.innerHTML="";}
