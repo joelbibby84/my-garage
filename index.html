@@ -3924,11 +3924,7 @@ function due(t){
 
  const a=
   c.d
-  ?dateText(
-    c.d
-     .toISOString()
-     .slice(0,10)
-   )
+  ?c.d.toLocaleDateString("en-GB")
   :"";
 
 
