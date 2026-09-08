@@ -759,6 +759,37 @@ dialog::backdrop{
  }
 }
 
+
+/* SUBTLE RAISED TREATMENT FOR TAPPABLE INFORMATION */
+.dashboard-stat,
+.dashboard-item,
+.vehicle-tile,
+.linked-box[onclick],
+.attachment-thumb[onclick],
+.linked-photo-item[onclick]{
+ box-shadow:0 3px 8px #0002;
+ transition:transform .08s ease,box-shadow .08s ease;
+ -webkit-tap-highlight-color:transparent
+}
+
+.dashboard-item{
+ background:#fff;
+ border-top:0;
+ border-radius:12px;
+ padding:11px;
+ margin:7px 0
+}
+
+.dashboard-stat:active,
+.dashboard-item:active,
+.vehicle-tile:active,
+.linked-box[onclick]:active,
+.attachment-thumb[onclick]:active,
+.linked-photo-item[onclick]:active{
+ transform:translateY(2px);
+ box-shadow:0 1px 3px #0002
+}
+
 </style>
 </head>
 
