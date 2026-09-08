@@ -864,6 +864,15 @@ button:not(.back):active,
  </div>
 
  <div>
+  <label>First due at — mileage</label>
+  <input
+   id="taskFirstDueMiles"
+   type="number"
+   min="0"
+   placeholder="Optional">
+ </div>
+
+ <div>
   <label>Last done — date</label>
   <input
    id="taskDate"
@@ -2773,7 +2782,11 @@ function normaliseVehicle(x,base){
    ?source.tasks.map(
      t=>({
       ...t,
-      id:t.id||uid("task")
+      id:t.id||uid("task"),
+      firstDueMiles:
+       t.firstDueMiles==null
+       ?""
+       :String(t.firstDueMiles)
      })
     )
    :[],
@@ -3808,14 +3821,26 @@ function calc(t){
 
  }
 
- if(
-  t.miles &&
-  t.lastMiles
- ){
+ if(t.miles){
 
-  m=
-   Number(t.lastMiles)+
-   Number(t.miles);
+  if(
+   t.lastMiles!=="" &&
+   t.lastMiles!=null
+  ){
+
+   m=
+    Number(t.lastMiles)+
+    Number(t.miles);
+
+  }else if(
+   t.firstDueMiles!=="" &&
+   t.firstDueMiles!=null
+  ){
+
+   m=
+    Number(t.firstDueMiles);
+
+  }
 
  }
 
@@ -7447,6 +7472,18 @@ function maintenance(){
       </p>
 
 
+      ${
+       t.firstDueMiles
+       ?`
+        <p class="muted">
+         First due at:
+         ${Number(t.firstDueMiles).toLocaleString()} miles
+        </p>
+       `
+       :""
+      }
+
+
       <p class="muted">
 
        Last done:
@@ -9040,6 +9077,9 @@ function editTask(i){
  $("taskMiles").value=
   t.miles||"";
 
+ $("taskFirstDueMiles").value=
+  t.firstDueMiles||"";
+
  $("taskDate").value=
   t.date||"";
 
@@ -9088,6 +9128,10 @@ $("taskForm").onsubmit=
 
   miles:
    $("taskMiles")
+    .value,
+
+  firstDueMiles:
+   $("taskFirstDueMiles")
     .value,
 
   date:
