@@ -4259,6 +4259,26 @@ function dashboard(){
   );
 
 
+ const plannedParts=
+  db.reduce(
+   (sum,vehicle)=>
+    sum+(vehicle.wishlistJobs||[]).reduce(
+     (jobSum,job)=>
+      jobSum+(job.items||[]).reduce(
+       (partSum,item)=>
+        partSum+(
+         item.bought
+         ?0
+         :Number(item.price||0)
+        ),
+       0
+      ),
+     0
+    ),
+   0
+  );
+
+
  const scheduled=
   items.filter(
    x=>x.priority<3
@@ -4367,6 +4387,19 @@ function dashboard(){
 
     <div class="label">
      Spent in ${currentYear}
+    </div>
+
+   </div>
+
+
+   <div class="dashboard-stat">
+
+    <div class="number">
+     ${money(plannedParts)}
+    </div>
+
+    <div class="label">
+     Planned parts
     </div>
 
    </div>
