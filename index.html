@@ -538,7 +538,9 @@ dialog::backdrop{
 .dashboard-stat{
  background:#f3f4f6;
  border-radius:14px;
- padding:13px
+ padding:13px;
+ cursor:pointer;
+ touch-action:manipulation
 }
 
 .dashboard-stat .number{
@@ -4325,7 +4327,9 @@ function dashboard(){
 
    <div
     class="dashboard-stat
-    ${overdue?"alert":""}">
+    ${overdue?"alert":""}"
+    role="button" tabindex="0"
+    onclick="showDashboardDetail('overdue')">
 
     <div class="number">
      ${overdue}
@@ -4340,7 +4344,9 @@ function dashboard(){
 
    <div
     class="dashboard-stat
-    ${soon?"warning":""}">
+    ${soon?"warning":""}"
+    role="button" tabindex="0"
+    onclick="showDashboardDetail('soon')">
 
     <div class="number">
      ${soon}
@@ -4353,7 +4359,9 @@ function dashboard(){
    </div>
 
 
-   <div class="dashboard-stat">
+   <div class="dashboard-stat"
+    role="button" tabindex="0"
+    onclick="showDashboardDetail('maintenance')">
 
     <div class="number">
      ${maintenanceTotal}
@@ -4366,7 +4374,9 @@ function dashboard(){
    </div>
 
 
-   <div class="dashboard-stat">
+   <div class="dashboard-stat"
+    role="button" tabindex="0"
+    onclick="showDashboardDetail('vehicles')">
 
     <div class="number">
      ${db.length}
@@ -4379,7 +4389,9 @@ function dashboard(){
    </div>
 
 
-   <div class="dashboard-stat">
+   <div class="dashboard-stat"
+    role="button" tabindex="0"
+    onclick="showDashboardDetail('spent')">
 
     <div class="number">
      ${money(spentThisYear)}
@@ -4392,7 +4404,9 @@ function dashboard(){
    </div>
 
 
-   <div class="dashboard-stat">
+   <div class="dashboard-stat"
+    role="button" tabindex="0"
+    onclick="showDashboardDetail('planned')">
 
     <div class="number">
      ${money(plannedParts)}
@@ -4407,6 +4421,8 @@ function dashboard(){
   </div>
 
  </div>
+
+ <div id="dashboardDetail"></div>
 
 
  <div class="card">
@@ -4577,6 +4593,48 @@ function dashboard(){
 
 }
 
+
+function showDashboardDetail(type){
+ const target=$("dashboardDetail");
+ if(!target){ return; }
+ const items=getDashboardItems();
+ const currentYear=new Date().getFullYear();
+ let title="",body="";
+ const itemMarkup=x=>{
+  if(x.kind==="maintenance"){
+   return `<div class="dashboard-item" onclick="openDashboardTask('${x.vehicle.id}','${x.task.id}')"><div class="row between"><div><h3>🔧 ${esc(x.task.name)}</h3><div class="vehicle-name">${x.vehicle.emoji} ${esc(x.vehicle.name)}</div></div><span class="badge ${x.status.od?"overdue":x.status.so?"soon":"ok"}">${x.status.label}</span></div><div class="due-line"><b>Next due:</b> ${esc(due(x.task))}</div></div>`;
+  }
+  return `<div class="dashboard-item" onclick="openDashboardDate('${x.vehicle.id}')"><div class="row between"><div><h3>${x.dateItem.icon} ${esc(x.dateItem.title)}</h3><div class="vehicle-name">${x.vehicle.emoji} ${esc(x.vehicle.name)}</div></div><span class="badge ${x.status.className}">${x.status.label}</span></div><div class="due-line"><b>Due:</b> ${dateText(x.dateItem.date)} · ${esc(daysDescription(x.dateItem.date))}</div></div>`;
+ };
+ if(type==="overdue"||type==="soon"){
+  title=type==="overdue"?"Overdue items":"Due soon";
+  const filtered=items.filter(x=>type==="overdue"?x.status.od:x.status.so);
+  body=filtered.length?filtered.map(itemMarkup).join(""):`<div class="empty">No ${type==="overdue"?"overdue items":"items due soon"}.</div>`;
+ }
+ if(type==="maintenance"){
+  title="Maintenance tasks"; const tasks=[];
+  db.forEach(vehicle=>(vehicle.tasks||[]).forEach(task=>tasks.push({vehicle,task})));
+  body=tasks.length?tasks.map(x=>`<div class="dashboard-item" onclick="openDashboardTask('${x.vehicle.id}','${x.task.id}')"><h3>🔧 ${esc(x.task.name)}</h3><div class="vehicle-name">${x.vehicle.emoji} ${esc(x.vehicle.name)}</div><div class="due-line"><b>Next due:</b> ${esc(due(x.task))}</div></div>`).join(""):`<div class="empty">No maintenance tasks yet.</div>`;
+ }
+ if(type==="vehicles"){
+  const vehicleGrid=document.querySelector(".vehicle-grid"); if(vehicleGrid){vehicleGrid.scrollIntoView({behavior:"smooth",block:"start"});} return;
+ }
+ if(type==="spent"){
+  title=`Spent in ${currentYear}`;
+  const rows=db.map(vehicle=>{const amount=vehicleCostEvents(vehicle).reduce((sum,x)=>{if(!x.date)return sum;const d=new Date(x.date+"T00:00:00");return d.getFullYear()===currentYear?sum+x.amount:sum;},0);return {vehicle,amount};}).filter(x=>x.amount>0).sort((a,b)=>b.amount-a.amount);
+  body=rows.length?rows.map(x=>`<div class="dashboard-item" onclick="openDashboardCosts('${x.vehicle.id}')"><div class="row between"><h3>${x.vehicle.emoji} ${esc(x.vehicle.name)}</h3><b>${money(x.amount)}</b></div><div class="muted">Tap to view vehicle costs</div></div>`).join(""):`<div class="empty">No costs recorded for ${currentYear}.</div>`;
+ }
+ if(type==="planned"){
+  title="Planned parts"; const rows=[];
+  db.forEach(vehicle=>{let amount=0,count=0;(vehicle.wishlistJobs||[]).forEach(job=>(job.items||[]).forEach(item=>{if(!item.bought&&Number(item.price||0)>0){amount+=Number(item.price||0);count++;}}));if(count)rows.push({vehicle,amount,count});});
+  body=rows.length?rows.sort((a,b)=>b.amount-a.amount).map(x=>`<div class="dashboard-item" onclick="openDashboardWishlist('${x.vehicle.id}')"><div class="row between"><h3>${x.vehicle.emoji} ${esc(x.vehicle.name)}</h3><b>${money(x.amount)}</b></div><div class="muted">${x.count} unbought priced ${x.count===1?"part":"parts"} · Tap to view wishlist</div></div>`).join(""):`<div class="empty">No unbought wishlist parts with a price entered.</div>`;
+ }
+ target.innerHTML=`<div class="card"><div class="row between"><h2>${title}</h2><button class="secondary" onclick="closeDashboardDetail()">Close</button></div>${body}</div>`;
+ target.scrollIntoView({behavior:"smooth",block:"start"});
+}
+function closeDashboardDetail(){const target=$("dashboardDetail");if(target)target.innerHTML="";}
+function openDashboardCosts(vehicleId){current=vehicleId;tab="costs";focusTaskId=null;focusPartId=null;focusHistoryId=null;focusAttachmentId=null;focusWishlistJobId=null;render();}
+function openDashboardWishlist(vehicleId){current=vehicleId;tab="wishlist";focusTaskId=null;focusPartId=null;focusHistoryId=null;focusAttachmentId=null;focusWishlistJobId=null;render();}
 
 function openDashboardTask(
  vehicleId,
