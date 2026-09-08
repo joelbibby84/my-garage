@@ -626,6 +626,15 @@ dialog::backdrop{
  color:#68707c
 }
 
+.date-note{
+ margin-top:8px;
+ padding:9px 10px;
+ border-radius:10px;
+ background:#f3f4f6;
+ font-size:14px;
+ white-space:pre-wrap
+}
+
 
 /* PULL TO REFRESH */
 
@@ -895,6 +904,59 @@ dialog::backdrop{
   type="button"
   class="secondary"
   onclick="cancelVehicleEdit()">
+  Cancel
+ </button>
+
+</div>
+
+</form>
+</dialog>
+
+
+<!-- CUSTOM DATE REMINDER -->
+
+<dialog id="customDateDlg">
+
+<form
+ class="modal"
+ id="customDateForm">
+
+<h2 id="customDateHeading">
+ Add reminder
+</h2>
+
+<label>Reminder name</label>
+
+<input
+ id="customDateTitle"
+ required
+ placeholder="Breakdown cover renewal">
+
+<label>Date</label>
+
+<input
+ id="customDateValue"
+ type="date"
+ required>
+
+<label>Notes</label>
+
+<textarea
+ id="customDateNotes"
+ rows="4"
+ placeholder="Optional notes"></textarea>
+
+<div class="row"
+ style="margin-top:13px">
+
+ <button type="submit">
+  Save reminder
+ </button>
+
+ <button
+  type="button"
+  class="secondary"
+  onclick="customDateDlg.close()">
   Cancel
  </button>
 
@@ -1285,6 +1347,7 @@ const starter=[
   motDate:"",
   taxDate:"",
   insuranceDate:"",
+  customDates:[],
   notes:"",
   tasks:[],
   history:[],
@@ -1303,6 +1366,7 @@ const starter=[
   motDate:"",
   taxDate:"",
   insuranceDate:"",
+  customDates:[],
   notes:"",
   tasks:[],
   history:[],
@@ -1321,6 +1385,7 @@ const starter=[
   motDate:"",
   taxDate:"",
   insuranceDate:"",
+  customDates:[],
   notes:"",
   tasks:[],
   history:[],
@@ -1339,6 +1404,7 @@ const starter=[
   motDate:"",
   taxDate:"",
   insuranceDate:"",
+  customDates:[],
   notes:"",
   tasks:[],
   history:[],
@@ -1353,6 +1419,7 @@ let tab="maintenance";
 
 let editing=-1;
 let editingPart=-1;
+let editingCustomDateId=null;
 
 let recordTaskId=null;
 let editingRecordId=null;
@@ -1361,6 +1428,7 @@ let focusPartId=null;
 let focusTaskId=null;
 let focusHistoryId=null;
 let focusAttachmentId=null;
+let focusCustomDateId=null;
 
 
 /* VEHICLE PHOTO EDIT STATE */
@@ -2317,6 +2385,7 @@ function blankVehicle(base){
   motDate:"",
   taxDate:"",
   insuranceDate:"",
+  customDates:[],
 
   notes:"",
   tasks:[],
@@ -2376,6 +2445,19 @@ function normaliseVehicle(x,base){
    source.insuranceDate==null
    ?""
    :String(source.insuranceDate),
+
+  customDates:
+   Array.isArray(source.customDates)
+   ?source.customDates.map(
+     d=>({
+      ...d,
+      id:d.id||uid("date"),
+      title:d.title||"Reminder",
+      date:d.date||"",
+      notes:d.notes||""
+     })
+    )
+   :[],
 
   notes:
    source.notes==null
@@ -2957,6 +3039,18 @@ function attachmentById(id){
  return (
   v()?.attachments.find(
    a=>a.id===id
+  ) ||
+  null
+ );
+
+}
+
+
+function customDateById(id){
+
+ return (
+  v()?.customDates.find(
+   d=>d.id===id
   ) ||
   null
  );
@@ -3639,28 +3733,52 @@ function vehicleImportantDates(
  vehicle
 ){
 
- return [
+ const standard=[
   {
    type:"mot",
    title:"MOT",
    icon:"🧾",
    date:
-    vehicle.motDate||""
+    vehicle.motDate||"",
+   standard:true
   },
   {
    type:"tax",
    title:"Tax",
    icon:"💷",
    date:
-    vehicle.taxDate||""
+    vehicle.taxDate||"",
+   standard:true
   },
   {
    type:"insurance",
    title:"Insurance",
    icon:"🛡️",
    date:
-    vehicle.insuranceDate||""
+    vehicle.insuranceDate||"",
+   standard:true
   }
+ ];
+
+
+ const custom=
+  (vehicle.customDates||[])
+  .map(
+   d=>({
+    type:"custom",
+    title:d.title||"Reminder",
+    icon:"📌",
+    date:d.date||"",
+    notes:d.notes||"",
+    customId:d.id,
+    standard:false
+   })
+  );
+
+
+ return [
+  ...standard,
+  ...custom
  ];
 
 }
@@ -4027,7 +4145,7 @@ function dashboard(){
      class="muted"
      style="margin-top:4px">
 
-     Maintenance, MOT, tax and insurance.
+     Maintenance, MOT, tax, insurance and reminders.
 
     </p>
 
@@ -4107,7 +4225,14 @@ function dashboard(){
 
        <div
         class="dashboard-item"
-        onclick="openDashboardDate('${x.vehicle.id}')">
+        onclick="openDashboardDate(
+         '${x.vehicle.id}',
+         ${
+          x.dateItem.customId
+          ?"'"+x.dateItem.customId+"'"
+          :"null"
+         }
+        )">
 
         <div class="row between">
 
@@ -4205,13 +4330,17 @@ function openDashboardTask(
  focusAttachmentId=
   null;
 
+ focusCustomDateId=
+  null;
+
  render();
 
 }
 
 
 function openDashboardDate(
- vehicleId
+ vehicleId,
+ customDateId=null
 ){
 
  current=
@@ -4224,6 +4353,8 @@ function openDashboardDate(
  focusPartId=null;
  focusHistoryId=null;
  focusAttachmentId=null;
+ focusCustomDateId=
+  customDateId;
 
  render();
 
@@ -4670,9 +4801,19 @@ function datesPage(){
   v();
 
 
- const dates=
+ const standardDates=
   vehicleImportantDates(
    vehicle
+  ).filter(
+   x=>x.standard
+  );
+
+
+ const customDates=
+  vehicleImportantDates(
+   vehicle
+  ).filter(
+   x=>!x.standard
   );
 
 
@@ -4687,20 +4828,20 @@ function datesPage(){
    </h3>
 
    <p class="muted">
-    MOT, tax and insurance renewal dates.
+    MOT, tax, insurance and your own reminders.
    </p>
 
   </div>
 
-  <button onclick="editVehicle()">
-   Edit dates
+  <button onclick="newCustomDate()">
+   + Add reminder
   </button>
 
  </div>
 
 
  ${
-  dates.map(
+  standardDates.map(
    x=>{
 
 
@@ -4779,12 +4920,180 @@ function datesPage(){
        `
       }
 
+
+      <div
+       class="row"
+       style="margin-top:10px">
+
+       <button
+        class="secondary small"
+        onclick="editVehicle()">
+
+        Edit
+
+       </button>
+
+      </div>
+
      </div>
 
     `;
 
    }
   ).join("")
+ }
+
+
+ <div
+  class="row between"
+  style="margin-top:18px">
+
+  <div>
+
+   <h3>
+    Other reminders
+   </h3>
+
+   <p class="muted">
+    Breakdown cover, warranty, permits or anything else.
+   </p>
+
+  </div>
+
+ </div>
+
+
+ ${
+  customDates.length
+
+  ?customDates
+   .slice()
+   .sort(
+    (a,b)=>
+     String(a.date||"")
+      .localeCompare(
+       String(b.date||"")
+      )
+   )
+   .map(
+    x=>{
+
+
+     const s=
+      importantDateStatus(
+       x.date
+      );
+
+
+     return `
+
+      <div
+       id="custom-date-${esc(x.customId)}"
+       class="card date-card
+       ${s.className}
+       ${
+        focusCustomDateId===x.customId
+        ?"highlight"
+        :""
+       }">
+
+       <div class="row between">
+
+        <div>
+
+         <h3>
+          📌 ${esc(x.title)}
+         </h3>
+
+        </div>
+
+
+        <span
+         class="badge
+         ${s.className}">
+
+         ${s.label}
+
+        </span>
+
+       </div>
+
+
+       <div class="date-value">
+
+        ${dateText(
+         x.date
+        )}
+
+       </div>
+
+
+       <div class="date-detail">
+
+        ${esc(
+         daysDescription(
+          x.date
+         )
+        )}
+
+       </div>
+
+
+       ${
+        x.notes
+
+        ?`
+
+         <div class="date-note">
+          ${esc(x.notes)}
+         </div>
+
+        `
+
+        :""
+       }
+
+
+       <div
+        class="row"
+        style="margin-top:10px">
+
+        <button
+         class="secondary small"
+         onclick="editCustomDate('${x.customId}')">
+
+         Edit
+
+        </button>
+
+        <button
+         class="danger small"
+         onclick="deleteCustomDate('${x.customId}')">
+
+         Delete
+
+        </button>
+
+       </div>
+
+      </div>
+
+     `;
+
+    }
+   ).join("")
+
+  :`
+
+   <div class="card empty">
+
+    No extra reminders yet.
+    <br><br>
+    Add reminders for things such as breakdown cover or warranty renewals.
+
+   </div>
+
+  `
  }
 
 
@@ -4803,12 +5112,186 @@ function datesPage(){
    when they are within 30 days.
    Once the due date has passed they appear as
    <b>Overdue</b>.
+   Custom reminders also appear automatically on the Garage Dashboard.
 
   </p>
 
  </div>
 
  `;
+
+}
+
+
+/* CUSTOM DATE REMINDERS */
+
+function newCustomDate(){
+
+ editingCustomDateId=null;
+
+ $("customDateForm")
+  .reset();
+
+ $("customDateHeading")
+  .textContent=
+   "Add reminder";
+
+ $("customDateValue")
+  .value="";
+
+ $("customDateDlg")
+  .showModal();
+
+}
+
+
+function editCustomDate(id){
+
+ const item=
+  customDateById(id);
+
+ if(!item){
+  return;
+ }
+
+ editingCustomDateId=id;
+
+ $("customDateHeading")
+  .textContent=
+   "Edit reminder";
+
+ $("customDateTitle")
+  .value=
+   item.title||"";
+
+ $("customDateValue")
+  .value=
+   item.date||"";
+
+ $("customDateNotes")
+  .value=
+   item.notes||"";
+
+ $("customDateDlg")
+  .showModal();
+
+}
+
+
+$("customDateForm")
+ .addEventListener(
+  "submit",
+  async e=>{
+
+   e.preventDefault();
+
+   const vehicle=v();
+
+   if(!vehicle){
+    return;
+   }
+
+
+   const item={
+
+    id:
+     editingCustomDateId||
+     uid("date"),
+
+    title:
+     $("customDateTitle")
+      .value
+      .trim(),
+
+    date:
+     $("customDateValue")
+      .value,
+
+    notes:
+     $("customDateNotes")
+      .value
+      .trim()
+
+   };
+
+
+   if(editingCustomDateId){
+
+    const index=
+     vehicle.customDates
+      .findIndex(
+       x=>
+        x.id===
+        editingCustomDateId
+      );
+
+
+    if(index>=0){
+
+     vehicle.customDates[index]=
+      item;
+
+    }
+
+   }else{
+
+    vehicle.customDates.push(
+     item
+    );
+
+   }
+
+
+   editingCustomDateId=null;
+
+   focusCustomDateId=
+    item.id;
+
+
+   $("customDateDlg")
+    .close();
+
+
+   render();
+
+   await save();
+
+  }
+ );
+
+
+async function deleteCustomDate(id){
+
+ const item=
+  customDateById(id);
+
+ if(!item){
+  return;
+ }
+
+
+ if(
+  !confirm(
+   "Delete the reminder \""+
+   item.title+
+   "\"?"
+  )
+ ){
+  return;
+ }
+
+
+ v().customDates=
+  v().customDates.filter(
+   x=>x.id!==id
+  );
+
+
+ focusCustomDateId=null;
+
+ render();
+
+ await save();
 
 }
 
@@ -5083,6 +5566,7 @@ function openAttachment(id){
  focusPartId=null;
  focusTaskId=null;
  focusHistoryId=null;
+ focusCustomDateId=null;
 
  tab="photos";
 
@@ -5198,12 +5682,6 @@ $("attachmentForm")
      selectedLink.historyId;
 
 
-    /*
-     If a history record is selected
-     and it belongs to a maintenance
-     task, keep both relationships.
-    */
-
     if(historyId){
 
      const history=
@@ -5223,13 +5701,6 @@ $("attachmentForm")
 
     }
 
-
-    /*
-     If the user keeps the same
-     maintenance task selected while
-     editing a completed photo, retain
-     its matching history relationship.
-    */
 
     if(
      taskId &&
@@ -6635,6 +7106,16 @@ function scrollToFocus(){
  }
 
 
+ if(
+  tab==="dates" &&
+  focusCustomDateId
+ ){
+  id=
+   "custom-date-"+
+   focusCustomDateId;
+ }
+
+
  if(!id){
   return;
  }
@@ -6661,6 +7142,7 @@ function scrollToFocus(){
    focusTaskId=null;
    focusHistoryId=null;
    focusAttachmentId=null;
+   focusCustomDateId=null;
 
   },
   1000
@@ -6675,6 +7157,7 @@ function openPart(id){
  focusTaskId=null;
  focusHistoryId=null;
  focusAttachmentId=null;
+ focusCustomDateId=null;
 
  tab="parts";
 
@@ -6689,6 +7172,7 @@ function openMaintenanceTask(id){
  focusPartId=null;
  focusHistoryId=null;
  focusAttachmentId=null;
+ focusCustomDateId=null;
 
  tab="maintenance";
 
@@ -6703,6 +7187,7 @@ function openHistoryRecord(id){
  focusPartId=null;
  focusTaskId=null;
  focusAttachmentId=null;
+ focusCustomDateId=null;
 
  tab="history";
 
@@ -6728,6 +7213,8 @@ function openTaskHistory(taskId){
   records[
    records.length-1
   ].id;
+
+ focusCustomDateId=null;
 
  tab="history";
 
@@ -7662,12 +8149,6 @@ $("recordForm").onsubmit=
  }
 
 
- /*
-  Any photos already linked to this
-  maintenance task now also belong
-  to the completed History record.
- */
-
  if(r.taskId){
 
   vehicle.attachments
@@ -7676,13 +8157,6 @@ $("recordForm").onsubmit=
    )
    .forEach(
     a=>{
-
-     /*
-      If this is a newly completed
-      record, or the photo does not
-      already have a history link,
-      attach it to this completion.
-     */
 
      if(
       !a.historyId ||
@@ -8169,6 +8643,7 @@ function openV(id){
  focusTaskId=null;
  focusHistoryId=null;
  focusAttachmentId=null;
+ focusCustomDateId=null;
 
 
  render();
@@ -8185,6 +8660,7 @@ $("back").onclick=
  focusTaskId=null;
  focusHistoryId=null;
  focusAttachmentId=null;
+ focusCustomDateId=null;
 
  render();
 
