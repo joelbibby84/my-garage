@@ -1025,6 +1025,16 @@ dialog::backdrop{
  rows="3"
  placeholder="Anything useful about the planned job"></textarea>
 
+<label>Link to maintenance task (optional)</label>
+
+<select id="wishlistJobTaskId">
+ <option value="">Not linked</option>
+</select>
+
+<p class="muted" style="margin-top:5px">
+ If linked, completing this job will update that maintenance task's last-done date and mileage, so its next reminder starts again.
+</p>
+
 <div class="row"
  style="margin-top:13px">
 
@@ -2686,6 +2696,7 @@ function normaliseVehicle(x,base){
       id:job.id||uid("wishjob"),
       title:job.title||"Parts job",
       notes:job.notes||"",
+      taskId:job.taskId||null,
       items:
        Array.isArray(job.items)
        ?job.items.map(
@@ -5402,6 +5413,19 @@ function wishlistJobMarkup(job){
      :""
     }
 
+    ${
+     job.taskId && taskById(job.taskId)
+     ?`
+
+      <div class="linked-box" style="margin-top:9px">
+       <b>🔗 Maintenance:</b>
+       ${esc(taskById(job.taskId).name)}
+      </div>
+
+     `
+     :""
+    }
+
    </div>
 
 
@@ -5506,7 +5530,7 @@ function wishlistJobMarkup(job){
       class="small"
       onclick="completeWishlistJob('${job.id}')">
 
-      ✓ Complete job
+      🔧 Record job as completed
 
      </button>
 
@@ -5739,7 +5763,7 @@ function completeWishlistJob(id){
  }
 
  completingWishlistJobId=id;
- recordTaskId=null;
+ recordTaskId=job.taskId||null;
  editingRecordId=null;
  editing=-1;
 
@@ -5772,6 +5796,34 @@ function completeWishlistJob(id){
 }
 
 
+function wishlistMaintenanceOptions(selectedTaskId=null){
+
+ const vehicle=v();
+
+ let html=`<option value="">Not linked</option>`;
+
+ if(!vehicle){
+  return html;
+ }
+
+ vehicle.tasks.forEach(t=>{
+
+  const selected=
+   selectedTaskId===t.id
+   ?" selected"
+   :"";
+
+  html+=
+   `<option value="${esc(t.id)}"${selected}>
+     ${esc(t.name)}
+    </option>`;
+
+ });
+
+ return html;
+}
+
+
 function newWishlistJob(){
 
  editingWishlistJobId=null;
@@ -5782,6 +5834,9 @@ function newWishlistJob(){
  $("wishlistJobHeading")
   .textContent=
    "Add parts job";
+
+ $("wishlistJobTaskId").innerHTML=
+  wishlistMaintenanceOptions();
 
  $("wishlistJobDlg")
   .showModal();
@@ -5815,6 +5870,11 @@ function editWishlistJob(id){
  $("wishlistJobNotes")
   .value=
    job.notes||"";
+
+ $("wishlistJobTaskId").innerHTML=
+  wishlistMaintenanceOptions(
+   job.taskId||null
+  );
 
 
  $("wishlistJobDlg")
@@ -5866,6 +5926,9 @@ $("wishlistJobForm")
        .value
        .trim();
 
+     job.taskId=
+      $("wishlistJobTaskId").value||null;
+
      focusWishlistJobId=
       job.id;
 
@@ -5884,6 +5947,9 @@ $("wishlistJobForm")
       $("wishlistJobNotes")
        .value
        .trim(),
+
+     taskId:
+      $("wishlistJobTaskId").value||null,
 
      items:[]
 
