@@ -1587,6 +1587,7 @@ let editingPart=-1;
 let editingWishlistJobId=null;
 let editingWishlistPartId=null;
 let wishlistPartJobId=null;
+let completingWishlistJobId=null;
 
 let recordTaskId=null;
 let editingRecordId=null;
@@ -5497,6 +5498,22 @@ function wishlistJobMarkup(job){
 
    </button>
 
+   ${
+    total>0 && bought===total
+    ?`
+
+     <button
+      class="small"
+      onclick="completeWishlistJob('${job.id}')">
+
+      ✓ Complete job
+
+     </button>
+
+    `
+    :""
+   }
+
   </div>
 
 
@@ -5707,6 +5724,51 @@ function wishlistItemMarkup(
 
  `;
 
+}
+
+
+function completeWishlistJob(id){
+
+ const job=wishlistJobById(id);
+ if(!job){ return; }
+
+ const boughtItems=(job.items||[]).filter(item=>item.bought);
+ if(!boughtItems.length){
+  alert("Mark the parts as bought before completing this job.");
+  return;
+ }
+
+ completingWishlistJobId=id;
+ recordTaskId=null;
+ editingRecordId=null;
+ editing=-1;
+
+ $("recordForm").reset();
+ $("recordHeading").textContent="Complete wishlist job: "+job.title;
+ $("recordJob").value=job.title||"";
+ $("recordDate").value=today();
+ $("recordMileage").value=v().mileage||"";
+
+ const totalCost=boughtItems.reduce((sum,item)=>{
+  const price=Number(item.price);
+  return sum+(Number.isFinite(price)?price:0);
+ },0);
+
+ $("recordCost").value=totalCost>0?totalCost.toFixed(2):"";
+ $("recordNotes").value=job.notes||"";
+
+ resetRecordParts(
+  boughtItems.map(item=>({
+   name:item.name||"",
+   category:"",
+   maker:"",
+   number:item.number||"",
+   spec:"",
+   cost:item.price||""
+  }))
+ );
+
+ $("recordDlg").showModal();
 }
 
 
@@ -8813,6 +8875,8 @@ function collectRecordParts(){
 
 function completeTask(i){
 
+ completingWishlistJobId=null;
+
  const t=
   v().tasks[i];
 
@@ -8865,6 +8929,7 @@ function completeTask(i){
 
 function newRecord(){
 
+ completingWishlistJobId=null;
  recordTaskId=null;
  editingRecordId=null;
  editing=-1;
@@ -9119,6 +9184,16 @@ $("recordForm").onsubmit=
  }
 
 
+ if(completingWishlistJobId){
+
+  vehicle.wishlistJobs=vehicle.wishlistJobs.filter(
+   job=>job.id!==completingWishlistJobId
+  );
+
+  completingWishlistJobId=null;
+ }
+
+
  editing=-1;
  editingRecordId=null;
  recordTaskId=null;
@@ -9133,6 +9208,8 @@ $("recordForm").onsubmit=
 /* EDIT HISTORY */
 
 function editRecord(i){
+
+ completingWishlistJobId=null;
 
  const r=
   v().history[i];
