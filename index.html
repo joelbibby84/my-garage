@@ -5824,19 +5824,64 @@ function wishlistMaintenanceOptions(selectedTaskId=null){
 }
 
 
-function newWishlistJob(){
+function planPartsForTask(taskId){
+
+ const task=
+  taskById(taskId);
+
+ if(!task){
+  return;
+ }
+
+ const existing=
+  (v().wishlistJobs||[]).find(
+   job=>job.taskId===taskId
+  );
+
+ if(existing){
+
+  tab="wishlist";
+  focusWishlistJobId=
+   existing.id;
+
+  render();
+  return;
+ }
+
+ newWishlistJob(taskId);
+
+}
+
+
+function newWishlistJob(selectedTaskId=null){
 
  editingWishlistJobId=null;
 
  $("wishlistJobForm")
   .reset();
 
+ const selectedTask=
+  selectedTaskId
+  ?taskById(selectedTaskId)
+  :null;
+
  $("wishlistJobHeading")
   .textContent=
-   "Add parts job";
+   selectedTask
+   ?"Plan parts for "+selectedTask.name
+   :"Add parts job";
 
  $("wishlistJobTaskId").innerHTML=
-  wishlistMaintenanceOptions();
+  wishlistMaintenanceOptions(
+   selectedTask?.id||null
+  );
+
+ if(selectedTask){
+
+  $("wishlistJobTitle").value=
+   selectedTask.name||"";
+
+ }
 
  $("wishlistJobDlg")
   .showModal();
@@ -6994,6 +7039,12 @@ function maintenance(){
       );
 
 
+     const plannedWishlistJob=
+      (vehicle.wishlistJobs||[]).find(
+       job=>job.taskId===t.id
+      )||null;
+
+
      return `
 
      <div
@@ -7293,6 +7344,18 @@ function maintenance(){
       <div
        class="row"
        style="margin-top:10px">
+
+       <button
+        class="secondary"
+        onclick="planPartsForTask('${t.id}')">
+
+        ${
+         plannedWishlistJob
+         ?"🛒 View planned parts"
+         :"🛒 Plan parts"
+        }
+
+       </button>
 
        <button
         onclick="completeTask(${i})">
