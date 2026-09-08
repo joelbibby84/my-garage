@@ -4239,6 +4239,26 @@ function dashboard(){
   );
 
 
+ const currentYear=
+  new Date().getFullYear();
+
+ const spentThisYear=
+  db.reduce(
+   (sum,vehicle)=>
+    sum+vehicleCostEvents(vehicle).reduce(
+     (vehicleSum,x)=>{
+      if(!x.date){ return vehicleSum; }
+      const d=new Date(x.date+"T00:00:00");
+      return d.getFullYear()===currentYear
+       ?vehicleSum+x.amount
+       :vehicleSum;
+     },
+     0
+    ),
+   0
+  );
+
+
  const scheduled=
   items.filter(
    x=>x.priority<3
@@ -4334,6 +4354,19 @@ function dashboard(){
 
     <div class="label">
      Vehicles
+    </div>
+
+   </div>
+
+
+   <div class="dashboard-stat">
+
+    <div class="number">
+     ${money(spentThisYear)}
+    </div>
+
+    <div class="label">
+     Spent in ${currentYear}
     </div>
 
    </div>
@@ -4566,6 +4599,34 @@ function openDashboardDate(
 
 /* HOME VEHICLE TILE */
 
+function vehicleHomeSummary(vehicle){
+
+ const items=
+  getDashboardItems()
+   .filter(x=>x.vehicle.id===vehicle.id);
+
+ const next=
+  items.find(x=>x.priority<3)||null;
+
+ const year=
+  new Date().getFullYear();
+
+ const spend=
+  vehicleCostEvents(vehicle).reduce(
+   (sum,x)=>{
+    if(!x.date){ return sum; }
+    const d=new Date(x.date+"T00:00:00");
+    return d.getFullYear()===year
+     ?sum+x.amount
+     :sum;
+   },
+   0
+  );
+
+ return {next,year,spend};
+}
+
+
 function vehicleTile(vehicle){
 
  const photoUrl=
@@ -4574,6 +4635,9 @@ function vehicleTile(vehicle){
     vehicle.photoPath
    )
   :"";
+
+ const summary=
+  vehicleHomeSummary(vehicle);
 
 
  return `
@@ -4672,6 +4736,26 @@ function vehicleTile(vehicle){
 
     :""
    }
+
+   <div style="margin-top:10px;padding-top:10px;border-top:1px solid #e5e7eb">
+
+    <div class="vehicle-tile-detail">
+     <b>Next:</b>
+     ${
+      summary.next
+      ?summary.next.kind==="maintenance"
+       ?"🔧 "+esc(summary.next.task.name)+" · "+esc(due(summary.next.task))
+       :summary.next.dateItem.icon+" "+esc(summary.next.dateItem.title)+" · "+dateText(summary.next.dateItem.date)
+      :"Nothing scheduled"
+     }
+    </div>
+
+    <div class="vehicle-tile-detail" style="margin-top:5px">
+     <b>Spent ${summary.year}:</b>
+     ${money(summary.spend)}
+    </div>
+
+   </div>
 
   </div>
 
