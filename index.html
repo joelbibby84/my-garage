@@ -4414,9 +4414,36 @@ function dashboard(){
   );
 
 
+ const now=
+  new Date();
+
+ const todayStart=
+  new Date(
+   now.getFullYear(),
+   now.getMonth(),
+   now.getDate()
+  ).getTime();
+
+ const sixtyDaysMs=
+  60*24*60*60*1000;
+
  const scheduled=
   items.filter(
-   x=>x.priority<3
+   x=>{
+    if(x.status.od){
+     return true;
+    }
+
+    const dueByDate=
+     x.dateTime<9999999999999 &&
+     x.dateTime-todayStart<=sixtyDaysMs;
+
+    const dueByMiles=
+     x.mileGap<999999999 &&
+     x.mileGap<=1000;
+
+    return dueByDate || dueByMiles;
+   }
   );
 
 
