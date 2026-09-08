@@ -4961,6 +4961,22 @@ function render(){
 
     <button
      class="${
+      tab==="costs"
+      ?"active"
+      :""
+     }"
+     onclick="
+      tab='costs';
+      render();
+     ">
+
+     💷 Costs
+
+    </button>
+
+
+    <button
+     class="${
       tab==="parts"
       ?"active"
       :""
@@ -5010,8 +5026,11 @@ function render(){
       :tab==="history"
        ?history()
 
-       :tab==="parts"
-        ?parts()
+       :tab==="costs"
+        ?costsPage()
+
+        :tab==="parts"
+         ?parts()
 
         :notes()
   );
@@ -7803,6 +7822,209 @@ function history(){
   `
  );
 
+}
+
+
+/* COSTS */
+
+function money(value){
+ return "£"+Number(value||0).toFixed(2);
+}
+
+
+function vehicleCostEvents(vehicle){
+
+ const events=[];
+ const historyIds=new Set();
+
+ (vehicle.history||[]).forEach(r=>{
+
+  historyIds.add(r.id);
+
+  const recordCost=Number(r.cost||0);
+
+  const linkedParts=(vehicle.parts||[]).filter(
+   p=>p.historyId===r.id
+  );
+
+  const linkedPartsCost=linkedParts.reduce(
+   (sum,p)=>sum+Number(p.cost||0),
+   0
+  );
+
+  const amount=
+   recordCost>0
+   ?recordCost
+   :linkedPartsCost;
+
+  if(amount>0){
+   events.push({
+    date:r.date||"",
+    amount,
+    title:r.job||"Completed work",
+    kind:"History",
+    historyId:r.id
+   });
+  }
+
+ });
+
+ (vehicle.parts||[]).forEach(p=>{
+
+  if(p.historyId && historyIds.has(p.historyId)){
+   return;
+  }
+
+  const amount=Number(p.cost||0);
+
+  if(amount>0){
+   events.push({
+    date:p.date||"",
+    amount,
+    title:p.name||"Part / oil",
+    kind:"Part / oil",
+    partId:p.id
+   });
+  }
+
+ });
+
+ return events;
+}
+
+
+function costsPage(){
+
+ const vehicle=v();
+ const events=vehicleCostEvents(vehicle);
+
+ const now=new Date();
+ const year=now.getFullYear();
+
+ const start12=new Date(now);
+ start12.setFullYear(start12.getFullYear()-1);
+
+ const thisYear=events.reduce(
+  (sum,x)=>{
+   if(!x.date){ return sum; }
+   const d=new Date(x.date+"T00:00:00");
+   return d.getFullYear()===year
+    ?sum+x.amount
+    :sum;
+  },
+  0
+ );
+
+ const last12=events.reduce(
+  (sum,x)=>{
+   if(!x.date){ return sum; }
+   const d=new Date(x.date+"T00:00:00");
+   return d>=start12 && d<=now
+    ?sum+x.amount
+    :sum;
+  },
+  0
+ );
+
+ const total=events.reduce(
+  (sum,x)=>sum+x.amount,
+  0
+ );
+
+ const planned=(vehicle.wishlistJobs||[]).reduce(
+  (sum,job)=>
+   sum+(job.items||[]).reduce(
+    (partSum,item)=>
+     partSum+(
+      item.bought
+      ?0
+      :Number(item.price||0)
+     ),
+    0
+   ),
+  0
+ );
+
+ const sorted=events.slice().sort(
+  (a,b)=>String(b.date||"").localeCompare(
+   String(a.date||"")
+  )
+ );
+
+ return `
+  <div>
+   <h3>Vehicle costs</h3>
+   <p class="muted">
+    What you've spent on ${esc(vehicle.name)}.
+    Linked Parts & Oils are not counted twice.
+   </p>
+  </div>
+
+  <div class="dashboard-grid">
+   <div class="dashboard-stat">
+    <div class="number">${money(thisYear)}</div>
+    <div class="label">Spent in ${year}</div>
+   </div>
+
+   <div class="dashboard-stat">
+    <div class="number">${money(last12)}</div>
+    <div class="label">Last 12 months</div>
+   </div>
+
+   <div class="dashboard-stat">
+    <div class="number">${money(last12/12)}</div>
+    <div class="label">Average per month</div>
+   </div>
+
+   <div class="dashboard-stat">
+    <div class="number">${money(total)}</div>
+    <div class="label">Total recorded spend</div>
+   </div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+   <div class="row between">
+    <div>
+     <h3>🛒 Planned parts</h3>
+     <p class="muted" style="margin-top:4px">
+      Unbought wishlist items with a price entered.
+     </p>
+    </div>
+    <h2>${money(planned)}</h2>
+   </div>
+  </div>
+
+  <div class="card">
+   <h3>Where the money went</h3>
+   <p class="muted" style="margin-top:4px">
+    Completed jobs and standalone parts with a cost recorded.
+   </p>
+
+   ${
+    sorted.length
+    ?sorted.map(x=>`
+      <div class="dashboard-item"
+       onclick="${
+        x.historyId
+        ?`openHistoryRecord('${x.historyId}')`
+        :`openPart('${x.partId}')`
+       }">
+       <div class="row between" style="flex-wrap:nowrap">
+        <div style="min-width:0">
+         <h3>${esc(x.title)}</h3>
+         <div class="muted" style="margin-top:3px">
+          ${x.date?dateText(x.date):"Date not entered"}
+          · ${esc(x.kind)}
+         </div>
+        </div>
+        <b style="white-space:nowrap">${money(x.amount)}</b>
+       </div>
+      </div>
+     `).join("")
+    :`<div class="empty">No costs recorded yet.</div>`
+   }
+  </div>
+ `;
 }
 
 
