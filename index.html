@@ -760,6 +760,16 @@ dialog::backdrop{
 }
 
 
+/* VEHICLE NOTES */
+.note-card{
+ border-left:5px solid #2563eb
+}
+.note-text{
+ margin-top:9px;
+ white-space:pre-wrap;
+ line-height:1.45
+}
+
 /* SUBTLE RAISED TREATMENT FOR EVERYTHING TAPPABLE */
 button:not(.back),
 .dashboard-stat[onclick],
@@ -1006,11 +1016,6 @@ button:not(.back):active,
  </div>
 
 </div>
-
-<label>Notes / modifications</label>
-<textarea
- id="vehicleNotes"
- rows="4"></textarea>
 
 <div class="row"
  style="margin-top:13px">
@@ -1525,6 +1530,51 @@ button:not(.back):active,
 </dialog>
 
 
+<!-- VEHICLE NOTE -->
+
+<dialog id="noteDlg">
+
+<form
+ class="modal"
+ id="noteForm">
+
+<h2 id="noteHeading">
+ Add note
+</h2>
+
+<label>Title</label>
+<input
+ id="noteTitle"
+ required
+ placeholder="EGR deleted">
+
+<label>Details</label>
+<textarea
+ id="noteText"
+ rows="6"
+ required
+ placeholder="Add anything useful you want to remember about this vehicle."></textarea>
+
+<div class="row"
+ style="margin-top:13px">
+
+ <button type="submit">
+  Save note
+ </button>
+
+ <button
+  type="button"
+  class="secondary"
+  onclick="noteDlg.close()">
+  Cancel
+ </button>
+
+</div>
+
+</form>
+</dialog>
+
+
 <script>
 
 const SUPABASE_URL=
@@ -1556,6 +1606,7 @@ const starter=[
   taxDate:"",
   insuranceDate:"",
   notes:"",
+  noteEntries:[],
   tasks:[],
   history:[],
   parts:[],
@@ -1575,6 +1626,7 @@ const starter=[
   taxDate:"",
   insuranceDate:"",
   notes:"",
+  noteEntries:[],
   tasks:[],
   history:[],
   parts:[],
@@ -1594,6 +1646,7 @@ const starter=[
   taxDate:"",
   insuranceDate:"",
   notes:"",
+  noteEntries:[],
   tasks:[],
   history:[],
   parts:[],
@@ -1613,6 +1666,7 @@ const starter=[
   taxDate:"",
   insuranceDate:"",
   notes:"",
+  noteEntries:[],
   tasks:[],
   history:[],
   parts:[],
@@ -1636,6 +1690,7 @@ let completingWishlistJobId=null;
 
 let recordTaskId=null;
 let editingRecordId=null;
+let editingNoteId=null;
 
 let focusPartId=null;
 let focusTaskId=null;
@@ -2625,6 +2680,7 @@ function blankVehicle(base){
   insuranceDate:"",
 
   notes:"",
+  noteEntries:[],
   tasks:[],
   history:[],
   parts:[],
@@ -2684,10 +2740,27 @@ function normaliseVehicle(x,base){
    ?""
    :String(source.insuranceDate),
 
-  notes:
-   source.notes==null
-   ?""
-   :String(source.notes),
+  notes:"",
+
+  noteEntries:
+   Array.isArray(source.noteEntries)
+   ?source.noteEntries.map(
+     n=>({
+      ...n,
+      id:n.id||uid("note"),
+      title:n.title||"Note",
+      text:n.text==null?"":String(n.text)
+     })
+    )
+   :(
+     source.notes
+     ?[{
+       id:uid("note"),
+       title:"General notes",
+       text:String(source.notes)
+      }]
+     :[]
+    ),
 
   tasks:
    Array.isArray(source.tasks)
@@ -8581,31 +8654,187 @@ function parts(){
 
 function notes(){
 
+ const list=
+  v().noteEntries||[];
+
  return `
 
- <div class="card">
+ <div class="row between">
 
-  <h3>
-   Vehicle notes & modifications
-  </h3>
+  <div>
+   <h3>Vehicle notes & modifications</h3>
+   <p class="muted">Keep useful information about this vehicle.</p>
+  </div>
 
-  <p
-   style="
-    margin-top:8px;
-    white-space:pre-wrap
-   ">
-
-   ${
-    esc(v().notes)
-    ||
-    '<span class="muted">No notes yet.</span>'
-   }
-
-  </p>
+  <button onclick="newNote()">
+   + Add note
+  </button>
 
  </div>
 
+ ${
+  list.length
+  ?list.slice().reverse().map(
+    n=>`
+     <div class="card note-card">
+      <h3>${esc(n.title)}</h3>
+      <p class="note-text">${esc(n.text)}</p>
+
+      <div class="row" style="margin-top:12px">
+       <button
+        class="secondary"
+        onclick="editNote('${n.id}')">
+        Edit
+       </button>
+
+       <button
+        class="danger"
+        onclick="deleteNote('${n.id}')">
+        Delete
+       </button>
+      </div>
+     </div>
+    `
+   ).join("")
+  :`
+   <div class="card empty">
+    No notes yet. Tap <b>Add note</b> to add one.
+   </div>
+  `
+ }
+
  `;
+
+}
+
+
+function newNote(){
+
+ editingNoteId=null;
+
+ $("noteForm").reset();
+
+ $("noteHeading")
+  .textContent="Add note";
+
+ $("noteDlg")
+  .showModal();
+
+}
+
+
+function editNote(id){
+
+ const note=
+  (v().noteEntries||[])
+   .find(n=>n.id===id);
+
+ if(!note){
+  return;
+ }
+
+ editingNoteId=id;
+
+ $("noteHeading")
+  .textContent="Edit note";
+
+ $("noteTitle").value=
+  note.title||"";
+
+ $("noteText").value=
+  note.text||"";
+
+ $("noteDlg")
+  .showModal();
+
+}
+
+
+$("noteForm")
+ .addEventListener(
+  "submit",
+  async e=>{
+
+   e.preventDefault();
+
+   const vehicle=v();
+
+   if(!vehicle){
+    return;
+   }
+
+   if(!Array.isArray(vehicle.noteEntries)){
+    vehicle.noteEntries=[];
+   }
+
+   const note={
+    id:editingNoteId||uid("note"),
+    title:$("noteTitle").value.trim(),
+    text:$("noteText").value.trim()
+   };
+
+   if(!note.title||!note.text){
+    return;
+   }
+
+   if(editingNoteId){
+
+    const index=
+     vehicle.noteEntries
+      .findIndex(n=>n.id===editingNoteId);
+
+    if(index>=0){
+     vehicle.noteEntries[index]=note;
+    }
+
+   }else{
+
+    vehicle.noteEntries.push(note);
+
+   }
+
+   editingNoteId=null;
+
+   $("noteDlg").close();
+
+   render();
+   await save();
+
+  }
+ );
+
+
+async function deleteNote(id){
+
+ const vehicle=v();
+
+ if(!vehicle){
+  return;
+ }
+
+ const note=
+  (vehicle.noteEntries||[])
+   .find(n=>n.id===id);
+
+ if(!note){
+  return;
+ }
+
+ if(!confirm(
+  'Delete note "'+
+  note.title+
+  '"?'
+ )){
+  return;
+ }
+
+ vehicle.noteEntries=
+  vehicle.noteEntries.filter(
+   n=>n.id!==id
+  );
+
+ render();
+ await save();
 
 }
 
@@ -8994,9 +9223,6 @@ function editVehicle(){
  $("vehicleInsuranceDate").value=
   v().insuranceDate||"";
 
- $("vehicleNotes").value=
-  v().notes||"";
-
 
  $("vehiclePhotoStatus")
   .textContent="";
@@ -9155,11 +9381,6 @@ $("vehicleForm")
     vehicle.insuranceDate=
      $("vehicleInsuranceDate")
       .value;
-
-    vehicle.notes=
-     $("vehicleNotes")
-      .value
-      .trim();
 
 
     clearPendingVehiclePhoto();
