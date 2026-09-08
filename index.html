@@ -626,13 +626,99 @@ dialog::backdrop{
  color:#68707c
 }
 
-.date-note{
+
+/* PARTS WISHLIST */
+
+.wishlist-job{
+ border-left:5px solid #2563eb
+}
+
+.wishlist-progress{
+ margin-top:10px;
+ height:9px;
+ border-radius:999px;
+ overflow:hidden;
+ background:#e5e7eb
+}
+
+.wishlist-progress-bar{
+ height:100%;
+ background:#2563eb;
+ transition:width .2s ease
+}
+
+.wishlist-summary{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ gap:8px;
  margin-top:8px;
- padding:9px 10px;
- border-radius:10px;
- background:#f3f4f6;
- font-size:14px;
+ font-size:13px;
+ color:#68707c
+}
+
+.wishlist-item{
+ margin-top:10px;
+ padding:12px;
+ border:1px solid #e5e7eb;
+ border-radius:13px;
+ background:#f8f9fa
+}
+
+.wishlist-item.bought{
+ background:#f0fdf4;
+ border-color:#bbf7d0
+}
+
+.wishlist-item-title{
+ display:flex;
+ align-items:flex-start;
+ gap:10px
+}
+
+.wishlist-checkbox{
+ width:23px;
+ height:23px;
+ margin:1px 0 0;
+ flex:0 0 auto;
+ accent-color:#16a34a
+}
+
+.wishlist-item-name{
+ font-size:15px;
+ font-weight:800;
+ line-height:1.3
+}
+
+.wishlist-item.bought .wishlist-item-name{
+ text-decoration:line-through;
+ color:#68707c
+}
+
+.wishlist-meta{
+ font-size:13px;
+ color:#68707c;
+ margin-top:5px;
+ line-height:1.45
+}
+
+.wishlist-notes{
+ margin-top:8px;
+ font-size:13px;
  white-space:pre-wrap
+}
+
+.wishlist-link{
+ display:inline-block;
+ margin-top:7px;
+ font-size:13px;
+ color:#2563eb;
+ font-weight:700;
+ text-decoration:none
+}
+
+.wishlist-link:hover{
+ text-decoration:underline
 }
 
 
@@ -913,50 +999,127 @@ dialog::backdrop{
 </dialog>
 
 
-<!-- CUSTOM DATE REMINDER -->
+<!-- WISHLIST JOB -->
 
-<dialog id="customDateDlg">
+<dialog id="wishlistJobDlg">
 
 <form
  class="modal"
- id="customDateForm">
+ id="wishlistJobForm">
 
-<h2 id="customDateHeading">
- Add reminder
+<h2 id="wishlistJobHeading">
+ Add parts job
 </h2>
 
-<label>Reminder name</label>
+<label>Job / project title</label>
 
 <input
- id="customDateTitle"
+ id="wishlistJobTitle"
  required
- placeholder="Breakdown cover renewal">
-
-<label>Date</label>
-
-<input
- id="customDateValue"
- type="date"
- required>
+ placeholder="Clutch">
 
 <label>Notes</label>
 
 <textarea
- id="customDateNotes"
- rows="4"
- placeholder="Optional notes"></textarea>
+ id="wishlistJobNotes"
+ rows="3"
+ placeholder="Anything useful about the planned job"></textarea>
 
 <div class="row"
  style="margin-top:13px">
 
  <button type="submit">
-  Save reminder
+  Save job
  </button>
 
  <button
   type="button"
   class="secondary"
-  onclick="customDateDlg.close()">
+  onclick="wishlistJobDlg.close()">
+  Cancel
+ </button>
+
+</div>
+
+</form>
+</dialog>
+
+
+<!-- WISHLIST PART -->
+
+<dialog id="wishlistPartDlg">
+
+<form
+ class="modal"
+ id="wishlistPartForm">
+
+<h2 id="wishlistPartHeading">
+ Add required part
+</h2>
+
+<label>Part / item</label>
+
+<input
+ id="wishlistPartName"
+ required
+ placeholder="Clutch plate">
+
+<div class="grid">
+
+ <div>
+  <label>Part number</label>
+  <input
+   id="wishlistPartNumber"
+   placeholder="Optional">
+ </div>
+
+ <div>
+  <label>Price (£)</label>
+  <input
+   id="wishlistPartPrice"
+   type="number"
+   min="0"
+   step="0.01"
+   placeholder="Optional">
+ </div>
+
+</div>
+
+<label>Supplier / website</label>
+
+<input
+ id="wishlistPartSupplier"
+ placeholder="Euro Car Parts, eBay, https://...">
+
+<label>Notes</label>
+
+<textarea
+ id="wishlistPartNotes"
+ rows="3"
+ placeholder="Size, brand, alternative part number, etc."></textarea>
+
+<label style="margin-top:13px">
+
+ <input
+  id="wishlistPartBought"
+  type="checkbox"
+  style="width:auto;margin-right:8px">
+
+ Already bought
+
+</label>
+
+<div class="row"
+ style="margin-top:13px">
+
+ <button type="submit">
+  Save part
+ </button>
+
+ <button
+  type="button"
+  class="secondary"
+  onclick="wishlistPartDlg.close()">
   Cancel
  </button>
 
@@ -1347,11 +1510,11 @@ const starter=[
   motDate:"",
   taxDate:"",
   insuranceDate:"",
-  customDates:[],
   notes:"",
   tasks:[],
   history:[],
   parts:[],
+  wishlistJobs:[],
   attachments:[]
  },
  {
@@ -1366,11 +1529,11 @@ const starter=[
   motDate:"",
   taxDate:"",
   insuranceDate:"",
-  customDates:[],
   notes:"",
   tasks:[],
   history:[],
   parts:[],
+  wishlistJobs:[],
   attachments:[]
  },
  {
@@ -1385,11 +1548,11 @@ const starter=[
   motDate:"",
   taxDate:"",
   insuranceDate:"",
-  customDates:[],
   notes:"",
   tasks:[],
   history:[],
   parts:[],
+  wishlistJobs:[],
   attachments:[]
  },
  {
@@ -1404,11 +1567,11 @@ const starter=[
   motDate:"",
   taxDate:"",
   insuranceDate:"",
-  customDates:[],
   notes:"",
   tasks:[],
   history:[],
   parts:[],
+  wishlistJobs:[],
   attachments:[]
  }
 ];
@@ -1419,7 +1582,10 @@ let tab="maintenance";
 
 let editing=-1;
 let editingPart=-1;
-let editingCustomDateId=null;
+
+let editingWishlistJobId=null;
+let editingWishlistPartId=null;
+let wishlistPartJobId=null;
 
 let recordTaskId=null;
 let editingRecordId=null;
@@ -1428,7 +1594,7 @@ let focusPartId=null;
 let focusTaskId=null;
 let focusHistoryId=null;
 let focusAttachmentId=null;
-let focusCustomDateId=null;
+let focusWishlistJobId=null;
 
 
 /* VEHICLE PHOTO EDIT STATE */
@@ -1508,6 +1674,31 @@ function sameText(a,b){
    .toLowerCase()
  );
 
+}
+
+
+function supplierHref(value){
+
+ const text=
+  String(value||"").trim();
+
+ if(!text){
+  return "";
+ }
+
+ if(
+  /^https?:\/\//i.test(text)
+ ){
+  return text;
+ }
+
+ if(
+  /^www\./i.test(text)
+ ){
+  return "https://"+text;
+ }
+
+ return "";
 }
 
 
@@ -2385,12 +2576,12 @@ function blankVehicle(base){
   motDate:"",
   taxDate:"",
   insuranceDate:"",
-  customDates:[],
 
   notes:"",
   tasks:[],
   history:[],
   parts:[],
+  wishlistJobs:[],
   attachments:[]
  };
 
@@ -2446,19 +2637,6 @@ function normaliseVehicle(x,base){
    ?""
    :String(source.insuranceDate),
 
-  customDates:
-   Array.isArray(source.customDates)
-   ?source.customDates.map(
-     d=>({
-      ...d,
-      id:d.id||uid("date"),
-      title:d.title||"Reminder",
-      date:d.date||"",
-      notes:d.notes||""
-     })
-    )
-   :[],
-
   notes:
    source.notes==null
    ?""
@@ -2494,6 +2672,33 @@ function normaliseVehicle(x,base){
      p=>({
       ...p,
       id:p.id||uid("part")
+     })
+    )
+   :[],
+
+  wishlistJobs:
+   Array.isArray(source.wishlistJobs)
+   ?source.wishlistJobs.map(
+     job=>({
+      ...job,
+      id:job.id||uid("wishjob"),
+      title:job.title||"Parts job",
+      notes:job.notes||"",
+      items:
+       Array.isArray(job.items)
+       ?job.items.map(
+         item=>({
+          ...item,
+          id:item.id||uid("wishpart"),
+          name:item.name||"",
+          number:item.number||"",
+          price:item.price==null?"":String(item.price),
+          supplier:item.supplier||"",
+          notes:item.notes||"",
+          bought:!!item.bought
+         })
+        )
+       :[]
      })
     )
    :[],
@@ -3046,11 +3251,29 @@ function attachmentById(id){
 }
 
 
-function customDateById(id){
+function wishlistJobById(id){
 
  return (
-  v()?.customDates.find(
-   d=>d.id===id
+  v()?.wishlistJobs.find(
+   job=>job.id===id
+  ) ||
+  null
+ );
+
+}
+
+
+function wishlistPartById(
+ jobId,
+ partId
+){
+
+ const job=
+  wishlistJobById(jobId);
+
+ return (
+  job?.items.find(
+   item=>item.id===partId
   ) ||
   null
  );
@@ -3733,52 +3956,28 @@ function vehicleImportantDates(
  vehicle
 ){
 
- const standard=[
+ return [
   {
    type:"mot",
    title:"MOT",
    icon:"🧾",
    date:
-    vehicle.motDate||"",
-   standard:true
+    vehicle.motDate||""
   },
   {
    type:"tax",
    title:"Tax",
    icon:"💷",
    date:
-    vehicle.taxDate||"",
-   standard:true
+    vehicle.taxDate||""
   },
   {
    type:"insurance",
    title:"Insurance",
    icon:"🛡️",
    date:
-    vehicle.insuranceDate||"",
-   standard:true
+    vehicle.insuranceDate||""
   }
- ];
-
-
- const custom=
-  (vehicle.customDates||[])
-  .map(
-   d=>({
-    type:"custom",
-    title:d.title||"Reminder",
-    icon:"📌",
-    date:d.date||"",
-    notes:d.notes||"",
-    customId:d.id,
-    standard:false
-   })
-  );
-
-
- return [
-  ...standard,
-  ...custom
  ];
 
 }
@@ -4145,7 +4344,7 @@ function dashboard(){
      class="muted"
      style="margin-top:4px">
 
-     Maintenance, MOT, tax, insurance and reminders.
+     Maintenance, MOT, tax and insurance.
 
     </p>
 
@@ -4225,14 +4424,7 @@ function dashboard(){
 
        <div
         class="dashboard-item"
-        onclick="openDashboardDate(
-         '${x.vehicle.id}',
-         ${
-          x.dateItem.customId
-          ?"'"+x.dateItem.customId+"'"
-          :"null"
-         }
-        )">
+        onclick="openDashboardDate('${x.vehicle.id}')">
 
         <div class="row between">
 
@@ -4330,7 +4522,7 @@ function openDashboardTask(
  focusAttachmentId=
   null;
 
- focusCustomDateId=
+ focusWishlistJobId=
   null;
 
  render();
@@ -4339,8 +4531,7 @@ function openDashboardTask(
 
 
 function openDashboardDate(
- vehicleId,
- customDateId=null
+ vehicleId
 ){
 
  current=
@@ -4353,8 +4544,7 @@ function openDashboardDate(
  focusPartId=null;
  focusHistoryId=null;
  focusAttachmentId=null;
- focusCustomDateId=
-  customDateId;
+ focusWishlistJobId=null;
 
  render();
 
@@ -4700,6 +4890,22 @@ function render(){
 
     <button
      class="${
+      tab==="wishlist"
+      ?"active"
+      :""
+     }"
+     onclick="
+      tab='wishlist';
+      render();
+     ">
+
+     🛒 Parts Wishlist
+
+    </button>
+
+
+    <button
+     class="${
       tab==="photos"
       ?"active"
       :""
@@ -4772,16 +4978,19 @@ function render(){
    :tab==="dates"
     ?datesPage()
 
-    :tab==="photos"
-     ?photosPage()
+    :tab==="wishlist"
+     ?wishlistPage()
 
-     :tab==="history"
-      ?history()
+     :tab==="photos"
+      ?photosPage()
 
-      :tab==="parts"
-       ?parts()
+      :tab==="history"
+       ?history()
 
-       :notes()
+       :tab==="parts"
+        ?parts()
+
+        :notes()
   );
 
 
@@ -4801,19 +5010,9 @@ function datesPage(){
   v();
 
 
- const standardDates=
+ const dates=
   vehicleImportantDates(
    vehicle
-  ).filter(
-   x=>x.standard
-  );
-
-
- const customDates=
-  vehicleImportantDates(
-   vehicle
-  ).filter(
-   x=>!x.standard
   );
 
 
@@ -4828,20 +5027,20 @@ function datesPage(){
    </h3>
 
    <p class="muted">
-    MOT, tax, insurance and your own reminders.
+    MOT, tax and insurance renewal dates.
    </p>
 
   </div>
 
-  <button onclick="newCustomDate()">
-   + Add reminder
+  <button onclick="editVehicle()">
+   Edit dates
   </button>
 
  </div>
 
 
  ${
-  standardDates.map(
+  dates.map(
    x=>{
 
 
@@ -4920,180 +5119,12 @@ function datesPage(){
        `
       }
 
-
-      <div
-       class="row"
-       style="margin-top:10px">
-
-       <button
-        class="secondary small"
-        onclick="editVehicle()">
-
-        Edit
-
-       </button>
-
-      </div>
-
      </div>
 
     `;
 
    }
   ).join("")
- }
-
-
- <div
-  class="row between"
-  style="margin-top:18px">
-
-  <div>
-
-   <h3>
-    Other reminders
-   </h3>
-
-   <p class="muted">
-    Breakdown cover, warranty, permits or anything else.
-   </p>
-
-  </div>
-
- </div>
-
-
- ${
-  customDates.length
-
-  ?customDates
-   .slice()
-   .sort(
-    (a,b)=>
-     String(a.date||"")
-      .localeCompare(
-       String(b.date||"")
-      )
-   )
-   .map(
-    x=>{
-
-
-     const s=
-      importantDateStatus(
-       x.date
-      );
-
-
-     return `
-
-      <div
-       id="custom-date-${esc(x.customId)}"
-       class="card date-card
-       ${s.className}
-       ${
-        focusCustomDateId===x.customId
-        ?"highlight"
-        :""
-       }">
-
-       <div class="row between">
-
-        <div>
-
-         <h3>
-          📌 ${esc(x.title)}
-         </h3>
-
-        </div>
-
-
-        <span
-         class="badge
-         ${s.className}">
-
-         ${s.label}
-
-        </span>
-
-       </div>
-
-
-       <div class="date-value">
-
-        ${dateText(
-         x.date
-        )}
-
-       </div>
-
-
-       <div class="date-detail">
-
-        ${esc(
-         daysDescription(
-          x.date
-         )
-        )}
-
-       </div>
-
-
-       ${
-        x.notes
-
-        ?`
-
-         <div class="date-note">
-          ${esc(x.notes)}
-         </div>
-
-        `
-
-        :""
-       }
-
-
-       <div
-        class="row"
-        style="margin-top:10px">
-
-        <button
-         class="secondary small"
-         onclick="editCustomDate('${x.customId}')">
-
-         Edit
-
-        </button>
-
-        <button
-         class="danger small"
-         onclick="deleteCustomDate('${x.customId}')">
-
-         Delete
-
-        </button>
-
-       </div>
-
-      </div>
-
-     `;
-
-    }
-   ).join("")
-
-  :`
-
-   <div class="card empty">
-
-    No extra reminders yet.
-    <br><br>
-    Add reminders for things such as breakdown cover or warranty renewals.
-
-   </div>
-
-  `
  }
 
 
@@ -5112,7 +5143,6 @@ function datesPage(){
    when they are within 30 days.
    Once the due date has passed they appear as
    <b>Overdue</b>.
-   Custom reminders also appear automatically on the Garage Dashboard.
 
   </p>
 
@@ -5123,132 +5153,680 @@ function datesPage(){
 }
 
 
-/* CUSTOM DATE REMINDERS */
+/* PARTS WISHLIST */
 
-function newCustomDate(){
+function wishlistPage(){
 
- editingCustomDateId=null;
+ const jobs=
+  v().wishlistJobs||[];
 
- $("customDateForm")
+
+ const totalJobs=
+  jobs.length;
+
+
+ const totalItems=
+  jobs.reduce(
+   (sum,job)=>
+    sum+job.items.length,
+   0
+  );
+
+
+ const totalBought=
+  jobs.reduce(
+   (sum,job)=>
+    sum+
+    job.items.filter(
+     x=>x.bought
+    ).length,
+   0
+  );
+
+
+ return `
+
+ <div class="row between">
+
+  <div>
+
+   <h3>
+    Parts Wishlist
+   </h3>
+
+   <p class="muted">
+    Plan jobs and keep track of the parts you still need.
+   </p>
+
+  </div>
+
+  <button onclick="newWishlistJob()">
+   + Add job
+  </button>
+
+ </div>
+
+
+ ${
+  totalJobs
+
+  ?`
+
+   <div class="card">
+
+    <div class="row between">
+
+     <div>
+
+      <h3>
+       Shopping overview
+      </h3>
+
+      <p
+       class="muted"
+       style="margin-top:5px">
+
+       ${totalBought} of ${totalItems}
+       part${totalItems===1?"":"s"} bought across
+       ${totalJobs} job${totalJobs===1?"":"s"}.
+
+      </p>
+
+     </div>
+
+     <span style="font-size:28px">
+      🛒
+     </span>
+
+    </div>
+
+   </div>
+
+  `
+
+  :""
+ }
+
+
+ ${
+  jobs.length
+
+  ?jobs.map(
+    job=>wishlistJobMarkup(job)
+   ).join("")
+
+  :`
+
+   <div class="card empty">
+
+    No planned jobs yet.
+    <br><br>
+
+    Tap <b>Add job</b> and create something like
+    <b>Clutch</b>, then add all the parts you'll need.
+
+   </div>
+
+  `
+ }
+
+ `;
+
+}
+
+
+function wishlistJobMarkup(job){
+
+ const items=
+  job.items||[];
+
+
+ const bought=
+  items.filter(
+   item=>item.bought
+  ).length;
+
+
+ const total=
+  items.length;
+
+
+ const progress=
+  total
+  ?Math.round(
+    bought/total*100
+   )
+  :0;
+
+
+ const estimatedTotal=
+  items.reduce(
+   (sum,item)=>{
+
+    const price=
+     Number(item.price);
+
+    return (
+     sum+
+     (
+      Number.isFinite(price)
+      ?price
+      :0
+     )
+    );
+
+   },
+   0
+  );
+
+
+ const remainingTotal=
+  items
+   .filter(
+    item=>!item.bought
+   )
+   .reduce(
+    (sum,item)=>{
+
+     const price=
+      Number(item.price);
+
+     return (
+      sum+
+      (
+       Number.isFinite(price)
+       ?price
+       :0
+      )
+     );
+
+    },
+    0
+   );
+
+
+ return `
+
+ <div
+  id="wishlist-job-${esc(job.id)}"
+  class="card wishlist-job
+  ${
+   focusWishlistJobId===job.id
+   ?"highlight"
+   :""
+  }">
+
+  <div class="row between">
+
+   <div>
+
+    <h3>
+     🛠️ ${esc(job.title)}
+    </h3>
+
+    ${
+     job.notes
+
+     ?`
+
+      <p
+       class="muted"
+       style="
+        margin-top:5px;
+        white-space:pre-wrap
+       ">
+
+       ${esc(job.notes)}
+
+      </p>
+
+     `
+
+     :""
+    }
+
+   </div>
+
+
+   <div class="row">
+
+    <button
+     class="secondary small"
+     onclick="editWishlistJob('${job.id}')">
+
+     Edit job
+
+    </button>
+
+    <button
+     class="danger small"
+     onclick="deleteWishlistJob('${job.id}')">
+
+     Delete
+
+    </button>
+
+   </div>
+
+  </div>
+
+
+  <div class="wishlist-progress">
+
+   <div
+    class="wishlist-progress-bar"
+    style="width:${progress}%">
+   </div>
+
+  </div>
+
+
+  <div class="wishlist-summary">
+
+   <span>
+
+    <b>${bought} of ${total}</b>
+    bought
+
+   </span>
+
+   ${
+    estimatedTotal>0
+
+    ?`
+
+     <span>
+      Estimated total:
+      <b>£${estimatedTotal.toFixed(2)}</b>
+     </span>
+
+    `
+
+    :""
+   }
+
+  </div>
+
+
+  ${
+   remainingTotal>0 &&
+   bought>0
+
+   ?`
+
+    <div
+     class="muted"
+     style="margin-top:5px">
+
+     Approx. still to buy:
+     <b>£${remainingTotal.toFixed(2)}</b>
+
+    </div>
+
+   `
+
+   :""
+  }
+
+
+  <div
+   class="row"
+   style="margin-top:12px">
+
+   <button
+    class="small"
+    onclick="newWishlistPart('${job.id}')">
+
+    + Add part
+
+   </button>
+
+  </div>
+
+
+  ${
+   items.length
+
+   ?items.map(
+     item=>
+      wishlistItemMarkup(
+       job,
+       item
+      )
+    ).join("")
+
+   :`
+
+    <div
+     class="linked-box"
+     style="margin-top:12px">
+
+     <p class="muted">
+      No parts added to this job yet.
+     </p>
+
+    </div>
+
+   `
+  }
+
+ </div>
+
+ `;
+
+}
+
+
+function wishlistItemMarkup(
+ job,
+ item
+){
+
+ const href=
+  supplierHref(
+   item.supplier
+  );
+
+
+ const meta=[];
+
+
+ if(item.number){
+
+  meta.push(
+   "Part no: "+
+   item.number
+  );
+
+ }
+
+
+ if(item.price!==""){
+
+  const price=
+   Number(item.price);
+
+  if(Number.isFinite(price)){
+
+   meta.push(
+    "£"+
+    price.toFixed(2)
+   );
+
+  }
+
+ }
+
+
+ if(
+  item.supplier &&
+  !href
+ ){
+
+  meta.push(
+   item.supplier
+  );
+
+ }
+
+
+ return `
+
+ <div
+  class="wishlist-item
+  ${item.bought?"bought":""}">
+
+  <div class="wishlist-item-title">
+
+   <input
+    class="wishlist-checkbox"
+    type="checkbox"
+    ${
+     item.bought
+     ?"checked"
+     :""
+    }
+    onchange="
+     toggleWishlistBought(
+      '${job.id}',
+      '${item.id}',
+      this.checked
+     )
+    ">
+
+
+   <div style="flex:1;min-width:0">
+
+    <div class="wishlist-item-name">
+
+     ${esc(item.name)}
+
+     ${
+      item.bought
+      ?" ✓"
+      :""
+     }
+
+    </div>
+
+
+    ${
+     meta.length
+
+     ?`
+
+      <div class="wishlist-meta">
+       ${meta.map(esc).join(" · ")}
+      </div>
+
+     `
+
+     :""
+    }
+
+
+    ${
+     href
+
+     ?`
+
+      <a
+       class="wishlist-link"
+       href="${esc(href)}"
+       target="_blank"
+       rel="noopener noreferrer">
+
+       🔗 Open supplier / website
+
+      </a>
+
+     `
+
+     :""
+    }
+
+
+    ${
+     item.notes
+
+     ?`
+
+      <div class="wishlist-notes">
+       ${esc(item.notes)}
+      </div>
+
+     `
+
+     :""
+    }
+
+   </div>
+
+  </div>
+
+
+  <div
+   class="row"
+   style="margin-top:10px">
+
+   <button
+    class="secondary small"
+    onclick="editWishlistPart('${job.id}','${item.id}')">
+
+    Edit
+
+   </button>
+
+   <button
+    class="danger small"
+    onclick="deleteWishlistPart('${job.id}','${item.id}')">
+
+    Delete
+
+   </button>
+
+  </div>
+
+ </div>
+
+ `;
+
+}
+
+
+function newWishlistJob(){
+
+ editingWishlistJobId=null;
+
+ $("wishlistJobForm")
   .reset();
 
- $("customDateHeading")
+ $("wishlistJobHeading")
   .textContent=
-   "Add reminder";
+   "Add parts job";
 
- $("customDateValue")
-  .value="";
-
- $("customDateDlg")
+ $("wishlistJobDlg")
   .showModal();
 
 }
 
 
-function editCustomDate(id){
+function editWishlistJob(id){
 
- const item=
-  customDateById(id);
+ const job=
+  wishlistJobById(id);
 
- if(!item){
+ if(!job){
   return;
  }
 
- editingCustomDateId=id;
 
- $("customDateHeading")
+ editingWishlistJobId=id;
+
+
+ $("wishlistJobHeading")
   .textContent=
-   "Edit reminder";
+   "Edit parts job";
 
- $("customDateTitle")
+
+ $("wishlistJobTitle")
   .value=
-   item.title||"";
+   job.title||"";
 
- $("customDateValue")
+
+ $("wishlistJobNotes")
   .value=
-   item.date||"";
+   job.notes||"";
 
- $("customDateNotes")
-  .value=
-   item.notes||"";
 
- $("customDateDlg")
+ $("wishlistJobDlg")
   .showModal();
 
 }
 
 
-$("customDateForm")
+$("wishlistJobForm")
  .addEventListener(
   "submit",
   async e=>{
 
    e.preventDefault();
 
-   const vehicle=v();
+
+   const vehicle=
+    v();
 
    if(!vehicle){
     return;
    }
 
 
-   const item={
-
-    id:
-     editingCustomDateId||
-     uid("date"),
-
-    title:
-     $("customDateTitle")
-      .value
-      .trim(),
-
-    date:
-     $("customDateValue")
-      .value,
-
-    notes:
-     $("customDateNotes")
-      .value
-      .trim()
-
-   };
+   const title=
+    $("wishlistJobTitle")
+     .value
+     .trim();
 
 
-   if(editingCustomDateId){
-
-    const index=
-     vehicle.customDates
-      .findIndex(
-       x=>
-        x.id===
-        editingCustomDateId
-      );
+   if(!title){
+    return;
+   }
 
 
-    if(index>=0){
+   if(editingWishlistJobId){
 
-     vehicle.customDates[index]=
-      item;
+    const job=
+     wishlistJobById(
+      editingWishlistJobId
+     );
+
+    if(job){
+
+     job.title=title;
+
+     job.notes=
+      $("wishlistJobNotes")
+       .value
+       .trim();
+
+     focusWishlistJobId=
+      job.id;
 
     }
 
    }else{
 
-    vehicle.customDates.push(
-     item
+    const job={
+
+     id:
+      uid("wishjob"),
+
+     title:title,
+
+     notes:
+      $("wishlistJobNotes")
+       .value
+       .trim(),
+
+     items:[]
+
+    };
+
+
+    vehicle.wishlistJobs.push(
+     job
     );
+
+
+    focusWishlistJobId=
+     job.id;
 
    }
 
 
-   editingCustomDateId=null;
-
-   focusCustomDateId=
-    item.id;
+   editingWishlistJobId=null;
 
 
-   $("customDateDlg")
+   $("wishlistJobDlg")
     .close();
 
 
@@ -5260,34 +5838,351 @@ $("customDateForm")
  );
 
 
-async function deleteCustomDate(id){
+async function deleteWishlistJob(id){
+
+ const job=
+  wishlistJobById(id);
+
+ if(!job){
+  return;
+ }
+
+
+ let message=
+  "Delete the planned job \""+
+  job.title+
+  "\"?";
+
+
+ if(job.items.length){
+
+  message+=
+   "\n\nThis will also delete its "+
+   job.items.length+
+   " wishlist part"+
+   (
+    job.items.length===1
+    ?""
+    :"s"
+   )+
+   ".";
+
+ }
+
+
+ if(!confirm(message)){
+  return;
+ }
+
+
+ v().wishlistJobs=
+  v().wishlistJobs.filter(
+   x=>x.id!==id
+  );
+
+
+ focusWishlistJobId=null;
+
+ render();
+
+ await save();
+
+}
+
+
+function newWishlistPart(jobId){
+
+ const job=
+  wishlistJobById(jobId);
+
+ if(!job){
+  return;
+ }
+
+
+ wishlistPartJobId=
+  jobId;
+
+ editingWishlistPartId=null;
+
+
+ $("wishlistPartForm")
+  .reset();
+
+
+ $("wishlistPartHeading")
+  .textContent=
+   "Add part for "+
+   job.title;
+
+
+ $("wishlistPartBought")
+  .checked=false;
+
+
+ $("wishlistPartDlg")
+  .showModal();
+
+}
+
+
+function editWishlistPart(
+ jobId,
+ partId
+){
+
+ const job=
+  wishlistJobById(jobId);
 
  const item=
-  customDateById(id);
+  wishlistPartById(
+   jobId,
+   partId
+  );
+
+
+ if(
+  !job ||
+  !item
+ ){
+  return;
+ }
+
+
+ wishlistPartJobId=
+  jobId;
+
+ editingWishlistPartId=
+  partId;
+
+
+ $("wishlistPartHeading")
+  .textContent=
+   "Edit part for "+
+   job.title;
+
+
+ $("wishlistPartName")
+  .value=
+   item.name||"";
+
+
+ $("wishlistPartNumber")
+  .value=
+   item.number||"";
+
+
+ $("wishlistPartPrice")
+  .value=
+   item.price||"";
+
+
+ $("wishlistPartSupplier")
+  .value=
+   item.supplier||"";
+
+
+ $("wishlistPartNotes")
+  .value=
+   item.notes||"";
+
+
+ $("wishlistPartBought")
+  .checked=
+   !!item.bought;
+
+
+ $("wishlistPartDlg")
+  .showModal();
+
+}
+
+
+$("wishlistPartForm")
+ .addEventListener(
+  "submit",
+  async e=>{
+
+   e.preventDefault();
+
+
+   const job=
+    wishlistJobById(
+     wishlistPartJobId
+    );
+
+
+   if(!job){
+    return;
+   }
+
+
+   const name=
+    $("wishlistPartName")
+     .value
+     .trim();
+
+
+   if(!name){
+    return;
+   }
+
+
+   const item={
+
+    id:
+     editingWishlistPartId||
+     uid("wishpart"),
+
+    name:name,
+
+    number:
+     $("wishlistPartNumber")
+      .value
+      .trim(),
+
+    price:
+     $("wishlistPartPrice")
+      .value,
+
+    supplier:
+     $("wishlistPartSupplier")
+      .value
+      .trim(),
+
+    notes:
+     $("wishlistPartNotes")
+      .value
+      .trim(),
+
+    bought:
+     $("wishlistPartBought")
+      .checked
+
+   };
+
+
+   if(editingWishlistPartId){
+
+    const index=
+     job.items.findIndex(
+      x=>
+       x.id===
+       editingWishlistPartId
+     );
+
+
+    if(index>=0){
+
+     job.items[index]=item;
+
+    }
+
+   }else{
+
+    job.items.push(item);
+
+   }
+
+
+   focusWishlistJobId=
+    job.id;
+
+
+   editingWishlistPartId=null;
+   wishlistPartJobId=null;
+
+
+   $("wishlistPartDlg")
+    .close();
+
+
+   render();
+
+   await save();
+
+  }
+ );
+
+
+async function toggleWishlistBought(
+ jobId,
+ partId,
+ checked
+){
+
+ const item=
+  wishlistPartById(
+   jobId,
+   partId
+  );
+
 
  if(!item){
   return;
  }
 
 
+ item.bought=
+  !!checked;
+
+
+ focusWishlistJobId=
+  jobId;
+
+
+ render();
+
+ await save();
+
+}
+
+
+async function deleteWishlistPart(
+ jobId,
+ partId
+){
+
+ const job=
+  wishlistJobById(jobId);
+
+ const item=
+  wishlistPartById(
+   jobId,
+   partId
+  );
+
+
+ if(
+  !job ||
+  !item
+ ){
+  return;
+ }
+
+
  if(
   !confirm(
-   "Delete the reminder \""+
-   item.title+
-   "\"?"
+   "Delete \""+
+   item.name+
+   "\" from the "+
+   job.title+
+   " wishlist?"
   )
  ){
   return;
  }
 
 
- v().customDates=
-  v().customDates.filter(
-   x=>x.id!==id
+ job.items=
+  job.items.filter(
+   x=>x.id!==partId
   );
 
 
- focusCustomDateId=null;
+ focusWishlistJobId=
+  jobId;
+
 
  render();
 
@@ -5566,7 +6461,7 @@ function openAttachment(id){
  focusPartId=null;
  focusTaskId=null;
  focusHistoryId=null;
- focusCustomDateId=null;
+ focusWishlistJobId=null;
 
  tab="photos";
 
@@ -7107,12 +8002,12 @@ function scrollToFocus(){
 
 
  if(
-  tab==="dates" &&
-  focusCustomDateId
+  tab==="wishlist" &&
+  focusWishlistJobId
  ){
   id=
-   "custom-date-"+
-   focusCustomDateId;
+   "wishlist-job-"+
+   focusWishlistJobId;
  }
 
 
@@ -7142,7 +8037,7 @@ function scrollToFocus(){
    focusTaskId=null;
    focusHistoryId=null;
    focusAttachmentId=null;
-   focusCustomDateId=null;
+   focusWishlistJobId=null;
 
   },
   1000
@@ -7157,7 +8052,7 @@ function openPart(id){
  focusTaskId=null;
  focusHistoryId=null;
  focusAttachmentId=null;
- focusCustomDateId=null;
+ focusWishlistJobId=null;
 
  tab="parts";
 
@@ -7172,7 +8067,7 @@ function openMaintenanceTask(id){
  focusPartId=null;
  focusHistoryId=null;
  focusAttachmentId=null;
- focusCustomDateId=null;
+ focusWishlistJobId=null;
 
  tab="maintenance";
 
@@ -7187,7 +8082,7 @@ function openHistoryRecord(id){
  focusPartId=null;
  focusTaskId=null;
  focusAttachmentId=null;
- focusCustomDateId=null;
+ focusWishlistJobId=null;
 
  tab="history";
 
@@ -7213,8 +8108,6 @@ function openTaskHistory(taskId){
   records[
    records.length-1
   ].id;
-
- focusCustomDateId=null;
 
  tab="history";
 
@@ -8643,7 +9536,7 @@ function openV(id){
  focusTaskId=null;
  focusHistoryId=null;
  focusAttachmentId=null;
- focusCustomDateId=null;
+ focusWishlistJobId=null;
 
 
  render();
@@ -8660,7 +9553,7 @@ $("back").onclick=
  focusTaskId=null;
  focusHistoryId=null;
  focusAttachmentId=null;
- focusCustomDateId=null;
+ focusWishlistJobId=null;
 
  render();
 
