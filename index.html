@@ -478,6 +478,54 @@ dialog::backdrop{
 }
 
 
+/* LINKED PHOTO THUMBNAILS */
+
+.linked-photo-grid{
+ display:grid;
+ grid-template-columns:repeat(3,1fr);
+ gap:8px;
+ margin-top:9px
+}
+
+.linked-photo-item{
+ min-width:0;
+ cursor:pointer
+}
+
+.linked-photo-thumb{
+ width:100%;
+ aspect-ratio:4/3;
+ border-radius:10px;
+ overflow:hidden;
+ background:#e5e7eb
+}
+
+.linked-photo-thumb img{
+ width:100%;
+ height:100%;
+ display:block;
+ object-fit:cover
+}
+
+.linked-photo-title{
+ font-size:11px;
+ font-weight:800;
+ margin-top:4px;
+ overflow:hidden;
+ text-overflow:ellipsis;
+ white-space:nowrap
+}
+
+.linked-photo-note{
+ font-size:11px;
+ color:#68707c;
+ margin-top:2px;
+ overflow:hidden;
+ text-overflow:ellipsis;
+ white-space:nowrap
+}
+
+
 /* DASHBOARD */
 
 .dashboard-grid{
@@ -607,6 +655,10 @@ dialog::backdrop{
 @media(max-width:520px){
  .grid{
   grid-template-columns:1fr
+ }
+
+ .linked-photo-grid{
+  grid-template-columns:repeat(2,1fr)
  }
 }
 
@@ -2080,6 +2132,7 @@ function attachmentLinkOptions(
     r=>{
 
      const selected=
+      !selectedTaskId &&
       selectedHistoryId===r.id
       ?" selected"
       :"";
@@ -2102,7 +2155,10 @@ function attachmentLinkOptions(
 }
 
 
-function newAttachment(){
+function newAttachment(
+ selectedTaskId=null,
+ selectedHistoryId=null
+){
 
  editingAttachmentId=null;
 
@@ -2124,10 +2180,17 @@ function newAttachment(){
   "";
 
  $("attachmentLink").innerHTML=
-  attachmentLinkOptions();
+  attachmentLinkOptions(
+   selectedTaskId,
+   selectedHistoryId
+  );
 
  $("attachmentStatus").textContent=
-  "Take a new photo or choose one from your phone.";
+  selectedTaskId
+  ?"This photo will be linked to the maintenance task."
+  :selectedHistoryId
+   ?"This photo will be linked to the history record."
+   :"Take a new photo or choose one from your phone.";
 
  setAttachmentPreview("");
 
@@ -2688,6 +2751,27 @@ function normaliseVehicle(x,base){
    a.historyId=null;
   }
 
+
+  if(
+   a.historyId &&
+   !a.taskId
+  ){
+
+   const history=
+    vehicle.history.find(
+     r=>r.id===a.historyId
+    );
+
+   if(
+    history &&
+    history.taskId
+   ){
+    a.taskId=
+     history.taskId;
+   }
+
+  }
+
  });
 
 
@@ -2898,6 +2982,63 @@ function linkedAttachmentsForHistory(historyId){
  ).filter(
   a=>a.historyId===historyId
  );
+
+}
+
+
+function linkedPhotoMarkup(
+ photos
+){
+
+ if(!photos.length){
+  return "";
+ }
+
+
+ return `
+
+ <div class="linked-photo-grid">
+
+  ${
+   photos.map(
+    a=>`
+
+     <div
+      class="linked-photo-item"
+      onclick="viewAttachment('${a.id}')">
+
+      <div class="linked-photo-thumb">
+
+       <img
+        src="${esc(publicPhotoUrl(a.path))}"
+        loading="lazy"
+        alt="${esc(a.category||"Photo")}">
+
+      </div>
+
+      <div class="linked-photo-title">
+       ${esc(a.category||"Photo")}
+      </div>
+
+      ${
+       a.description
+       ?`
+        <div class="linked-photo-note">
+         ${esc(a.description)}
+        </div>
+       `
+       :""
+      }
+
+     </div>
+
+    `
+   ).join("")
+  }
+
+ </div>
+
+ `;
 
 }
 
@@ -4676,16 +4817,25 @@ function datesPage(){
 
 function attachmentLinkText(a){
 
+ const parts=[];
+
+
  if(a.taskId){
 
   const task=
    taskById(a.taskId);
 
   if(task){
-   return "Maintenance: "+task.name;
+
+   parts.push(
+    "Maintenance: "+
+    task.name
+   );
+
   }
 
  }
+
 
  if(a.historyId){
 
@@ -4694,7 +4844,7 @@ function attachmentLinkText(a){
 
   if(history){
 
-   return (
+   parts.push(
     "History: "+
     history.job+
     " · "+
@@ -4705,7 +4855,8 @@ function attachmentLinkText(a){
 
  }
 
- return "";
+
+ return parts.join(" · ");
 }
 
 
@@ -5034,10 +5185,75 @@ $("attachmentForm")
     }
 
 
-    const link=
+    const selectedLink=
      parseAttachmentLink(
       $("attachmentLink").value
      );
+
+
+    let taskId=
+     selectedLink.taskId;
+
+    let historyId=
+     selectedLink.historyId;
+
+
+    /*
+     If a history record is selected
+     and it belongs to a maintenance
+     task, keep both relationships.
+    */
+
+    if(historyId){
+
+     const history=
+      historyById(
+       historyId
+      );
+
+     if(
+      history &&
+      history.taskId
+     ){
+
+      taskId=
+       history.taskId;
+
+     }
+
+    }
+
+
+    /*
+     If the user keeps the same
+     maintenance task selected while
+     editing a completed photo, retain
+     its matching history relationship.
+    */
+
+    if(
+     taskId &&
+     !historyId &&
+     existing?.historyId
+    ){
+
+     const oldHistory=
+      historyById(
+       existing.historyId
+      );
+
+     if(
+      oldHistory &&
+      oldHistory.taskId===
+       taskId
+     ){
+
+      historyId=
+       oldHistory.id;
+
+     }
+
+    }
 
 
     const item={
@@ -5061,10 +5277,10 @@ $("attachmentForm")
        .trim(),
 
      taskId:
-      link.taskId,
+      taskId,
 
      historyId:
-      link.historyId
+      historyId
 
     };
 
@@ -5471,16 +5687,16 @@ function maintenance(){
       }
 
 
-      ${
-       linkedPhotos.length
+      <div class="linked-box">
 
-       ?`
+       <h4>
+        📷 Photos & documents
+       </h4>
 
-        <div class="linked-box">
+       ${
+        linkedPhotos.length
 
-         <h4>
-          📷 Photos & documents
-         </h4>
+        ?`
 
          <p class="muted">
           ${linkedPhotos.length}
@@ -5488,21 +5704,55 @@ function maintenance(){
           linked to this maintenance job.
          </p>
 
-         <button
-          class="secondary small"
-          style="margin-top:8px"
-          onclick="openAttachment('${linkedPhotos[0].id}')">
+         ${linkedPhotoMarkup(linkedPhotos)}
 
-          View photos
+        `
 
-         </button>
+        :`
 
-        </div>
+         <p class="muted">
 
-       `
+          No photos linked yet.
+          Photograph a fault, worn part, receipt or repair.
 
-       :""
-      }
+         </p>
+
+        `
+       }
+
+       <div
+        class="row"
+        style="margin-top:9px">
+
+        <button
+         class="secondary small"
+         onclick="newAttachment('${t.id}',null)">
+
+         + Add linked photo
+
+        </button>
+
+        ${
+         linkedPhotos.length
+
+         ?`
+
+          <button
+           class="secondary small"
+           onclick="openAttachment('${linkedPhotos[0].id}')">
+
+           View all
+
+          </button>
+
+         `
+
+         :""
+        }
+
+       </div>
+
+      </div>
 
 
       ${
@@ -5820,38 +6070,69 @@ function history(){
       }
 
 
-      ${
-       linkedPhotos.length
+      <div class="linked-box">
 
-       ?`
+       <h4>
+        📷 Photos & documents
+       </h4>
 
-        <div class="linked-box">
+       ${
+        linkedPhotos.length
 
-         <h4>
-          📷 Photos & documents
-         </h4>
+        ?`
 
          <p class="muted">
           ${linkedPhotos.length}
           photo${linkedPhotos.length===1?"":"s"}
-          linked to this history record.
+          linked to this completed job.
          </p>
 
-         <button
-          class="secondary small"
-          style="margin-top:8px"
-          onclick="openAttachment('${linkedPhotos[0].id}')">
+         ${linkedPhotoMarkup(linkedPhotos)}
 
-          View photos
+        `
 
-         </button>
+        :`
 
-        </div>
+         <p class="muted">
+          No photos linked to this completed job yet.
+         </p>
 
-       `
+        `
+       }
 
-       :""
-      }
+       <div
+        class="row"
+        style="margin-top:9px">
+
+        <button
+         class="secondary small"
+         onclick="newAttachment(null,'${r.id}')">
+
+         + Add linked photo
+
+        </button>
+
+        ${
+         linkedPhotos.length
+
+         ?`
+
+          <button
+           class="secondary small"
+           onclick="openAttachment('${linkedPhotos[0].id}')">
+
+           View all
+
+          </button>
+
+         `
+
+         :""
+        }
+
+       </div>
+
+      </div>
 
 
       ${
@@ -7381,6 +7662,44 @@ $("recordForm").onsubmit=
  }
 
 
+ /*
+  Any photos already linked to this
+  maintenance task now also belong
+  to the completed History record.
+ */
+
+ if(r.taskId){
+
+  vehicle.attachments
+   .filter(
+    a=>a.taskId===r.taskId
+   )
+   .forEach(
+    a=>{
+
+     /*
+      If this is a newly completed
+      record, or the photo does not
+      already have a history link,
+      attach it to this completion.
+     */
+
+     if(
+      !a.historyId ||
+      a.historyId===oldRecord?.id
+     ){
+
+      a.historyId=
+       r.id;
+
+     }
+
+    }
+   );
+
+ }
+
+
  if(
   r.mileage &&
   Number(r.mileage)>
@@ -7528,7 +7847,7 @@ function deleteRecord(i){
  if(linkedPhotos.length){
 
   message+=
-   "\n\nLinked photos will be kept, but will no longer be linked to this history record.";
+   "\n\nLinked photos will be kept. If they belong to a Maintenance task, they will remain linked to that task.";
 
  }
 
