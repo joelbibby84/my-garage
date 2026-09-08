@@ -4617,7 +4617,12 @@ function showDashboardDetail(type){
   body=tasks.length?tasks.map(x=>`<div class="dashboard-item" onclick="openDashboardTask('${x.vehicle.id}','${x.task.id}')"><h3>🔧 ${esc(x.task.name)}</h3><div class="vehicle-name">${x.vehicle.emoji} ${esc(x.vehicle.name)}</div><div class="due-line"><b>Next due:</b> ${esc(due(x.task))}</div></div>`).join(""):`<div class="empty">No maintenance tasks yet.</div>`;
  }
  if(type==="vehicles"){
-  const vehicleGrid=document.querySelector(".vehicle-grid"); if(vehicleGrid){vehicleGrid.scrollIntoView({behavior:"smooth",block:"start"});} return;
+  const vehicleGrid=document.querySelector(".vehicle-grid");
+  if(vehicleGrid){
+   const y=vehicleGrid.getBoundingClientRect().top+window.scrollY-110;
+   window.scrollTo({top:Math.max(0,y),behavior:"smooth"});
+  }
+  return;
  }
  if(type==="spent"){
   title=`Spent in ${currentYear}`;
@@ -4630,7 +4635,8 @@ function showDashboardDetail(type){
   body=rows.length?rows.sort((a,b)=>b.amount-a.amount).map(x=>`<div class="dashboard-item" onclick="openDashboardWishlist('${x.vehicle.id}')"><div class="row between"><h3>${x.vehicle.emoji} ${esc(x.vehicle.name)}</h3><b>${money(x.amount)}</b></div><div class="muted">${x.count} unbought priced ${x.count===1?"part":"parts"} · Tap to view wishlist</div></div>`).join(""):`<div class="empty">No unbought wishlist parts with a price entered.</div>`;
  }
  target.innerHTML=`<div class="card"><div class="row between"><h2>${title}</h2><button class="secondary" onclick="closeDashboardDetail()">Close</button></div>${body}</div>`;
- target.scrollIntoView({behavior:"smooth",block:"start"});
+ const y=target.getBoundingClientRect().top+window.scrollY-110;
+ window.scrollTo({top:Math.max(0,y),behavior:"smooth"});
 }
 function closeDashboardDetail(){const target=$("dashboardDetail");if(target)target.innerHTML="";}
 function openDashboardCosts(vehicleId){current=vehicleId;tab="costs";focusTaskId=null;focusPartId=null;focusHistoryId=null;focusAttachmentId=null;focusWishlistJobId=null;render();}
