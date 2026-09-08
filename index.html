@@ -4619,7 +4619,8 @@ function showDashboardDetail(type){
  if(type==="vehicles"){
   const vehicleGrid=document.querySelector(".vehicle-grid");
   if(vehicleGrid){
-   const y=vehicleGrid.getBoundingClientRect().top+window.scrollY-110;
+   const vehicleHeading=vehicleGrid.previousElementSibling||vehicleGrid;
+   const y=vehicleHeading.getBoundingClientRect().top+window.scrollY-90;
    window.scrollTo({top:Math.max(0,y),behavior:"smooth"});
   }
   return;
