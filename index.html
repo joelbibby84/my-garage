@@ -922,7 +922,32 @@ button:not(.back):active,
  class="modal"
  id="vehicleForm">
 
-<h2>Edit vehicle</h2>
+<h2 id="vehicleDlgHeading">Edit vehicle</h2>
+
+<label>Vehicle name</label>
+<input id="vehicleName" required placeholder="Ford Transit">
+
+<div class="grid">
+ <div>
+  <label>Year</label>
+  <input id="vehicleYear" type="number" min="1900" max="2100" placeholder="2020">
+ </div>
+ <div>
+  <label>Engine / model</label>
+  <input id="vehicleEngine" placeholder="2.0 TDI">
+ </div>
+</div>
+
+<label>Vehicle type</label>
+<select id="vehicleEmoji">
+ <option value="🚗">🚗 Car</option>
+ <option value="🏍️">🏍️ Motorcycle</option>
+ <option value="🚐">🚐 Van / camper</option>
+ <option value="🚚">🚚 Truck</option>
+ <option value="🛻">🛻 Pickup</option>
+ <option value="🏕️">🏕️ Caravan / trailer</option>
+ <option value="🚜">🚜 Other vehicle</option>
+</select>
 
 
 <h3 style="margin-top:16px">
@@ -1046,6 +1071,15 @@ button:not(.back):active,
   class="secondary"
   onclick="cancelVehicleEdit()">
   Cancel
+ </button>
+
+ <button
+  type="button"
+  id="deleteVehicleBtn"
+  class="danger"
+  style="display:none"
+  onclick="deleteVehicle()">
+  Delete vehicle
  </button>
 
 </div>
@@ -1695,6 +1729,7 @@ let current=null;
 let tab="maintenance";
 let vehicleTabsScrollLeft=0;
 let resetVehicleScrollTop=false;
+let addingVehicle=false;
 
 let editing=-1;
 let editingPart=-1;
@@ -2324,6 +2359,7 @@ function removeVehiclePhoto(){
 
 function cancelVehicleEdit(){
 
+ addingVehicle=false;
  clearPendingVehiclePhoto();
 
  $("vehicleDlg").close();
@@ -3248,7 +3284,7 @@ function normaliseDatabase(input){
   return null;
  }
 
- return starter.map(
+ const known=starter.map(
   base=>{
 
    const found=
@@ -3267,6 +3303,28 @@ function normaliseDatabase(input){
 
   }
  );
+
+ const extras=input
+  .filter(
+   x=>
+    !starter.some(
+     base=>vehicleMatches(x,base)
+    )
+  )
+  .map(
+   x=>normaliseVehicle(
+    x,
+    {
+     id:x.id||uid("vehicle"),
+     name:x.name||"Vehicle",
+     year:Number(x.year)||"",
+     engine:x.engine||"",
+     emoji:x.emoji||"🚗"
+    }
+   )
+  );
+
+ return [...known,...extras];
 
 }
 
@@ -5089,6 +5147,12 @@ function render(){
       Tap a vehicle to manage it.
 
      </p>
+
+     <button
+      style="margin-top:12px"
+      onclick="addVehicle()">
+      + Add vehicle
+     </button>
 
     </div>`
 
@@ -9300,10 +9364,43 @@ function delTask(i){
 
 /* VEHICLE EDIT */
 
-function editVehicle(){
+function addVehicle(){
 
+ addingVehicle=true;
  clearPendingVehiclePhoto();
 
+ $("vehicleDlgHeading").textContent="Add vehicle";
+ $("vehicleName").value="";
+ $("vehicleYear").value="";
+ $("vehicleEngine").value="";
+ $("vehicleEmoji").value="🚗";
+ $("vehicleReg").value="";
+ $("vehicleMileage").value="";
+ $("vehicleMotDate").value="";
+ $("vehicleTaxDate").value="";
+ $("vehicleInsuranceDate").value="";
+ $("vehiclePhotoStatus").textContent="";
+ setVehiclePhotoPreview("");
+ updateVehiclePhotoControls();
+ $("deleteVehicleBtn").style.display="none";
+ $("vehicleSaveBtn").disabled=false;
+ $("vehicleSaveBtn").textContent="Add vehicle";
+ $("vehicleDlg").showModal();
+
+}
+
+
+function editVehicle(){
+
+ addingVehicle=false;
+ clearPendingVehiclePhoto();
+
+ $("vehicleDlgHeading").textContent="Edit vehicle";
+ $("vehicleName").value=v().name||"";
+ $("vehicleYear").value=v().year||"";
+ $("vehicleEngine").value=v().engine||"";
+ $("vehicleEmoji").value=v().emoji||"🚗";
+ $("deleteVehicleBtn").style.display="inline-block";
 
  $("vehicleReg").value=
   v().reg||"";
@@ -9364,8 +9461,19 @@ $("vehicleForm")
    e.preventDefault();
 
 
-   const vehicle=
-    v();
+   let vehicle;
+
+   if(addingVehicle){
+    vehicle=blankVehicle({
+     id:uid("vehicle"),
+     name:$("vehicleName").value.trim()||"Vehicle",
+     year:Number($("vehicleYear").value)||"",
+     engine:$("vehicleEngine").value.trim(),
+     emoji:$("vehicleEmoji").value||"🚗"
+    });
+   }else{
+    vehicle=v();
+   }
 
    if(!vehicle){
     return;
@@ -9458,6 +9566,18 @@ $("vehicleForm")
     }
 
 
+    vehicle.name=
+     $("vehicleName").value.trim()||"Vehicle";
+
+    vehicle.year=
+     Number($("vehicleYear").value)||"";
+
+    vehicle.engine=
+     $("vehicleEngine").value.trim();
+
+    vehicle.emoji=
+     $("vehicleEmoji").value||"🚗";
+
     vehicle.reg=
      $("vehicleReg")
       .value
@@ -9480,6 +9600,14 @@ $("vehicleForm")
       .value;
 
 
+    if(addingVehicle){
+     db.push(vehicle);
+     current=vehicle.id;
+     tab="maintenance";
+     resetVehicleScrollTop=true;
+    }
+
+    addingVehicle=false;
     clearPendingVehiclePhoto();
 
 
@@ -9520,6 +9648,45 @@ $("vehicleForm")
 
   }
  );
+
+
+async function deleteVehicle(){
+
+ const vehicle=v();
+ if(!vehicle){
+  return;
+ }
+
+ const ok=confirm(
+  "Delete "+vehicle.name+"?\n\nThis removes this vehicle and all of its maintenance, history, parts, notes and dates from My Garage. This cannot be undone."
+ );
+
+ if(!ok){
+  return;
+ }
+
+ const paths=[
+  vehicle.photoPath,
+  ...(vehicle.attachments||[]).map(a=>a.path)
+ ].filter(Boolean);
+
+ for(const path of paths){
+  try{
+   await deleteStorageObject(path);
+  }catch(e){
+   console.warn("Could not remove stored vehicle image:",e);
+  }
+ }
+
+ db=db.filter(x=>x.id!==vehicle.id);
+ current=null;
+ tab="maintenance";
+ addingVehicle=false;
+ $("vehicleDlg").close();
+ save();
+ render();
+
+}
 
 
 /* RECORD PARTS */
