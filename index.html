@@ -1694,6 +1694,7 @@ const starter=[
 let current=null;
 let tab="maintenance";
 let vehicleTabsScrollLeft=0;
+let resetVehicleScrollTop=false;
 
 let editing=-1;
 let editingPart=-1;
@@ -5228,6 +5229,7 @@ function render(){
       :""
      }"
      onclick="
+      resetVehicleScrollTop=true;
       tab='maintenance';
       render();
      ">
@@ -5383,7 +5385,21 @@ requestAnimationFrame(()=>{
  if(tabsEl){
   tabsEl.scrollLeft=vehicleTabsScrollLeft;
  }
-}); setTimeout(
+
+ if(
+  resetVehicleScrollTop &&
+  !focusTaskId
+ ){
+  window.scrollTo({
+   top:0,
+   left:0,
+   behavior:"auto"
+  });
+  resetVehicleScrollTop=false;
+ }
+});
+
+setTimeout(
   scrollToFocus,
   50
  );
@@ -10496,6 +10512,7 @@ function openV(id){
 
  current=id;
  tab="maintenance";
+ resetVehicleScrollTop=true;
 
  focusPartId=null;
  focusTaskId=null;
