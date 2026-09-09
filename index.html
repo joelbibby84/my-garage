@@ -4766,7 +4766,11 @@ function dashboard(){
          <div class="due-line">
 
           <b>Next due:</b>
-          ${esc(due(x.task))}
+          ${
+           x.status.initial
+           ?"Initial check due"
+           :esc(due(x.task))
+          }
 
          </div>
 
@@ -4864,7 +4868,7 @@ function showDashboardDetail(type){
  let title="",body="";
  const itemMarkup=x=>{
   if(x.kind==="maintenance"){
-   return `<div class="dashboard-item" onclick="openDashboardTask('${x.vehicle.id}','${x.task.id}')"><div class="row between"><div><h3>🔧 ${esc(x.task.name)}</h3><div class="vehicle-name">${x.vehicle.emoji} ${esc(x.vehicle.name)}</div></div><span class="badge ${x.status.od?"overdue":x.status.initial?"initial":x.status.so?"soon":"ok"}">${x.status.label}</span></div><div class="due-line"><b>Next due:</b> ${esc(due(x.task))}</div></div>`;
+   return `<div class="dashboard-item" onclick="openDashboardTask('${x.vehicle.id}','${x.task.id}')"><div class="row between"><div><h3>🔧 ${esc(x.task.name)}</h3><div class="vehicle-name">${x.vehicle.emoji} ${esc(x.vehicle.name)}</div></div><span class="badge ${x.status.od?"overdue":x.status.initial?"initial":x.status.so?"soon":"ok"}">${x.status.label}</span></div><div class="due-line"><b>Next due:</b> ${x.status.initial?"Initial check due":esc(due(x.task))}</div></div>`;
   }
   return `<div class="dashboard-item" onclick="openDashboardDate('${x.vehicle.id}')"><div class="row between"><div><h3>${x.dateItem.icon} ${esc(x.dateItem.title)}</h3><div class="vehicle-name">${x.vehicle.emoji} ${esc(x.vehicle.name)}</div></div><span class="badge ${x.status.className}">${x.status.label}</span></div><div class="due-line"><b>Due:</b> ${dateText(x.dateItem.date)} · ${esc(daysDescription(x.dateItem.date))}</div></div>`;
  };
