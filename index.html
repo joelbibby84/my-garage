@@ -60,25 +60,6 @@ h2{font-size:19px}
  justify-content:space-between
 }
 
-/* Keep status badges at the top-right even when a title is long */
-.task .row.between,
-.dashboard-item .row.between{
- flex-wrap:nowrap;
- align-items:flex-start
-}
-
-.task .row.between>div,
-.dashboard-item .row.between>div{
- flex:1 1 auto;
- min-width:0
-}
-
-.task .badge,
-.dashboard-item .badge{
- flex:0 0 auto;
- white-space:nowrap
-}
-
 button{
  border:0;
  border-radius:11px;
@@ -143,7 +124,6 @@ button:disabled{
 
 .ok{background:#dcfce7;color:#166534}
 .soon{background:#ffedd5;color:#9a3412}
-.initial{background:#fef3c7;color:#92400e}
 .overdue{background:#fee2e2;color:#991b1b}
 .notset{background:#e5e7eb;color:#4b5563}
 
@@ -942,32 +922,7 @@ button:not(.back):active,
  class="modal"
  id="vehicleForm">
 
-<h2 id="vehicleDlgHeading">Edit vehicle</h2>
-
-<label>Vehicle name</label>
-<input id="vehicleName" required placeholder="Ford Transit">
-
-<div class="grid">
- <div>
-  <label>Year</label>
-  <input id="vehicleYear" type="number" min="1900" max="2100" placeholder="2020">
- </div>
- <div>
-  <label>Engine / model</label>
-  <input id="vehicleEngine" placeholder="2.0 TDI">
- </div>
-</div>
-
-<label>Vehicle type</label>
-<select id="vehicleEmoji">
- <option value="🚗">🚗 Car</option>
- <option value="🏍️">🏍️ Motorcycle</option>
- <option value="🚐">🚐 Van / camper</option>
- <option value="🚚">🚚 Truck</option>
- <option value="🛻">🛻 Pickup</option>
- <option value="🏕️">🏕️ Caravan / trailer</option>
- <option value="🚜">🚜 Other vehicle</option>
-</select>
+<h2>Edit vehicle</h2>
 
 
 <h3 style="margin-top:16px">
@@ -1091,15 +1046,6 @@ button:not(.back):active,
   class="secondary"
   onclick="cancelVehicleEdit()">
   Cancel
- </button>
-
- <button
-  type="button"
-  id="deleteVehicleBtn"
-  class="danger"
-  style="display:none"
-  onclick="deleteVehicle()">
-  Delete vehicle
  </button>
 
 </div>
@@ -1452,15 +1398,6 @@ button:not(.back):active,
    min="0">
  </div>
 
- <div>
-  <label>Cost (£)</label>
-  <input
-   id="recordCost"
-   type="number"
-   min="0"
-   step="0.01">
- </div>
-
 </div>
 
 <label>Parts / oils used</label>
@@ -1476,6 +1413,44 @@ button:not(.back):active,
  + Add another part
 
 </button>
+
+<div class="grid" style="margin-top:14px">
+
+ <div>
+  <label>Labour / service (£)</label>
+  <input
+   id="recordLabour"
+   type="number"
+   min="0"
+   step="0.01"
+   oninput="updateRecordTotal()">
+ </div>
+
+ <div>
+  <label>Other costs (£)</label>
+  <input
+   id="recordOtherCost"
+   type="number"
+   min="0"
+   step="0.01"
+   oninput="updateRecordTotal()">
+ </div>
+
+ <div>
+  <label>Total job cost (£)</label>
+  <input
+   id="recordCost"
+   type="number"
+   min="0"
+   step="0.01"
+   readonly>
+ </div>
+
+</div>
+
+<p class="muted" style="margin-top:7px">
+ Parts / oils + labour / service + other costs = total automatically.
+</p>
 
 <label>Notes</label>
 
@@ -1543,13 +1518,12 @@ button:not(.back):active,
   <label>Category / type</label>
   <input
    id="partCategory"
-   list="partCategorySuggestions"
    placeholder="Oil, filter, brake...">
  </div>
 
  <div>
   <label>Manufacturer</label>
-  <input id="partMaker" list="partMakerSuggestions">
+  <input id="partMaker">
  </div>
 
  <div>
@@ -1572,13 +1546,7 @@ button:not(.back):active,
 
 <input
  id="partSpec"
- list="partSpecSuggestions"
  placeholder="10W-40">
-
-<!-- Suggestions are built automatically from Parts & Oils saved across every vehicle. -->
-<datalist id="partCategorySuggestions"></datalist>
-<datalist id="partMakerSuggestions"></datalist>
-<datalist id="partSpecSuggestions"></datalist>
 
 <label>Notes</label>
 
@@ -1756,7 +1724,6 @@ let current=null;
 let tab="maintenance";
 let vehicleTabsScrollLeft=0;
 let resetVehicleScrollTop=false;
-let addingVehicle=false;
 
 let editing=-1;
 let editingPart=-1;
@@ -2386,7 +2353,6 @@ function removeVehiclePhoto(){
 
 function cancelVehicleEdit(){
 
- addingVehicle=false;
  clearPendingVehiclePhoto();
 
  $("vehicleDlg").close();
@@ -3311,7 +3277,7 @@ function normaliseDatabase(input){
   return null;
  }
 
- const known=starter.map(
+ return starter.map(
   base=>{
 
    const found=
@@ -3330,28 +3296,6 @@ function normaliseDatabase(input){
 
   }
  );
-
- const extras=input
-  .filter(
-   x=>
-    !starter.some(
-     base=>vehicleMatches(x,base)
-    )
-  )
-  .map(
-   x=>normaliseVehicle(
-    x,
-    {
-     id:x.id||uid("vehicle"),
-     name:x.name||"Vehicle",
-     year:Number(x.year)||"",
-     engine:x.engine||"",
-     emoji:x.emoji||"🚗"
-    }
-   )
-  );
-
- return [...known,...extras];
 
 }
 
@@ -3410,53 +3354,6 @@ function loadLocalData(){
 
 let db=
  loadLocalData();
-
-
-/* Reuse previously entered Parts & Oils values as optional suggestions.
-   Values are gathered across the whole garage; typing a new value is always allowed. */
-function refreshPartSuggestions(){
-
- const fields=[
-  ["partCategorySuggestions","category"],
-  ["partMakerSuggestions","maker"],
-  ["partSpecSuggestions","spec"]
- ];
-
- fields.forEach(([listId,key])=>{
-
-  const list=document.getElementById(listId);
-  if(!list)return;
-
-  const seen=new Map();
-
-  db.forEach(vehicle=>{
-   (vehicle.parts||[]).forEach(part=>{
-    const value=String(part?.[key]||"").trim();
-    if(value && !seen.has(value.toLocaleLowerCase())){
-     seen.set(value.toLocaleLowerCase(),value);
-    }
-   });
-  });
-
-  list.innerHTML=[...seen.values()]
-   .sort((a,b)=>a.localeCompare(b,undefined,{sensitivity:"base"}))
-   .map(value=>`<option value="${esc(value)}"></option>`)
-   .join("");
-
- });
-}
-
-/* Refresh immediately before one of these fields is used, so newly saved
-   categories/manufacturers/specifications appear without reloading the app. */
-document.addEventListener("focusin",e=>{
- if(
-  e.target?.matches?.(
-   "#partCategory,#partMaker,#partSpec,.rp-category,.rp-maker,.rp-spec"
-  )
- ){
-  refreshPartSuggestions();
- }
-});
 
 
 function findVehicle(id){
@@ -4028,15 +3925,8 @@ function statusForVehicle(
   );
 
 
- const initial=
-  !c.d &&
-  !c.m &&
-  !!(t.months || t.miles);
-
-
  const so=
   !od &&
-  !initial &&
   (
    (
     c.d &&
@@ -4059,16 +3949,13 @@ function statusForVehicle(
   c,
   od,
   so,
-  initial,
 
   label:
    od
    ?"OVERDUE"
-   :initial
-    ?"INITIAL CHECK"
-    :so
-     ?"DUE SOON"
-     :"OK"
+   :so
+    ?"DUE SOON"
+    :"OK"
  };
 
 }
@@ -4108,11 +3995,7 @@ function due(t){
    .filter(Boolean)
    .join(" OR ")
   ||
-  (
-   status(t).initial
-   ?"Initial check due"
-   :"Not scheduled"
-  )
+  "Not scheduled"
  );
 
 }
@@ -4373,10 +4256,6 @@ function getDashboardItems(){
 
       priority=0;
 
-     }else if(s.initial){
-
-      priority=1;
-
      }else if(s.so){
 
       priority=1;
@@ -4581,10 +4460,7 @@ function dashboard(){
  const scheduled=
   items.filter(
    x=>{
-    if(
-     x.status.od ||
-     x.status.initial
-    ){
+    if(x.status.od){
      return true;
     }
 
@@ -4803,11 +4679,9 @@ function dashboard(){
            ${
             x.status.od
             ?"overdue"
-            :x.status.initial
-             ?"initial"
-             :x.status.so
-              ?"soon"
-              :"ok"
+            :x.status.so
+             ?"soon"
+             :"ok"
            }">
 
            ${x.status.label}
@@ -4820,11 +4694,7 @@ function dashboard(){
          <div class="due-line">
 
           <b>Next due:</b>
-          ${
-           x.status.initial
-           ?"Initial check due"
-           :esc(due(x.task))
-          }
+          ${esc(due(x.task))}
 
          </div>
 
@@ -4922,7 +4792,7 @@ function showDashboardDetail(type){
  let title="",body="";
  const itemMarkup=x=>{
   if(x.kind==="maintenance"){
-   return `<div class="dashboard-item" onclick="openDashboardTask('${x.vehicle.id}','${x.task.id}')"><div class="row between"><div><h3>🔧 ${esc(x.task.name)}</h3><div class="vehicle-name">${x.vehicle.emoji} ${esc(x.vehicle.name)}</div></div><span class="badge ${x.status.od?"overdue":x.status.initial?"initial":x.status.so?"soon":"ok"}">${x.status.label}</span></div><div class="due-line"><b>Next due:</b> ${x.status.initial?"Initial check due":esc(due(x.task))}</div></div>`;
+   return `<div class="dashboard-item" onclick="openDashboardTask('${x.vehicle.id}','${x.task.id}')"><div class="row between"><div><h3>🔧 ${esc(x.task.name)}</h3><div class="vehicle-name">${x.vehicle.emoji} ${esc(x.vehicle.name)}</div></div><span class="badge ${x.status.od?"overdue":x.status.so?"soon":"ok"}">${x.status.label}</span></div><div class="due-line"><b>Next due:</b> ${esc(due(x.task))}</div></div>`;
   }
   return `<div class="dashboard-item" onclick="openDashboardDate('${x.vehicle.id}')"><div class="row between"><div><h3>${x.dateItem.icon} ${esc(x.dateItem.title)}</h3><div class="vehicle-name">${x.vehicle.emoji} ${esc(x.vehicle.name)}</div></div><span class="badge ${x.status.className}">${x.status.label}</span></div><div class="due-line"><b>Due:</b> ${dateText(x.dateItem.date)} · ${esc(daysDescription(x.dateItem.date))}</div></div>`;
  };
@@ -5249,12 +5119,6 @@ function render(){
 
      </p>
 
-     <button
-      style="margin-top:12px"
-      onclick="addVehicle()">
-      + Add vehicle
-     </button>
-
     </div>`
 
    +
@@ -5303,14 +5167,6 @@ function render(){
 
     </div>`;
 
-
-  requestAnimationFrame(()=>{
-   window.scrollTo({
-    top:0,
-    left:0,
-    behavior:"auto"
-   });
-  });
 
   return;
  }
@@ -6340,7 +6196,8 @@ function completeWishlistJob(id){
   return sum+(Number.isFinite(price)?price:0);
  },0);
 
- $("recordCost").value=totalCost>0?totalCost.toFixed(2):"";
+ $("recordLabour").value="";
+ $("recordOtherCost").value="";
  $("recordNotes").value=job.notes||"";
 
  resetRecordParts(
@@ -7615,11 +7472,9 @@ function maintenance(){
       ${
        s.od
        ?"overdue"
-       :s.initial
-        ?"initial"
-        :s.so
-         ?"soon"
-         :"ok"
+       :s.so
+        ?"soon"
+        :"ok"
       }
       ${
        focusTaskId===t.id
@@ -7670,11 +7525,9 @@ function maintenance(){
         ${
          s.od
          ?"overdue"
-         :s.initial
-          ?"initial"
-          :s.so
-           ?"soon"
-           :"ok"
+         :s.so
+          ?"soon"
+          :"ok"
         }">
 
         ${s.label}
@@ -8114,11 +7967,17 @@ function history(){
          class="muted"
          style="margin-top:5px">
 
-         <b>Cost:</b>
+         <b>Total cost:</b>
 
          £${Number(
           r.cost
          ).toFixed(2)}
+
+         ${
+          (r.labour!==undefined || r.otherCost!==undefined)
+          ?`<br><span style="font-size:12px">Labour / service: £${Number(r.labour||0).toFixed(2)} · Other: £${Number(r.otherCost||0).toFixed(2)}</span>`
+          :""
+         }
 
         </p>
 
@@ -9469,43 +9328,10 @@ function delTask(i){
 
 /* VEHICLE EDIT */
 
-function addVehicle(){
-
- addingVehicle=true;
- clearPendingVehiclePhoto();
-
- $("vehicleDlgHeading").textContent="Add vehicle";
- $("vehicleName").value="";
- $("vehicleYear").value="";
- $("vehicleEngine").value="";
- $("vehicleEmoji").value="🚗";
- $("vehicleReg").value="";
- $("vehicleMileage").value="";
- $("vehicleMotDate").value="";
- $("vehicleTaxDate").value="";
- $("vehicleInsuranceDate").value="";
- $("vehiclePhotoStatus").textContent="";
- setVehiclePhotoPreview("");
- updateVehiclePhotoControls();
- $("deleteVehicleBtn").style.display="none";
- $("vehicleSaveBtn").disabled=false;
- $("vehicleSaveBtn").textContent="Add vehicle";
- $("vehicleDlg").showModal();
-
-}
-
-
 function editVehicle(){
 
- addingVehicle=false;
  clearPendingVehiclePhoto();
 
- $("vehicleDlgHeading").textContent="Edit vehicle";
- $("vehicleName").value=v().name||"";
- $("vehicleYear").value=v().year||"";
- $("vehicleEngine").value=v().engine||"";
- $("vehicleEmoji").value=v().emoji||"🚗";
- $("deleteVehicleBtn").style.display="inline-block";
 
  $("vehicleReg").value=
   v().reg||"";
@@ -9566,19 +9392,8 @@ $("vehicleForm")
    e.preventDefault();
 
 
-   let vehicle;
-
-   if(addingVehicle){
-    vehicle=blankVehicle({
-     id:uid("vehicle"),
-     name:$("vehicleName").value.trim()||"Vehicle",
-     year:Number($("vehicleYear").value)||"",
-     engine:$("vehicleEngine").value.trim(),
-     emoji:$("vehicleEmoji").value||"🚗"
-    });
-   }else{
-    vehicle=v();
-   }
+   const vehicle=
+    v();
 
    if(!vehicle){
     return;
@@ -9671,18 +9486,6 @@ $("vehicleForm")
     }
 
 
-    vehicle.name=
-     $("vehicleName").value.trim()||"Vehicle";
-
-    vehicle.year=
-     Number($("vehicleYear").value)||"";
-
-    vehicle.engine=
-     $("vehicleEngine").value.trim();
-
-    vehicle.emoji=
-     $("vehicleEmoji").value||"🚗";
-
     vehicle.reg=
      $("vehicleReg")
       .value
@@ -9705,14 +9508,6 @@ $("vehicleForm")
       .value;
 
 
-    if(addingVehicle){
-     db.push(vehicle);
-     current=vehicle.id;
-     tab="maintenance";
-     resetVehicleScrollTop=true;
-    }
-
-    addingVehicle=false;
     clearPendingVehiclePhoto();
 
 
@@ -9753,45 +9548,6 @@ $("vehicleForm")
 
   }
  );
-
-
-async function deleteVehicle(){
-
- const vehicle=v();
- if(!vehicle){
-  return;
- }
-
- const ok=confirm(
-  "Delete "+vehicle.name+"?\n\nThis removes this vehicle and all of its maintenance, history, parts, notes and dates from My Garage. This cannot be undone."
- );
-
- if(!ok){
-  return;
- }
-
- const paths=[
-  vehicle.photoPath,
-  ...(vehicle.attachments||[]).map(a=>a.path)
- ].filter(Boolean);
-
- for(const path of paths){
-  try{
-   await deleteStorageObject(path);
-  }catch(e){
-   console.warn("Could not remove stored vehicle image:",e);
-  }
- }
-
- db=db.filter(x=>x.id!==vehicle.id);
- current=null;
- tab="maintenance";
- addingVehicle=false;
- $("vehicleDlg").close();
- save();
- render();
-
-}
 
 
 /* RECORD PARTS */
@@ -9864,7 +9620,6 @@ function addRecordPart(p={}){
 
     <input
      class="rp-category"
-     list="partCategorySuggestions"
      value="${esc(p.category||"")}"
      placeholder="Filter, oil, brake...">
 
@@ -9879,7 +9634,6 @@ function addRecordPart(p={}){
 
     <input
      class="rp-maker"
-     list="partMakerSuggestions"
      value="${esc(p.maker||"")}">
 
    </div>
@@ -9906,7 +9660,6 @@ function addRecordPart(p={}){
 
     <input
      class="rp-spec"
-     list="partSpecSuggestions"
      value="${esc(p.spec||"")}"
      placeholder="10W-40">
 
@@ -9924,6 +9677,7 @@ function addRecordPart(p={}){
      type="number"
      min="0"
      step="0.01"
+     oninput="updateRecordTotal()"
      value="${esc(p.cost||"")}">
 
    </div>
@@ -9944,6 +9698,7 @@ function addRecordPart(p={}){
       .remove();
 
      renumberRecordParts();
+     updateRecordTotal();
     ">
 
     Remove part
@@ -9957,6 +9712,39 @@ function addRecordPart(p={}){
 
  $("recordPartsList")
   .appendChild(d);
+
+ updateRecordTotal();
+
+}
+
+
+function updateRecordTotal(){
+
+ const partsTotal=[
+  ...$("recordPartsList")
+   .querySelectorAll(".rp-cost")
+ ]
+ .reduce(
+  (sum,input)=>{
+   const value=Number(input.value);
+   return sum+(Number.isFinite(value)?value:0);
+  },
+  0
+ );
+
+ const labour=Number($("recordLabour")?.value||0);
+ const other=Number($("recordOtherCost")?.value||0);
+ const total=
+  partsTotal+
+  (Number.isFinite(labour)?labour:0)+
+  (Number.isFinite(other)?other:0);
+
+ if($("recordCost")){
+  $("recordCost").value=
+   total>0
+   ?total.toFixed(2)
+   :"";
+ }
 
 }
 
@@ -10080,7 +9868,10 @@ function completeTask(i){
  $("recordMileage").value=
   v().mileage||"";
 
- $("recordCost").value=
+ $("recordLabour").value=
+  "";
+
+ $("recordOtherCost").value=
   "";
 
  $("recordNotes").value=
@@ -10178,6 +9969,14 @@ $("recordForm").onsubmit=
 
   mileage:
    $("recordMileage")
+    .value,
+
+  labour:
+   $("recordLabour")
+    .value,
+
+  otherCost:
+   $("recordOtherCost")
     .value,
 
   cost:
@@ -10409,9 +10208,6 @@ function editRecord(i){
  $("recordMileage").value=
   r.mileage||"";
 
- $("recordCost").value=
-  r.cost||"";
-
  $("recordNotes").value=
   r.notes||"";
 
@@ -10432,9 +10228,36 @@ function editRecord(i){
    );
 
 
+ const hasCostBreakdown=
+  r.labour!==undefined ||
+  r.otherCost!==undefined;
+
+ const existingPartsTotal=
+  editParts.reduce(
+   (sum,p)=>sum+Number(p.cost||0),
+   0
+  );
+
+ if(hasCostBreakdown){
+  $("recordLabour").value=r.labour||"";
+  $("recordOtherCost").value=r.otherCost||"";
+ }else{
+  const legacyRemainder=Math.max(
+   0,
+   Number(r.cost||0)-existingPartsTotal
+  );
+  $("recordLabour").value=
+   legacyRemainder>0
+   ?legacyRemainder.toFixed(2)
+   :"";
+  $("recordOtherCost").value="";
+ }
+
  resetRecordParts(
   editParts
  );
+
+ updateRecordTotal();
 
 
  $("recordDlg")
