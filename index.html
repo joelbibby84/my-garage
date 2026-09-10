@@ -5270,54 +5270,6 @@ function render(){
 
     <button
      class="${
-      tab==="dates"
-      ?"active"
-      :""
-     }"
-     onclick="
-      tab='dates';
-      render();
-     ">
-
-     📅 Dates
-
-    </button>
-
-
-    <button
-     class="${
-      tab==="wishlist"
-      ?"active"
-      :""
-     }"
-     onclick="
-      tab='wishlist';
-      render();
-     ">
-
-     🛒 Parts Wishlist
-
-    </button>
-
-
-    <button
-     class="${
-      tab==="photos"
-      ?"active"
-      :""
-     }"
-     onclick="
-      tab='photos';
-      render();
-     ">
-
-     📷 Photos & Docs
-
-    </button>
-
-
-    <button
-     class="${
       tab==="history"
       ?"active"
       :""
@@ -5328,6 +5280,22 @@ function render(){
      ">
 
      📖 History
+
+    </button>
+
+
+    <button
+     class="${
+      tab==="parts"
+      ?"active"
+      :""
+     }"
+     onclick="
+      tab='parts';
+      render();
+     ">
+
+     🔩 Parts & Oils
 
     </button>
 
@@ -5350,16 +5318,48 @@ function render(){
 
     <button
      class="${
-      tab==="parts"
+      tab==="wishlist"
       ?"active"
       :""
      }"
      onclick="
-      tab='parts';
+      tab='wishlist';
       render();
      ">
 
-     🔩 Parts & Oils
+     🛒 Parts Wishlist
+
+    </button>
+
+
+    <button
+     class="${
+      tab==="dates"
+      ?"active"
+      :""
+     }"
+     onclick="
+      tab='dates';
+      render();
+     ">
+
+     📅 Dates
+
+    </button>
+
+
+    <button
+     class="${
+      tab==="photos"
+      ?"active"
+      :""
+     }"
+     onclick="
+      tab='photos';
+      render();
+     ">
+
+     📷 Photos & Docs
 
     </button>
 
