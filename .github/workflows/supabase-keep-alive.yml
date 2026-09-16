@@ -1,0 +1,24 @@
+name: Keep Supabase active
+
+on:
+  schedule:
+    - cron: "17 9 */3 * *"
+  workflow_dispatch:
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Make a small database request
+        env:
+          SUPABASE_URL: https://baqdlzrdyuzgjdsjzenl.supabase.co
+          SUPABASE_KEY: sb_publishable_Clz_wO8YPjTQOqrlbZ2d4w_RSimZxDH
+        run: |
+          curl --fail --silent --show-error \
+            --get "$SUPABASE_URL/rest/v1/garage_data" \
+            --data-urlencode "select=id" \
+            --data-urlencode "id=eq.1" \
+            -H "apikey: $SUPABASE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_KEY" \
+            -H "Range: 0-0" \
+            > /dev/null
