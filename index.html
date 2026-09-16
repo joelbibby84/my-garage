@@ -126,6 +126,7 @@ button:disabled{
 .soon{background:#ffedd5;color:#9a3412}
 .overdue{background:#fee2e2;color:#991b1b}
 .notset{background:#e5e7eb;color:#4b5563}
+.initial{background:#fef3c7;color:#92400e}
 
 .task{
  border-left:5px solid #16a34a
@@ -137,6 +138,10 @@ button:disabled{
 
 .task.overdue{
  border-left-color:#dc2626
+}
+
+.task.initial{
+ border-left-color:#d97706
 }
 
 .empty{
@@ -3893,6 +3898,7 @@ function statusForVehicle(
    c:{},
    od:false,
    so:false,
+   initial:false,
    label:"OK"
   };
 
@@ -3925,8 +3931,15 @@ function statusForVehicle(
   );
 
 
+ const initial=
+  !c.d &&
+  !c.m &&
+  !!(t.months || t.miles);
+
+
  const so=
   !od &&
+  !initial &&
   (
    (
     c.d &&
@@ -3949,13 +3962,16 @@ function statusForVehicle(
   c,
   od,
   so,
+  initial,
 
   label:
    od
    ?"OVERDUE"
-   :so
-    ?"DUE SOON"
-    :"OK"
+   :initial
+    ?"INITIAL CHECK"
+    :so
+     ?"DUE SOON"
+     :"OK"
  };
 
 }
@@ -3995,7 +4011,11 @@ function due(t){
    .filter(Boolean)
    .join(" OR ")
   ||
-  "Not scheduled"
+  (
+   status(t).initial
+   ?"Initial check due"
+   :"Not scheduled"
+  )
  );
 
 }
@@ -4256,6 +4276,10 @@ function getDashboardItems(){
 
       priority=0;
 
+     }else if(s.initial){
+
+      priority=1;
+
      }else if(s.so){
 
       priority=1;
@@ -4460,7 +4484,7 @@ function dashboard(){
  const scheduled=
   items.filter(
    x=>{
-    if(x.status.od){
+    if(x.status.od || x.status.initial){
      return true;
     }
 
@@ -7472,9 +7496,11 @@ function maintenance(){
       ${
        s.od
        ?"overdue"
-       :s.so
-        ?"soon"
-        :"ok"
+       :s.initial
+        ?"initial"
+        :s.so
+         ?"soon"
+         :"ok"
       }
       ${
        focusTaskId===t.id
@@ -7525,9 +7551,11 @@ function maintenance(){
         ${
          s.od
          ?"overdue"
-         :s.so
-          ?"soon"
-          :"ok"
+         :s.initial
+          ?"initial"
+          :s.so
+           ?"soon"
+           :"ok"
         }">
 
         ${s.label}
