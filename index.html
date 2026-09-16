@@ -4484,7 +4484,11 @@ function dashboard(){
  const scheduled=
   items.filter(
    x=>{
-    if(x.status.od || x.status.initial){
+    if(x.status.initial){
+     return false;
+    }
+
+    if(x.status.od){
      return true;
     }
 
