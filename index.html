@@ -1208,7 +1208,7 @@ button:not(.back):active,
 
 
 <!-- PERMANENT MAINTENANCE PARTS REFERENCE -->
-<dialog id="taskReferenceDlg"><div class="modal"><h2 id="taskReferenceHeading">Parts & oils reference</h2><p class="muted" style="margin-top:5px">These stay with the maintenance task for future services.</p><div id="taskReferenceList" style="margin-top:12px"></div><button type="button" class="secondary" style="margin-top:10px" onclick="addTaskReferencePart()">+ Add part / oil</button><div class="row" style="margin-top:14px"><button type="button" onclick="saveTaskReferenceParts()">Save reference</button><button type="button" class="secondary" onclick="taskReferenceDlg.close()">Cancel</button></div></div></dialog>
+<dialog id="taskReferenceDlg"><div class="modal"><h2 id="taskReferenceHeading">Parts & oils reference</h2><p class="muted" style="margin-top:5px">These are saved in the vehicle Parts & Oils library and stay linked to this maintenance task for future services.</p><div id="taskReferenceList" style="margin-top:12px"></div><button type="button" class="secondary" style="margin-top:10px" onclick="addTaskReferencePart()">+ Add part / oil</button><div class="row" style="margin-top:14px"><button type="button" onclick="saveTaskReferenceParts()">Save reference</button><button type="button" class="secondary" onclick="taskReferenceDlg.close()">Cancel</button></div></div></dialog>
 <dialog id="taskReferenceWishlistDlg"><div class="modal"><h2 id="taskReferenceWishlistHeading">Add parts to wishlist</h2><p class="muted" style="margin-top:5px">Tick only the items you need to buy this time.</p><div id="taskReferenceWishlistList" style="margin-top:12px"></div><div class="row" style="margin-top:14px"><button type="button" onclick="confirmReferencePartsToWishlist()">🛒 Add selected</button><button type="button" class="secondary" onclick="taskReferenceWishlistDlg.close()">Cancel</button></div></div></dialog>
 
 
@@ -1514,6 +1514,9 @@ button:not(.back):active,
 <input
  id="partName"
  required>
+
+<label>Quantity</label>
+<input id="partQuantity" placeholder="1 or 4 litres">
 
 <div class="grid">
 
@@ -2839,7 +2842,7 @@ function normaliseVehicle(x,base){
        :String(t.firstDueMiles),
       referenceParts:
        Array.isArray(t.referenceParts)
-       ?t.referenceParts.map(p=>({...p,id:p.id||uid("refpart"),name:p.name||"",category:p.category||"",maker:p.maker||"",number:p.number||"",spec:p.spec||"",quantity:p.quantity||"",notes:p.notes||""}))
+       ?t.referenceParts.map(p=>({...p,id:p.id||uid("refpart"),masterPartId:p.masterPartId||null,name:p.name||"",category:p.category||"",maker:p.maker||"",number:p.number||"",spec:p.spec||"",quantity:p.quantity||"",notes:p.notes||""}))
        :[]
      })
     )
@@ -2864,7 +2867,9 @@ function normaliseVehicle(x,base){
    ?source.parts.map(
      p=>({
       ...p,
-      id:p.id||uid("part")
+      id:p.id||uid("part"),
+      quantity:p.quantity==null?"":String(p.quantity),
+      referenceOnly:!!p.referenceOnly
      })
     )
    :[],
@@ -2915,6 +2920,25 @@ function normaliseVehicle(x,base){
 
  };
 
+
+ /* Keep maintenance reference items in the vehicle Parts & Oils master library. */
+ vehicle.tasks.forEach(task=>{
+  (task.referenceParts||[]).forEach(ref=>{
+   let master=ref.masterPartId?vehicle.parts.find(p=>p.id===ref.masterPartId):null;
+   if(!master){
+    master=vehicle.parts.find(p=>p.referenceOnly&&p.taskId===task.id&&sameText(p.name,ref.name)&&sameText(p.number||"",ref.number||""));
+   }
+   if(!master){
+    master={id:uid("part"),name:ref.name||"",date:"",mileage:"",category:ref.category||"",maker:ref.maker||"",number:ref.number||"",cost:"",spec:ref.spec||"",quantity:ref.quantity||"",notes:ref.notes||"",taskId:task.id,historyId:null,referenceOnly:true};
+    vehicle.parts.push(master);
+   }else{
+    master.referenceOnly=true;
+    master.taskId=task.id;
+    master.quantity=ref.quantity||master.quantity||"";
+   }
+   ref.masterPartId=master.id;
+  });
+ });
 
  vehicle.history.forEach(r=>{
 
@@ -7448,7 +7472,28 @@ function referencePartsForTask(taskId){const task=taskById(taskId);return Array.
 function referencePartMeta(p){return [p.quantity?"Qty: "+p.quantity:"",p.category||"",p.maker||"",p.number?"Part no: "+p.number:"",p.spec||""].filter(Boolean);}
 function openTaskReferenceParts(taskId){const task=taskById(taskId);if(!task)return;taskReferenceTaskId=taskId;$("taskReferenceHeading").textContent="Parts & oils for "+task.name;$("taskReferenceList").innerHTML="";const parts=referencePartsForTask(taskId);(parts.length?parts:[{}]).forEach(p=>addTaskReferencePart(p));$("taskReferenceDlg").showModal();}
 function addTaskReferencePart(p={}){const d=document.createElement("div");d.className="part-entry task-reference-editor";d.dataset.id=p.id||"";d.innerHTML=`<div class="grid"><div><label>Part / product</label><input class="tr-name" value="${esc(p.name||"")}" placeholder="Oil filter"></div><div><label>Quantity</label><input class="tr-quantity" value="${esc(p.quantity||"")}" placeholder="1 or 4 litres"></div><div><label>Category / type</label><input class="tr-category" value="${esc(p.category||"")}" placeholder="Oil, filter, washer..."></div><div><label>Manufacturer</label><input class="tr-maker" value="${esc(p.maker||"")}"></div><div><label>Part number</label><input class="tr-number" value="${esc(p.number||"")}"></div><div><label>Specification</label><input class="tr-spec" value="${esc(p.spec||"")}" placeholder="10W-30, JASO MA..."></div></div><label>Notes</label><textarea class="tr-notes" rows="2">${esc(p.notes||"")}</textarea><button type="button" class="danger small" style="margin-top:8px" onclick="this.closest('.task-reference-editor').remove()">Remove</button>`;$("taskReferenceList").appendChild(d);}
-async function saveTaskReferenceParts(){const task=taskById(taskReferenceTaskId);if(!task)return;task.referenceParts=[...$("taskReferenceList").querySelectorAll(".task-reference-editor")].map(x=>({id:x.dataset.id||uid("refpart"),name:x.querySelector(".tr-name").value.trim(),quantity:x.querySelector(".tr-quantity").value.trim(),category:x.querySelector(".tr-category").value.trim(),maker:x.querySelector(".tr-maker").value.trim(),number:x.querySelector(".tr-number").value.trim(),spec:x.querySelector(".tr-spec").value.trim(),notes:x.querySelector(".tr-notes").value.trim()})).filter(p=>p.name);$("taskReferenceDlg").close();taskReferenceTaskId=null;render();await save();}
+async function saveTaskReferenceParts(){
+ const task=taskById(taskReferenceTaskId);if(!task)return;
+ const previous=Array.isArray(task.referenceParts)?task.referenceParts:[];
+ const next=[...$("taskReferenceList").querySelectorAll(".task-reference-editor")].map(x=>({id:x.dataset.id||uid("refpart"),name:x.querySelector(".tr-name").value.trim(),quantity:x.querySelector(".tr-quantity").value.trim(),category:x.querySelector(".tr-category").value.trim(),maker:x.querySelector(".tr-maker").value.trim(),number:x.querySelector(".tr-number").value.trim(),spec:x.querySelector(".tr-spec").value.trim(),notes:x.querySelector(".tr-notes").value.trim()})).filter(p=>p.name);
+ next.forEach(ref=>{
+  const old=previous.find(p=>p.id===ref.id);
+  let master=old?.masterPartId?v().parts.find(p=>p.id===old.masterPartId):null;
+  if(!master){master=v().parts.find(p=>p.referenceOnly&&p.taskId===task.id&&sameText(p.name,ref.name)&&sameText(p.number||"",ref.number||""));}
+  if(!master){master={id:uid("part"),date:"",mileage:"",cost:"",historyId:null};v().parts.push(master);}
+  Object.assign(master,{name:ref.name,quantity:ref.quantity,category:ref.category,maker:ref.maker,number:ref.number,spec:ref.spec,notes:ref.notes,taskId:task.id,referenceOnly:true});
+  ref.masterPartId=master.id;
+ });
+ const kept=new Set(next.map(p=>p.masterPartId).filter(Boolean));
+ previous.forEach(ref=>{
+  if(ref.masterPartId&&!kept.has(ref.masterPartId)){
+   const master=v().parts.find(p=>p.id===ref.masterPartId);
+   if(master&&master.referenceOnly&&master.taskId===task.id){master.taskId=null;}
+  }
+ });
+ task.referenceParts=next;
+ $("taskReferenceDlg").close();taskReferenceTaskId=null;render();await save();
+}
 function openReferencePartsWishlist(taskId){const task=taskById(taskId);if(!task)return;const parts=referencePartsForTask(taskId);if(!parts.length){alert("Add the permanent Parts & Oils reference first.");return;}taskReferenceWishlistTaskId=taskId;$("taskReferenceWishlistHeading").textContent="Add parts to wishlist — "+task.name;const existing=(v().wishlistJobs||[]).find(j=>j.taskId===taskId);$("taskReferenceWishlistList").innerHTML=parts.map(p=>{const duplicate=existing?.items?.some(i=>sameText(i.name,p.name)&&sameText(i.number,p.number));const meta=referencePartMeta(p);return `<label class="reference-select-item"><input type="checkbox" class="ref-wish-check" data-id="${esc(p.id)}" ${duplicate?"disabled":"checked"}><div><b>${esc(p.name)}</b>${meta.length?`<div class="maintenance-reference-meta">${meta.map(esc).join(" · ")}</div>`:""}${duplicate?`<div class="muted">Already on this wishlist</div>`:""}</div></label>`;}).join("");$("taskReferenceWishlistDlg").showModal();}
 async function confirmReferencePartsToWishlist(){const task=taskById(taskReferenceWishlistTaskId);if(!task)return;const selected=[...$("taskReferenceWishlistList").querySelectorAll(".ref-wish-check:checked")].map(x=>x.dataset.id);if(!selected.length){alert("Choose at least one item to add.");return;}let job=(v().wishlistJobs||[]).find(j=>j.taskId===task.id);if(!job){job={id:uid("wishjob"),title:task.name,notes:"",taskId:task.id,items:[]};v().wishlistJobs.push(job);}referencePartsForTask(task.id).filter(p=>selected.includes(p.id)).forEach(p=>{const duplicate=job.items.some(i=>sameText(i.name,p.name)&&sameText(i.number,p.number));if(!duplicate)job.items.push({id:uid("wishpart"),name:p.name,number:p.number||"",price:"",supplier:"",notes:p.notes||"",bought:false,category:p.category||"",maker:p.maker||"",spec:p.spec||"",quantity:p.quantity||"",referencePartId:p.id});});$("taskReferenceWishlistDlg").close();taskReferenceWishlistTaskId=null;tab="wishlist";focusWishlistJobId=job.id;render();await save();}
 
@@ -7663,7 +7708,7 @@ function maintenance(){
       }
 
 
-      ${(()=>{const refs=referencePartsForTask(t.id);return `<div class="linked-box"><h4>🔩 Parts & oils reference</h4>${refs.length?refs.map(p=>{const meta=referencePartMeta(p);return `<div class="maintenance-reference-item"><b>${esc(p.name)}</b>${meta.length?`<div class="maintenance-reference-meta">${meta.map(esc).join(" · ")}</div>`:""}${p.notes?`<div class="muted" style="margin-top:4px">${esc(p.notes)}</div>`:""}</div>`;}).join(""):`<p class="muted">No permanent parts or oil details saved yet.</p>`}<div class="row" style="margin-top:9px"><button class="secondary small" onclick="openTaskReferenceParts('${t.id}')">${refs.length?"Edit reference":"+ Add reference parts"}</button>${refs.length?`<button class="secondary small" onclick="openReferencePartsWishlist('${t.id}')">🛒 Add to wishlist</button>`:""}</div></div>`;})()}
+      ${(()=>{const refs=referencePartsForTask(t.id);return `<div class="linked-box"><h4>🔩 Parts & oils reference</h4>${refs.length?refs.map(p=>{const meta=referencePartMeta(p);return `<div class="maintenance-reference-item"><b>${esc(p.name)}</b>${meta.length?`<div class="maintenance-reference-meta">${meta.map(esc).join(" · ")}</div>`:""}${p.notes?`<div class="muted" style="margin-top:4px">${esc(p.notes)}</div>`:""}</div>`;}).join(""):`<p class="muted">No Parts & Oils library items linked to this maintenance job yet.</p>`}<div class="row" style="margin-top:9px"><button class="secondary small" onclick="openTaskReferenceParts('${t.id}')">${refs.length?"Edit linked parts":"+ Add parts & oils"}</button>${refs.length?`<button class="secondary small" onclick="openReferencePartsWishlist('${t.id}')">🛒 Add to wishlist</button>`:""}</div></div>`;})()}
 
       ${linkedParts.length?`<div class="linked-box"><h4>🔧 Parts & oils used in completed services</h4><p class="muted">${linkedParts.length} recorded ${linkedParts.length===1?"item":"items"}. View them in Parts & Oils or History.</p></div>`:""}
 
@@ -8442,7 +8487,7 @@ function parts(){
 
    <p class="muted">
 
-    Record exactly what you fitted or used.
+    Master parts, oils and fitted-item records for this vehicle.
 
    </p>
 
@@ -8520,6 +8565,8 @@ function parts(){
 
        ${
         [
+         x.referenceOnly?"Reference":"",
+         x.quantity?"Qty: "+x.quantity:"",
          x.category,
          x.maker,
          x.number
@@ -10370,6 +10417,9 @@ function editPart(i){
  $("partName").value=
   p.name||"";
 
+ $("partQuantity").value=
+  p.quantity||"";
+
  $("partDate").value=
   p.date||"";
 
@@ -10422,6 +10472,11 @@ $("partForm").onsubmit=
     .value
     .trim(),
 
+  quantity:
+   $("partQuantity")
+    .value
+    .trim(),
+
   date:
    $("partDate")
     .value,
@@ -10465,7 +10520,10 @@ $("partForm").onsubmit=
 
   historyId:
    old?.historyId||
-   null
+   null,
+
+  referenceOnly:
+   !!old?.referenceOnly
 
  };
 
@@ -10516,6 +10574,12 @@ $("partForm").onsubmit=
 
  }
 
+
+ if(p.referenceOnly){
+  v().tasks.forEach(task=>(task.referenceParts||[]).forEach(ref=>{
+   if(ref.masterPartId===p.id){Object.assign(ref,{name:p.name,quantity:p.quantity||"",category:p.category||"",maker:p.maker||"",number:p.number||"",spec:p.spec||"",notes:p.notes||""});}
+  }));
+ }
 
  editingPart=-1;
 
