@@ -4233,7 +4233,7 @@ function linkedPartsForTask(
  return (
   v()?.parts||[]
  ).filter(
-  p=>p.taskId===taskId
+  p=>p.taskId===taskId && !p.referenceOnly
  );
 
 }
