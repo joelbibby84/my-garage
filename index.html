@@ -813,6 +813,14 @@ button:not(.back):active,
  box-shadow:0 1px 3px #0002
 }
 
+/* PERMANENT MAINTENANCE PARTS REFERENCE */
+.maintenance-reference-item{padding:10px 0;border-top:1px solid #e5e7eb}
+.maintenance-reference-item:first-of-type{border-top:0}
+.maintenance-reference-meta{font-size:13px;color:#68707c;margin-top:4px;line-height:1.4}
+.reference-select-item{display:flex;gap:10px;align-items:flex-start;padding:11px 0;border-top:1px solid #e5e7eb}
+.reference-select-item:first-of-type{border-top:0}
+.reference-select-item input[type=checkbox]{width:22px;height:22px;flex:0 0 auto;margin-top:1px;accent-color:#2563eb}
+
 </style>
 </head>
 
@@ -1197,6 +1205,11 @@ button:not(.back):active,
 
 </form>
 </dialog>
+
+
+<!-- PERMANENT MAINTENANCE PARTS REFERENCE -->
+<dialog id="taskReferenceDlg"><div class="modal"><h2 id="taskReferenceHeading">Parts & oils reference</h2><p class="muted" style="margin-top:5px">These stay with the maintenance task for future services.</p><div id="taskReferenceList" style="margin-top:12px"></div><button type="button" class="secondary" style="margin-top:10px" onclick="addTaskReferencePart()">+ Add part / oil</button><div class="row" style="margin-top:14px"><button type="button" onclick="saveTaskReferenceParts()">Save reference</button><button type="button" class="secondary" onclick="taskReferenceDlg.close()">Cancel</button></div></div></dialog>
+<dialog id="taskReferenceWishlistDlg"><div class="modal"><h2 id="taskReferenceWishlistHeading">Add parts to wishlist</h2><p class="muted" style="margin-top:5px">Tick only the items you need to buy this time.</p><div id="taskReferenceWishlistList" style="margin-top:12px"></div><div class="row" style="margin-top:14px"><button type="button" onclick="confirmReferencePartsToWishlist()">🛒 Add selected</button><button type="button" class="secondary" onclick="taskReferenceWishlistDlg.close()">Cancel</button></div></div></dialog>
 
 
 <!-- PHOTO / DOCUMENT -->
@@ -1737,6 +1750,8 @@ let editingWishlistJobId=null;
 let editingWishlistPartId=null;
 let wishlistPartJobId=null;
 let completingWishlistJobId=null;
+let taskReferenceTaskId=null;
+let taskReferenceWishlistTaskId=null;
 
 let recordTaskId=null;
 let editingRecordId=null;
@@ -2821,7 +2836,11 @@ function normaliseVehicle(x,base){
       firstDueMiles:
        t.firstDueMiles==null
        ?""
-       :String(t.firstDueMiles)
+       :String(t.firstDueMiles),
+      referenceParts:
+       Array.isArray(t.referenceParts)
+       ?t.referenceParts.map(p=>({...p,id:p.id||uid("refpart"),name:p.name||"",category:p.category||"",maker:p.maker||"",number:p.number||"",spec:p.spec||"",quantity:p.quantity||"",notes:p.notes||""}))
+       :[]
      })
     )
    :[],
@@ -6034,6 +6053,8 @@ function wishlistItemMarkup(
  const meta=[];
 
 
+ if(item.quantity){meta.push("Qty: "+item.quantity);}
+ if(item.maker){meta.push(item.maker);}
  if(item.number){
 
   meta.push(
@@ -6042,6 +6063,7 @@ function wishlistItemMarkup(
   );
 
  }
+ if(item.spec){meta.push(item.spec);}
 
 
  if(item.price!==""){
@@ -6231,10 +6253,10 @@ function completeWishlistJob(id){
  resetRecordParts(
   boughtItems.map(item=>({
    name:item.name||"",
-   category:"",
-   maker:"",
+   category:item.category||"",
+   maker:item.maker||"",
    number:item.number||"",
-   spec:"",
+   spec:item.spec||"",
    cost:item.price||""
   }))
  );
@@ -7421,6 +7443,16 @@ async function deleteAttachment(id){
 }
 
 
+/* PERMANENT MAINTENANCE PARTS REFERENCE */
+function referencePartsForTask(taskId){const task=taskById(taskId);return Array.isArray(task?.referenceParts)?task.referenceParts:[];}
+function referencePartMeta(p){return [p.quantity?"Qty: "+p.quantity:"",p.category||"",p.maker||"",p.number?"Part no: "+p.number:"",p.spec||""].filter(Boolean);}
+function openTaskReferenceParts(taskId){const task=taskById(taskId);if(!task)return;taskReferenceTaskId=taskId;$("taskReferenceHeading").textContent="Parts & oils for "+task.name;$("taskReferenceList").innerHTML="";const parts=referencePartsForTask(taskId);(parts.length?parts:[{}]).forEach(p=>addTaskReferencePart(p));$("taskReferenceDlg").showModal();}
+function addTaskReferencePart(p={}){const d=document.createElement("div");d.className="part-entry task-reference-editor";d.dataset.id=p.id||"";d.innerHTML=`<div class="grid"><div><label>Part / product</label><input class="tr-name" value="${esc(p.name||"")}" placeholder="Oil filter"></div><div><label>Quantity</label><input class="tr-quantity" value="${esc(p.quantity||"")}" placeholder="1 or 4 litres"></div><div><label>Category / type</label><input class="tr-category" value="${esc(p.category||"")}" placeholder="Oil, filter, washer..."></div><div><label>Manufacturer</label><input class="tr-maker" value="${esc(p.maker||"")}"></div><div><label>Part number</label><input class="tr-number" value="${esc(p.number||"")}"></div><div><label>Specification</label><input class="tr-spec" value="${esc(p.spec||"")}" placeholder="10W-30, JASO MA..."></div></div><label>Notes</label><textarea class="tr-notes" rows="2">${esc(p.notes||"")}</textarea><button type="button" class="danger small" style="margin-top:8px" onclick="this.closest('.task-reference-editor').remove()">Remove</button>`;$("taskReferenceList").appendChild(d);}
+async function saveTaskReferenceParts(){const task=taskById(taskReferenceTaskId);if(!task)return;task.referenceParts=[...$("taskReferenceList").querySelectorAll(".task-reference-editor")].map(x=>({id:x.dataset.id||uid("refpart"),name:x.querySelector(".tr-name").value.trim(),quantity:x.querySelector(".tr-quantity").value.trim(),category:x.querySelector(".tr-category").value.trim(),maker:x.querySelector(".tr-maker").value.trim(),number:x.querySelector(".tr-number").value.trim(),spec:x.querySelector(".tr-spec").value.trim(),notes:x.querySelector(".tr-notes").value.trim()})).filter(p=>p.name);$("taskReferenceDlg").close();taskReferenceTaskId=null;render();await save();}
+function openReferencePartsWishlist(taskId){const task=taskById(taskId);if(!task)return;const parts=referencePartsForTask(taskId);if(!parts.length){alert("Add the permanent Parts & Oils reference first.");return;}taskReferenceWishlistTaskId=taskId;$("taskReferenceWishlistHeading").textContent="Add parts to wishlist — "+task.name;const existing=(v().wishlistJobs||[]).find(j=>j.taskId===taskId);$("taskReferenceWishlistList").innerHTML=parts.map(p=>{const duplicate=existing?.items?.some(i=>sameText(i.name,p.name)&&sameText(i.number,p.number));const meta=referencePartMeta(p);return `<label class="reference-select-item"><input type="checkbox" class="ref-wish-check" data-id="${esc(p.id)}" ${duplicate?"disabled":"checked"}><div><b>${esc(p.name)}</b>${meta.length?`<div class="maintenance-reference-meta">${meta.map(esc).join(" · ")}</div>`:""}${duplicate?`<div class="muted">Already on this wishlist</div>`:""}</div></label>`;}).join("");$("taskReferenceWishlistDlg").showModal();}
+async function confirmReferencePartsToWishlist(){const task=taskById(taskReferenceWishlistTaskId);if(!task)return;const selected=[...$("taskReferenceWishlistList").querySelectorAll(".ref-wish-check:checked")].map(x=>x.dataset.id);if(!selected.length){alert("Choose at least one item to add.");return;}let job=(v().wishlistJobs||[]).find(j=>j.taskId===task.id);if(!job){job={id:uid("wishjob"),title:task.name,notes:"",taskId:task.id,items:[]};v().wishlistJobs.push(job);}referencePartsForTask(task.id).filter(p=>selected.includes(p.id)).forEach(p=>{const duplicate=job.items.some(i=>sameText(i.name,p.name)&&sameText(i.number,p.number));if(!duplicate)job.items.push({id:uid("wishpart"),name:p.name,number:p.number||"",price:"",supplier:"",notes:p.notes||"",bought:false,category:p.category||"",maker:p.maker||"",spec:p.spec||"",quantity:p.quantity||"",referencePartId:p.id});});$("taskReferenceWishlistDlg").close();taskReferenceWishlistTaskId=null;tab="wishlist";focusWishlistJobId=job.id;render();await save();}
+
+
 /* MAINTENANCE */
 
 function maintenance(){
@@ -7631,85 +7663,9 @@ function maintenance(){
       }
 
 
-      ${
-       linkedParts.length
+      ${(()=>{const refs=referencePartsForTask(t.id);return `<div class="linked-box"><h4>🔩 Parts & oils reference</h4>${refs.length?refs.map(p=>{const meta=referencePartMeta(p);return `<div class="maintenance-reference-item"><b>${esc(p.name)}</b>${meta.length?`<div class="maintenance-reference-meta">${meta.map(esc).join(" · ")}</div>`:""}${p.notes?`<div class="muted" style="margin-top:4px">${esc(p.notes)}</div>`:""}</div>`;}).join(""):`<p class="muted">No permanent parts or oil details saved yet.</p>`}<div class="row" style="margin-top:9px"><button class="secondary small" onclick="openTaskReferenceParts('${t.id}')">${refs.length?"Edit reference":"+ Add reference parts"}</button>${refs.length?`<button class="secondary small" onclick="openReferencePartsWishlist('${t.id}')">🛒 Add to wishlist</button>`:""}</div></div>`;})()}
 
-       ?`
-
-        <div class="linked-box">
-
-         <h4>
-          🔩 Parts & oils used for this maintenance job
-         </h4>
-
-         ${
-          linkedParts.map(
-           p=>`
-
-            <div class="linked-part">
-
-             <div>
-
-              <b>
-               ${esc(p.name)}
-              </b>
-
-              <div class="muted">
-
-               ${
-                [
-                 p.maker,
-                 p.number,
-                 p.spec
-                ]
-                .filter(Boolean)
-                .map(esc)
-                .join(" · ")
-               }
-
-              </div>
-
-             </div>
-
-
-             <button
-              class="secondary small"
-              onclick="openPart('${p.id}')">
-
-              View in Parts & Oils
-
-             </button>
-
-            </div>
-
-           `
-          ).join("")
-         }
-
-        </div>
-
-       `
-
-       :`
-
-        <div class="linked-box">
-
-         <h4>
-          🔩 Parts & oils
-         </h4>
-
-         <p class="muted">
-
-          No parts recorded for this maintenance job yet.
-          Add them when you record the job as completed.
-
-         </p>
-
-        </div>
-
-       `
-      }
-
+      ${linkedParts.length?`<div class="linked-box"><h4>🔧 Parts & oils used in completed services</h4><p class="muted">${linkedParts.length} recorded ${linkedParts.length===1?"item":"items"}. View them in Parts & Oils or History.</p></div>`:""}
 
       <div class="linked-box">
 
@@ -9910,7 +9866,8 @@ function completeTask(i){
   "";
 
 
- resetRecordParts();
+ const referenceParts=referencePartsForTask(t.id);
+ resetRecordParts(referenceParts.map(p=>({name:p.name||"",category:p.category||"",maker:p.maker||"",number:p.number||"",spec:p.spec||"",cost:""})));
 
 
  $("recordDlg")
