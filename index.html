@@ -1097,6 +1097,15 @@ button:not(.back):active,
   Cancel
  </button>
 
+ <button
+  type="button"
+  id="deleteVehicleBtn"
+  class="danger"
+  style="display:none"
+  onclick="deleteCurrentVehicle()">
+  Delete vehicle
+ </button>
+
 </div>
 
 </form>
@@ -9537,8 +9546,105 @@ function editVehicle(){
   .textContent="Save";
 
 
+ const deleteBtn=
+  $("deleteVehicleBtn");
+
+ if(deleteBtn){
+
+  deleteBtn.style.display=
+   starter.some(
+    base=>
+     vehicleMatches(
+      v(),
+      base
+     )
+   )
+   ?"none"
+   :"inline-block";
+
+ }
+
  $("vehicleDlg")
   .showModal();
+
+}
+
+
+async function deleteCurrentVehicle(){
+
+ const vehicle=v();
+
+ if(!vehicle){
+  return;
+ }
+
+ if(
+  starter.some(
+   base=>
+    vehicleMatches(
+     vehicle,
+     base
+    )
+  )
+ ){
+  alert(
+   "The four original garage vehicles are protected from deletion."
+  );
+  return;
+ }
+
+ if(
+  !confirm(
+   `Delete ${vehicle.name} and all of its maintenance, history, parts, notes and photos? This cannot be undone.`
+  )
+ ){
+  return;
+ }
+
+ const photoPaths=[];
+
+ if(vehicle.photoPath){
+  photoPaths.push(vehicle.photoPath);
+ }
+
+ (vehicle.attachments||[])
+  .forEach(
+   attachment=>{
+
+    if(attachment.photoPath){
+     photoPaths.push(
+      attachment.photoPath
+     );
+    }
+
+   }
+  );
+
+ for(const path of photoPaths){
+  await deleteStorageObject(path);
+ }
+
+ const index=
+  db.findIndex(
+   item=>
+    item.id===vehicle.id
+  );
+
+ if(index>=0){
+  db.splice(index,1);
+ }
+
+ clearPendingVehiclePhoto();
+
+ $("vehicleDlg").close();
+
+ current=null;
+ tab="maintenance";
+ vehicleTabsScrollLeft=0;
+ resetVehicleScrollTop=true;
+
+ save();
+ render();
 
 }
 
