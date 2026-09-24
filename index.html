@@ -927,6 +927,42 @@ button:not(.back):active,
 </dialog>
 
 
+<!-- ADD VEHICLE -->
+
+<dialog id="addVehicleDlg">
+<form class="modal" id="addVehicleForm">
+<h2>Add vehicle</h2>
+
+<label>Vehicle name</label>
+<input id="addVehicleName" required placeholder="Ford Focus">
+
+<div class="grid">
+ <div>
+  <label>Year</label>
+  <input id="addVehicleYear" type="number" min="1900" max="2100" required>
+ </div>
+ <div>
+  <label>Vehicle type</label>
+  <select id="addVehicleType">
+   <option value="🚗">Car</option>
+   <option value="🏍️">Motorcycle</option>
+   <option value="🚐">Van</option>
+   <option value="🚚">Other vehicle</option>
+  </select>
+ </div>
+</div>
+
+<label>Engine / model</label>
+<input id="addVehicleEngine" placeholder="1.6 Petrol">
+
+<div class="row" style="margin-top:13px">
+ <button type="submit">Add vehicle</button>
+ <button type="button" class="secondary" onclick="addVehicleDlg.close()">Cancel</button>
+</div>
+</form>
+</dialog>
+
+
 <!-- VEHICLE -->
 
 <dialog id="vehicleDlg">
@@ -3325,25 +3361,57 @@ function normaliseDatabase(input){
   return null;
  }
 
- return starter.map(
-  base=>{
+ const fixed=
+  starter.map(
+   base=>{
 
-   const found=
-    input.find(
-     x=>
+    const found=
+     input.find(
+      x=>
+       vehicleMatches(
+        x,
+        base
+       )
+     );
+
+    return normaliseVehicle(
+     found,
+     base
+    );
+
+   }
+  );
+
+ const extras=
+  input.filter(
+   x=>
+    x &&
+    typeof x==="object" &&
+    !starter.some(
+     base=>
       vehicleMatches(
        x,
        base
       )
-    );
+    )
+  )
+  .map(
+   x=>{
 
-   return normaliseVehicle(
-    found,
-    base
-   );
+    const base={
+     id:String(x.id||uid("vehicle")),
+     name:String(x.name||"Vehicle"),
+     year:x.year==null?"":x.year,
+     engine:String(x.engine||""),
+     emoji:String(x.emoji||"🚗")
+    };
 
-  }
- );
+    return normaliseVehicle(x,base);
+
+   }
+  );
+
+ return fixed.concat(extras);
 
 }
 
@@ -5189,6 +5257,14 @@ function render(){
       Tap a vehicle to manage it.
 
      </p>
+
+     <button
+      style="margin-top:12px"
+      onclick="newVehicle()">
+
+      + Add vehicle
+
+     </button>
 
     </div>`
 
@@ -9359,6 +9435,54 @@ function delTask(i){
  render();
 
 }
+
+
+/* ADD VEHICLE */
+
+function newVehicle(){
+
+ $("addVehicleForm").reset();
+ $("addVehicleType").value="🚗";
+ $("addVehicleDlg").showModal();
+
+}
+
+
+$("addVehicleForm")
+ .addEventListener(
+  "submit",
+  e=>{
+
+   e.preventDefault();
+
+   const name=
+    $("addVehicleName").value.trim();
+
+   if(!name){ return; }
+
+   const base={
+    id:uid("vehicle"),
+    name:name,
+    year:$("addVehicleYear").value,
+    engine:$("addVehicleEngine").value.trim(),
+    emoji:$("addVehicleType").value||"🚗"
+   };
+
+   const vehicle=blankVehicle(base);
+
+   db.push(vehicle);
+
+   $("addVehicleDlg").close();
+
+   current=vehicle.id;
+   tab="maintenance";
+   resetVehicleScrollTop=true;
+
+   save();
+   render();
+
+  }
+ );
 
 
 /* VEHICLE EDIT */
