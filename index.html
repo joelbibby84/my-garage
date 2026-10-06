@@ -927,6 +927,42 @@ button:not(.back):active,
 </dialog>
 
 
+<!-- ADD VEHICLE -->
+
+<dialog id="addVehicleDlg">
+<form class="modal" id="addVehicleForm">
+<h2>Add vehicle</h2>
+
+<label>Vehicle name</label>
+<input id="addVehicleName" required placeholder="Ford Focus">
+
+<div class="grid">
+ <div>
+  <label>Year</label>
+  <input id="addVehicleYear" type="number" min="1900" max="2100" required>
+ </div>
+ <div>
+  <label>Vehicle type</label>
+  <select id="addVehicleType">
+   <option value="🚗">Car</option>
+   <option value="🏍️">Motorcycle</option>
+   <option value="🚐">Van</option>
+   <option value="🚚">Other vehicle</option>
+  </select>
+ </div>
+</div>
+
+<label>Engine / model</label>
+<input id="addVehicleEngine" placeholder="1.6 Petrol">
+
+<div class="row" style="margin-top:13px">
+ <button type="submit">Add vehicle</button>
+ <button type="button" class="secondary" onclick="addVehicleDlg.close()">Cancel</button>
+</div>
+</form>
+</dialog>
+
+
 <!-- VEHICLE -->
 
 <dialog id="vehicleDlg">
@@ -936,6 +972,28 @@ button:not(.back):active,
  id="vehicleForm">
 
 <h2>Edit vehicle</h2>
+
+<label>Vehicle name</label>
+<input id="vehicleName" required placeholder="Ford Focus">
+
+<div class="grid">
+ <div>
+  <label>Year</label>
+  <input id="vehicleYear" type="number" min="1900" max="2100" required>
+ </div>
+ <div>
+  <label>Vehicle type</label>
+  <select id="vehicleType">
+   <option value="🚗">Car</option>
+   <option value="🏍️">Motorcycle</option>
+   <option value="🚐">Van</option>
+   <option value="🚚">Other vehicle</option>
+  </select>
+ </div>
+</div>
+
+<label>Engine / model</label>
+<input id="vehicleEngine" placeholder="1.6 Petrol">
 
 
 <h3 style="margin-top:16px">
@@ -1059,6 +1117,15 @@ button:not(.back):active,
   class="secondary"
   onclick="cancelVehicleEdit()">
   Cancel
+ </button>
+
+ <button
+  type="button"
+  id="deleteVehicleBtn"
+  class="danger"
+  style="display:none"
+  onclick="deleteCurrentVehicle()">
+  Delete vehicle
  </button>
 
 </div>
@@ -3325,25 +3392,57 @@ function normaliseDatabase(input){
   return null;
  }
 
- return starter.map(
-  base=>{
+ const fixed=
+  starter.map(
+   base=>{
 
-   const found=
-    input.find(
-     x=>
+    const found=
+     input.find(
+      x=>
+       vehicleMatches(
+        x,
+        base
+       )
+     );
+
+    return normaliseVehicle(
+     found,
+     base
+    );
+
+   }
+  );
+
+ const extras=
+  input.filter(
+   x=>
+    x &&
+    typeof x==="object" &&
+    !starter.some(
+     base=>
       vehicleMatches(
        x,
        base
       )
-    );
+    )
+  )
+  .map(
+   x=>{
 
-   return normaliseVehicle(
-    found,
-    base
-   );
+    const base={
+     id:String(x.id||uid("vehicle")),
+     name:String(x.name||"Vehicle"),
+     year:x.year==null?"":x.year,
+     engine:String(x.engine||""),
+     emoji:String(x.emoji||"🚗")
+    };
 
-  }
- );
+    return normaliseVehicle(x,base);
+
+   }
+  );
+
+ return fixed.concat(extras);
 
 }
 
@@ -5189,6 +5288,14 @@ function render(){
       Tap a vehicle to manage it.
 
      </p>
+
+     <button
+      style="margin-top:12px"
+      onclick="newVehicle()">
+
+      + Add vehicle
+
+     </button>
 
     </div>`
 
@@ -9361,11 +9468,72 @@ function delTask(i){
 }
 
 
+/* ADD VEHICLE */
+
+function newVehicle(){
+
+ $("addVehicleForm").reset();
+ $("addVehicleType").value="🚗";
+ $("addVehicleDlg").showModal();
+
+}
+
+
+$("addVehicleForm")
+ .addEventListener(
+  "submit",
+  e=>{
+
+   e.preventDefault();
+
+   const name=
+    $("addVehicleName").value.trim();
+
+   if(!name){ return; }
+
+   const base={
+    id:uid("vehicle"),
+    name:name,
+    year:$("addVehicleYear").value,
+    engine:$("addVehicleEngine").value.trim(),
+    emoji:$("addVehicleType").value||"🚗"
+   };
+
+   const vehicle=blankVehicle(base);
+
+   db.push(vehicle);
+
+   $("addVehicleDlg").close();
+
+   current=vehicle.id;
+   tab="maintenance";
+   resetVehicleScrollTop=true;
+
+   save();
+   render();
+
+  }
+ );
+
+
 /* VEHICLE EDIT */
 
 function editVehicle(){
 
  clearPendingVehiclePhoto();
+
+
+ $("vehicleName").value=
+  v().name||"";
+
+ $("vehicleYear").value=
+  v().year||"";
+
+ $("vehicleType").value=
+  v().emoji||"🚗";
+
+ $("vehicleEngine").value=
+  v().engine||"";
 
 
  $("vehicleReg").value=
@@ -9413,8 +9581,105 @@ function editVehicle(){
   .textContent="Save";
 
 
+ const deleteBtn=
+  $("deleteVehicleBtn");
+
+ if(deleteBtn){
+
+  deleteBtn.style.display=
+   starter.some(
+    base=>
+     vehicleMatches(
+      v(),
+      base
+     )
+   )
+   ?"none"
+   :"inline-block";
+
+ }
+
  $("vehicleDlg")
   .showModal();
+
+}
+
+
+async function deleteCurrentVehicle(){
+
+ const vehicle=v();
+
+ if(!vehicle){
+  return;
+ }
+
+ if(
+  starter.some(
+   base=>
+    vehicleMatches(
+     vehicle,
+     base
+    )
+  )
+ ){
+  alert(
+   "The four original garage vehicles are protected from deletion."
+  );
+  return;
+ }
+
+ if(
+  !confirm(
+   `Delete ${vehicle.name} and all of its maintenance, history, parts, notes and photos? This cannot be undone.`
+  )
+ ){
+  return;
+ }
+
+ const photoPaths=[];
+
+ if(vehicle.photoPath){
+  photoPaths.push(vehicle.photoPath);
+ }
+
+ (vehicle.attachments||[])
+  .forEach(
+   attachment=>{
+
+    if(attachment.photoPath){
+     photoPaths.push(
+      attachment.photoPath
+     );
+    }
+
+   }
+  );
+
+ for(const path of photoPaths){
+  await deleteStorageObject(path);
+ }
+
+ const index=
+  db.findIndex(
+   item=>
+    item.id===vehicle.id
+  );
+
+ if(index>=0){
+  db.splice(index,1);
+ }
+
+ clearPendingVehiclePhoto();
+
+ $("vehicleDlg").close();
+
+ current=null;
+ tab="maintenance";
+ vehicleTabsScrollLeft=0;
+ resetVehicleScrollTop=true;
+
+ save();
+ render();
 
 }
 
@@ -9519,6 +9784,25 @@ $("vehicleForm")
      vehicle.photoPath="";
 
     }
+
+
+    vehicle.name=
+     $("vehicleName")
+      .value
+      .trim();
+
+    vehicle.year=
+     $("vehicleYear")
+      .value;
+
+    vehicle.emoji=
+     $("vehicleType")
+      .value||"🚗";
+
+    vehicle.engine=
+     $("vehicleEngine")
+      .value
+      .trim();
 
 
     vehicle.reg=
